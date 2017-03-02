@@ -6,7 +6,7 @@ namespace CSharpCompiler.Scanners.Tokens
     {
         public bool Value { get; private set; }
 
-        public BoolToken(bool value, int tag) : base(tag)
+        public BoolToken(bool value, TokenTag tag) : base(value.ToString(), tag)
         {
             Value = value;
         }

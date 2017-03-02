@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace CSharpCompiler.Scanners.Regexp
 {
+    [Serializable]
     public sealed class TransitionTable
     {
         private static Lazy<TransitionTable> _default = new Lazy<TransitionTable>(() => GetDefaultTransitionTable());
@@ -58,14 +60,27 @@ namespace CSharpCompiler.Scanners.Regexp
                 return tReader.Read();
         }
 
-        private static TransitionTable GetDefaultTransitionTable()
+        private static TransitionTable GetSourceTransitionTable()
         {
             var assembly = Assembly.GetExecutingAssembly();
 
             using (var stream = assembly.GetManifestResourceStream("CSharpCompiler.vocabulary.txt"))
-            using (var fReader = new StreamReader(stream))
-            using (var tReader = new TransitionTableReader(fReader))
+                return (TransitionTable)new BinaryFormatter().Deserialize(stream);
+        }
+
+        private static TransitionTable GetDefaultTransitionTable()
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+
+#if FROM_SOURCE
+            using (var stream = assembly.GetManifestResourceStream("CSharpCompiler.vocabulary.txt"))
+            using (var reader = new StreamReader(stream))
+            using (var tReader = new TransitionTableReader(reader))
                 return tReader.Read();
+#else
+            using (var stream = assembly.GetManifestResourceStream("CSharpCompiler.vocabulary.bin"))
+                return (TransitionTable)new BinaryFormatter().Deserialize(stream);
+#endif
         }
 
         public bool IsAcceptingState(int state)

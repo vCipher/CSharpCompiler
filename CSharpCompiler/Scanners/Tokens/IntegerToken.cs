@@ -6,19 +6,14 @@ namespace CSharpCompiler.Scanners.Tokens
     {
         public int Value { get; private set; }
 
-        public IntegerToken(int value) : base((int)CSharpTokenTag.INT_CONST)
+        public IntegerToken(int value) : base(value.ToString(), TokenTag.INT_CONST)
         {
             Value = value;
         }
 
-        public IntegerToken(string value) : base((int)CSharpTokenTag.INT_CONST)
+        public IntegerToken(string value) : base(value, TokenTag.INT_CONST)
         {
             Value = int.Parse(value);
-        }
-
-        public override string ToString()
-        {
-            return Value.ToString();
         }
 
         public static explicit operator int(IntegerToken src)

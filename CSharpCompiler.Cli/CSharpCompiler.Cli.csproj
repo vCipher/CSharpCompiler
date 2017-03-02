@@ -4,24 +4,27 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{96B8AA30-90BD-436B-AAC1-FBEA37FA0F8D}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{33285076-38F8-4B72-B1A9-08DE73F56D2C}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CSharpCompiler</RootNamespace>
-    <AssemblyName>CSharpCompiler</AssemblyName>
+    <RootNamespace>CSharpCompiler.Cli</RootNamespace>
+    <AssemblyName>CSharpCompiler.Cli</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -40,47 +43,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ExtenstionMethods.cs" />
-    <Compile Include="Parsers\ParseException.cs" />
-    <Compile Include="Parsers\ParseNode.cs" />
-    <Compile Include="Parsers\ParseNodeTag.cs" />
-    <Compile Include="Parsers\Parser.cs" />
-    <Compile Include="Parsers\TokenExtensionMethods.cs" />
-    <Compile Include="Parsers\UnexpectedTokenException.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Scanners\CharIterator.cs" />
-    <Compile Include="Scanners\Regexp\Dfa.cs" />
-    <Compile Include="Scanners\Regexp\DfaBuilder.cs" />
-    <Compile Include="Scanners\Regexp\DfaState.cs" />
-    <Compile Include="Scanners\Regexp\IState.cs" />
-    <Compile Include="Scanners\Regexp\Nfa.cs" />
-    <Compile Include="Scanners\Regexp\NfaBuilder.cs" />
-    <Compile Include="Scanners\ScanException.cs" />
-    <Compile Include="Scanners\Scanner.cs" />
-    <Compile Include="Scanners\Regexp\NfaState.cs" />
-    <Compile Include="Scanners\Regexp\DfaStateFactory.cs" />
-    <Compile Include="Scanners\Regexp\NfaStateFactory.cs" />
-    <Compile Include="Scanners\Tokens\BoolToken.cs" />
-    <Compile Include="Scanners\Tokens\Tokens.cs" />
-    <Compile Include="Scanners\Tokens\TokenTag.cs" />
-    <Compile Include="Scanners\Tokens\DoubleToken.cs" />
-    <Compile Include="Scanners\Tokens\FloatToken.cs" />
-    <Compile Include="Scanners\Tokens\IntegerToken.cs" />
-    <Compile Include="Scanners\Tokens\Token.cs" />
-    <Compile Include="Scanners\Regexp\Transition.cs" />
-    <Compile Include="Scanners\Regexp\TransitionTable.cs" />
-    <Compile Include="Scanners\Regexp\TransitionTableReader.cs" />
-    <Compile Include="Scanners\Tokens\TokenIterator.cs" />
-    <Compile Include="Scanners\Tokens\TypeToken.cs" />
+    <Content Include="Target.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="vocabulary.txt" />
+    <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="grammar.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="vocabulary.bin" />
+    <ProjectReference Include="..\CSharpCompiler\CSharpCompiler.csproj">
+      <Project>{96b8aa30-90bd-436b-aac1-fbea37fa0f8d}</Project>
+      <Name>CSharpCompiler</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

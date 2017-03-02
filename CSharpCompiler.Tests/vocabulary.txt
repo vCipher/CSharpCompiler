@@ -125,10 +125,10 @@ while                   WHILE
 =>                      IMPLEMENTATION
 \(                      ROUND_BRACE_OPEN
 \)                      ROUND_BRACE_CLOSE
-{                       CURLY_BRACE_OPEN
-}                       CURLY_BRACE_CLOSE
-[                       SQUARE_BRACE_OPEN
-]                       SQUARE_BRACE_CLOSE
+{                       OPEN_CURLY_BRACE
+}                       CLOSE_CURLY_BRACE
+[                       OPEN_SQUARE_BRACE
+]                       CLOSE_SQUARE_BRACE
 :                       COLON
 ;                       SEMICOLON
 \.                      DOT

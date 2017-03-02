@@ -6,19 +6,14 @@ namespace CSharpCompiler.Scanners.Tokens
     {
         public double Value { get; private set; }
 
-        public DoubleToken(double value) : base((int)CSharpTokenTag.DOUBLE_CONST)
+        public DoubleToken(double value) : base(value.ToString(), TokenTag.DOUBLE_CONST)
         {
             Value = value;
         }
 
-        public DoubleToken(string value) : base((int)CSharpTokenTag.FLOAT_CONST)
+        public DoubleToken(string value) : base(value, TokenTag.FLOAT_CONST)
         {
             Value = double.Parse(value);
-        }
-
-        public override string ToString()
-        {
-            return Value.ToString();
         }
 
         public bool Equals(DoubleToken other)

@@ -7,17 +7,17 @@ namespace CSharpCompiler.Scanners.Tokens
     /// </summary>
     public class Token : IEquatable<Token>
     {
-        public int Tag { get; set; }
+        public TokenTag Tag { get; set; }
 
         public string Lexeme { get; set; }
 
-        public Token(int tag)
+        public Token(TokenTag tag)
         {
             Lexeme = tag.ToString();
             Tag = tag;
         }
 
-        public Token(string lexeme, int tag)
+        public Token(string lexeme, TokenTag tag)
         {
             Lexeme = lexeme;
             Tag = tag;
@@ -25,7 +25,7 @@ namespace CSharpCompiler.Scanners.Tokens
 
         public override string ToString()
         {
-            return Lexeme;
+            return string.Format("<{0}, {1}>", Tag, Lexeme);
         }
 
         public bool Equals(Token other)
@@ -46,10 +46,26 @@ namespace CSharpCompiler.Scanners.Tokens
             unchecked
             {
                 int res = 31;
-                res ^= (int)Tag;
+                res ^= Tag.GetHashCode();
                 res ^= (Lexeme == null ? 0 : Lexeme.GetHashCode());
                 return res;
             }
+        }
+
+        public static bool operator ==(Token first, Token second)
+        {
+            if (ReferenceEquals(first, second)) return true;
+            if (ReferenceEquals(first, null)) return false;
+            if (ReferenceEquals(second, null)) return false;
+            return first.Equals(second);
+        }
+
+        public static bool operator !=(Token first, Token second)
+        {
+            if (ReferenceEquals(first, second)) return false;
+            if (ReferenceEquals(first, null)) return true;
+            if (ReferenceEquals(second, null)) return true;
+            return !first.Equals(second);
         }
     }
 }

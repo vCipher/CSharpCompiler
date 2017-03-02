@@ -10,6 +10,8 @@ namespace CSharpCompiler.Scanners
         private const int END_STATE = -1;
         private const int BAD_STATE = -2;
 
+        public static readonly Scanner Default = new Scanner(TransitionTable.Default);
+
         private TransitionTable _table;
 
         public Scanner(TransitionTable table)
@@ -62,7 +64,7 @@ namespace CSharpCompiler.Scanners
                     throw new ScanException();
 
                 var alias = _table.GetTokenAlias(state);
-                var token = CSharpTokens.GetToken(alias, lexeme.ToString());
+                var token = Tokens.Tokens.GetToken(alias, lexeme.ToString());
                 tokens.Add(token);
             }
 

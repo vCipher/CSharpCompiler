@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CSharpCompiler.Scanners.Tokens
+﻿namespace CSharpCompiler.Scanners.Tokens
 {
-    public enum CSharpTokenTag
+    public enum TokenTag
     {
+        EOF,
         PLUS,
         MINUS,
         MULTIPLY,
@@ -119,13 +114,13 @@ namespace CSharpCompiler.Scanners.Tokens
         VOID,
         VOLATILE,
         WHILE,
-        IMPLEMENTATION,
-        ROUND_BRACE_OPEN,
-        ROUND_BRACE_CLOSE,
-        CURLY_BRACE_OPEN,
-        CURLY_BRACE_CLOSE,
-        SQUARE_BRACE_OPEN,
-        SQUARE_BRACE_CLOSE,
+        IMPLICATION,
+        OPEN_PAREN,
+        CLOSE_PAREN,
+        OPEN_CURLY_BRACE,
+        CLOSE_CURLY_BRACE,
+        OPEN_SQUARE_BRACE,
+        CLOSE_SQUARE_BRACE,
         DOT,
         COMMA,
         INCREMENT,

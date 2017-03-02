@@ -1,0 +1,36 @@
+﻿namespace CSharpCompiler.Parsers
+{
+    public enum ParseNodeTag
+    {
+        Program,
+        StmtSeq,
+        Stmt,
+        Terminal,
+        DeclarationStmt,
+        Block,
+        VarDeclaration,
+        TypeName,
+        PredefinedTypeName,
+        VarInitializer,
+        ExpressionStmt,
+        Expression,
+        ArithmeticExpression,
+        FactorExpression,
+        UnaryExpression,
+        ConditionExpression,
+        RelationExpression,
+        CastExpression,
+        Literal,
+        PrimaryExpression,
+        ParenthesisExpression,
+        InvocationExpression,
+        ArgumentList,
+        Argument,
+        VarAccess,
+        ElementAccess,
+        ExpressionList,
+        PostfixDecrement,
+        PostfixIncrement,
+        ObjectCreation
+    }
+}

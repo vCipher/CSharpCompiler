@@ -9,7 +9,7 @@ namespace CSharpCompiler.Scanners.Tokens
         /// </summary>
         public int Width { get; set; }
 
-        public TypeToken(string lexeme, int tag, int width = 4) : base(lexeme, tag)
+        public TypeToken(string lexeme, TokenTag tag, int width = 4) : base(lexeme, tag)
         {
             Width = width;
         }

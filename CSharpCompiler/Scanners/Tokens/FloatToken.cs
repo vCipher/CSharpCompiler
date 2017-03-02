@@ -6,19 +6,14 @@ namespace CSharpCompiler.Scanners.Tokens
     {
         public float Value { get; private set; }
 
-        public FloatToken(float value) : base((int)CSharpTokenTag.FLOAT_CONST)
+        public FloatToken(float value) : base(value.ToString(), TokenTag.FLOAT_CONST)
         {
             Value = value;
         }
 
-        public FloatToken(string value) : base((int)CSharpTokenTag.FLOAT_CONST)
+        public FloatToken(string value) : base(value, TokenTag.FLOAT_CONST)
         {
             Value = float.Parse(value);
-        }
-
-        public override string ToString()
-        {
-            return Value.ToString();
         }
 
         public bool Equals(FloatToken other)

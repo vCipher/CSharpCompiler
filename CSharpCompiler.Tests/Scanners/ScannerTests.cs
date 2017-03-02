@@ -1,10 +1,7 @@
 ﻿using Xunit;
-using System.Collections.Generic;
-using System.IO;
 using CSharpCompiler.Scanners.Regexp;
-using CSharpCompiler.Scanners.Tokens;
 
-using static CSharpCompiler.Scanners.Tokens.CSharpTokens;
+using static CSharpCompiler.Scanners.Tokens.Tokens;
 
 namespace CSharpCompiler.Scanners.Tests
 {
