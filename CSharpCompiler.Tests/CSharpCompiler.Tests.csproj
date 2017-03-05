@@ -67,8 +67,9 @@
     <Compile Include="JsonEqualityComparer.cs" />
     <Compile Include="Parsers\ParserTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Scanners\Regexp\DfaTests.cs" />
+    <Compile Include="Scanners\Regexp\NfaBuilderTests.cs" />
     <Compile Include="Scanners\Regexp\NfaTests.cs" />
+    <Compile Include="Scanners\Regexp\TransitionTableTests.cs" />
     <Compile Include="Scanners\ScannerTests.cs" />
   </ItemGroup>
   <ItemGroup>

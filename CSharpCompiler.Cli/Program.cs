@@ -1,6 +1,6 @@
-﻿using CSharpCompiler.Parsers;
-using CSharpCompiler.Scanners;
-using CSharpCompiler.Scanners.Regexp;
+﻿using CSharpCompiler.Syntax;
+using CSharpCompiler.Lexica;
+using CSharpCompiler.Lexica.Regexp;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 

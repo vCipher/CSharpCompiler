@@ -7,22 +7,6 @@ namespace CSharpCompiler
 {
     internal static class ExtenstionMethods
     {
-        internal static TRes With<TSrc, TRes>(this TSrc src, Func<TSrc, TRes> func)
-        {
-            if (src == null)
-                return default(TRes);
-
-            return func(src);
-        }
-
-        internal static TRes With<TSrc, TRes>(this TSrc src, Func<TSrc, TRes> func, TRes defaultVal)
-        {
-            if (src == null)
-                return defaultVal;
-
-            return func(src);
-        }
-
         internal static void Do<TSrc>(this TSrc src, Action<TSrc> func)
         {
             if (src == null)
@@ -43,18 +27,7 @@ namespace CSharpCompiler
         {
             return src == null || !src.Any();
         }
-
-        internal static bool IsNullOrEmpty(this IEnumerable src)
-        {
-            if (src == null)
-                return true;
-
-            foreach (var item in src)
-                return false;
-
-            return true;
-        }
-
+        
         internal static void ForEach<TSrc>(this IEnumerable<TSrc> src, Action<TSrc> action)
         {
             if (src == null)

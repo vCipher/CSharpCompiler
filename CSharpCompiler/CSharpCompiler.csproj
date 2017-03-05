@@ -40,38 +40,37 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DictionaryComparer.cs" />
     <Compile Include="ExtenstionMethods.cs" />
-    <Compile Include="Parsers\ParseException.cs" />
-    <Compile Include="Parsers\ParseNode.cs" />
-    <Compile Include="Parsers\ParseNodeTag.cs" />
-    <Compile Include="Parsers\Parser.cs" />
-    <Compile Include="Parsers\TokenExtensionMethods.cs" />
-    <Compile Include="Parsers\UnexpectedTokenException.cs" />
+    <Compile Include="Enumerator.cs" />
+    <Compile Include="Syntax\ParseException.cs" />
+    <Compile Include="Syntax\ParseNode.cs" />
+    <Compile Include="Syntax\ParseNodeTag.cs" />
+    <Compile Include="Syntax\Parser.cs" />
+    <Compile Include="Syntax\TokenExtensionMethods.cs" />
+    <Compile Include="Syntax\UnexpectedTokenException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Scanners\CharIterator.cs" />
-    <Compile Include="Scanners\Regexp\Dfa.cs" />
-    <Compile Include="Scanners\Regexp\DfaBuilder.cs" />
-    <Compile Include="Scanners\Regexp\DfaState.cs" />
-    <Compile Include="Scanners\Regexp\IState.cs" />
-    <Compile Include="Scanners\Regexp\Nfa.cs" />
-    <Compile Include="Scanners\Regexp\NfaBuilder.cs" />
-    <Compile Include="Scanners\ScanException.cs" />
-    <Compile Include="Scanners\Scanner.cs" />
-    <Compile Include="Scanners\Regexp\NfaState.cs" />
-    <Compile Include="Scanners\Regexp\DfaStateFactory.cs" />
-    <Compile Include="Scanners\Regexp\NfaStateFactory.cs" />
-    <Compile Include="Scanners\Tokens\BoolToken.cs" />
-    <Compile Include="Scanners\Tokens\Tokens.cs" />
-    <Compile Include="Scanners\Tokens\TokenTag.cs" />
-    <Compile Include="Scanners\Tokens\DoubleToken.cs" />
-    <Compile Include="Scanners\Tokens\FloatToken.cs" />
-    <Compile Include="Scanners\Tokens\IntegerToken.cs" />
-    <Compile Include="Scanners\Tokens\Token.cs" />
-    <Compile Include="Scanners\Regexp\Transition.cs" />
-    <Compile Include="Scanners\Regexp\TransitionTable.cs" />
-    <Compile Include="Scanners\Regexp\TransitionTableReader.cs" />
-    <Compile Include="Scanners\Tokens\TokenIterator.cs" />
-    <Compile Include="Scanners\Tokens\TypeToken.cs" />
+    <Compile Include="Lexica\NotAcceptLexemeException.cs" />
+    <Compile Include="Lexica\Regexp\CharEnumerator.cs" />
+    <Compile Include="Lexica\Regexp\Dfa.cs" />
+    <Compile Include="Lexica\Regexp\DfaBuilder.cs" />
+    <Compile Include="Lexica\Regexp\DfaState.cs" />
+    <Compile Include="Lexica\Regexp\FiniteAutomata.cs" />
+    <Compile Include="Lexica\Regexp\IState.cs" />
+    <Compile Include="Lexica\Regexp\ITransitionState.cs" />
+    <Compile Include="Lexica\Regexp\Nfa.cs" />
+    <Compile Include="Lexica\Regexp\NfaBuilder.cs" />
+    <Compile Include="Lexica\ScanException.cs" />
+    <Compile Include="Lexica\Scanner.cs" />
+    <Compile Include="Lexica\Regexp\NfaState.cs" />
+    <Compile Include="Lexica\Tokens\InvalidTokenException.cs" />
+    <Compile Include="Lexica\Tokens\TokenEnumerator.cs" />
+    <Compile Include="Lexica\Tokens\Tokens.cs" />
+    <Compile Include="Lexica\Tokens\TokenTag.cs" />
+    <Compile Include="Lexica\Tokens\Token.cs" />
+    <Compile Include="Lexica\Regexp\Transition.cs" />
+    <Compile Include="Lexica\Regexp\TransitionTable.cs" />
+    <Compile Include="Lexica\Regexp\TransitionTableReader.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="vocabulary.txt" />
@@ -81,6 +80,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="vocabulary.bin" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Semantic\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
