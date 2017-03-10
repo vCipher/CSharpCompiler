@@ -2,7 +2,7 @@
 {
     public enum TokenTag
     {
-        EOF,
+        UNKNOWN,
         PLUS,
         MINUS,
         MULTIPLY,

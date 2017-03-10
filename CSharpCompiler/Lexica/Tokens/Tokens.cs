@@ -7,8 +7,6 @@ namespace CSharpCompiler.Lexica.Tokens
 {
     public static class Tokens
     {
-        public static readonly Token EOF = new Token("eof", TokenTag.EOF);
-
         // arithmetic operations
         public static readonly Token PLUS = new Token("+", TokenTag.PLUS);
         public static readonly Token MINUS = new Token("-", TokenTag.MINUS);

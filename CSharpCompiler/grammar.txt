@@ -1,10 +1,10 @@
 
 /************************************************** Types ***************************************************/
-type_name
-    : predefined_type_name
+type
+    : primitive_type
     ;
 
-predefined_type_name
+primitive_type
     : BOOL
     | BYTE
     | CHAR
@@ -44,11 +44,7 @@ declaration_statement
     ;
 
 var_declaration
-    : type_name ID ASSIGN var_initializer
-    ;
-
-var_initializer
-    : expression
+    : type ID ASSIGN expression
     ;
 
 /************************************************ Expressions ***********************************************/
@@ -66,8 +62,8 @@ argument
 
 expression
 	: conditional_expression
-    | conditional_expression IS type_name
-    | conditional_expression AS type_name
+    | conditional_expression IS type
+    | conditional_expression AS type
     | conditional_expression QUESTION expression COLON expression
 	;
 
@@ -108,8 +104,7 @@ factor_expression
 unary_expression
     | MINUS primary_expression
     | NOT primary_expression
-    | MULTIPLY primary_expression
-    | prefix_increment
+    | INCREMENT primary_expression
     | DECREMENT primary_expression
     | primary_expression
 	;
@@ -127,7 +122,7 @@ primary_expression
     ;
 
 cast_expression
-    : OPEN_PAREN type_name CLOSE_PAREN unary_expression
+    : OPEN_PAREN type CLOSE_PAREN unary_expression
     ;
 
 parenthesis_expression
@@ -160,8 +155,8 @@ postfix_decrement
     ;
 
 object_creation
-    : NEW type_name OPEN_PAREN argument_list CLOSE_PAREN
-    | NEW type_name OPEN_PAREN CLOSE_PAREN
+    : NEW type OPEN_PAREN argument_list CLOSE_PAREN
+    | NEW type OPEN_PAREN CLOSE_PAREN
     ;
 
 /************************************************* Literals *************************************************/

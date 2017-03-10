@@ -64,13 +64,19 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="JsonEqualityComparer.cs" />
-    <Compile Include="Parsers\ParserTests.cs" />
+    <Compile Include="Assertions\AssertExtensions.cs" />
+    <Compile Include="Assertions\ObjectAssersions.cs" />
+    <Compile Include="Assertions\TransitionTableAssertions.cs" />
+    <Compile Include="Helpers\NfaBuilderHelper.cs" />
+    <Compile Include="Helpers\ParserHelper.cs" />
+    <Compile Include="Syntax\Ast\AstBuilderTests.cs" />
+    <Compile Include="Syntax\ParserTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Scanners\Regexp\NfaBuilderTests.cs" />
-    <Compile Include="Scanners\Regexp\NfaTests.cs" />
-    <Compile Include="Scanners\Regexp\TransitionTableTests.cs" />
-    <Compile Include="Scanners\ScannerTests.cs" />
+    <Compile Include="Lexica\Regexp\NfaBuilderTests.cs" />
+    <Compile Include="Lexica\Regexp\NfaTests.cs" />
+    <Compile Include="Lexica\Regexp\TransitionTableTests.cs" />
+    <Compile Include="Lexica\ScannerTests.cs" />
+    <Compile Include="TestCase.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

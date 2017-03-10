@@ -1,10 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using CSharpCompiler.Tests;
+using CSharpCompiler.Tests.Assertions;
+using System.Collections.Generic;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace CSharpCompiler.Lexica.Regexp.Tests
 {
-    public class TransitionTableTests
+    public class TransitionTableTests : TestCase
     {
+        public TransitionTableTests(ITestOutputHelper output) : base(output)
+        { }
+
         [Fact]
         public void FromFileTest()
         {
@@ -22,7 +28,7 @@ namespace CSharpCompiler.Lexica.Regexp.Tests
             );
             var actual = TransitionTable.FromFile("vocabulary.txt");
 
-            Assert.Equal(expected, actual);
+            actual.Should().Be(expected);
         }
 
         [Fact]
@@ -44,7 +50,7 @@ namespace CSharpCompiler.Lexica.Regexp.Tests
             );
             var actual = TransitionTable.FromString(@"a|b ID");
 
-            Assert.Equal(expected, actual);
+            actual.Should().Be(expected);
         }
     }
 }

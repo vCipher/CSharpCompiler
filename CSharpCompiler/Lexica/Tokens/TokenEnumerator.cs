@@ -8,11 +8,6 @@ namespace CSharpCompiler.Lexica.Tokens
 {
     public sealed class TokenEnumerator : Enumerator<Token>
     {
-        protected override Token DefaultValue
-        {
-            get { return Tokens.EOF; }
-        }
-
         public TokenEnumerator(IReadOnlyList<Token> source) : base(source)
         { }
 

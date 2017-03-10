@@ -1,38 +1,19 @@
 ﻿using CSharpCompiler.Lexica.Tokens;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using CSharpCompiler.Syntax.Ast.Types;
 
 namespace CSharpCompiler.Syntax
 {
     internal static class TokenExtensionMethods
     {
-        public static bool IsPredefinedTypeToken(this Token token)
+        public static bool IsPrimitiveTypeToken(this Token token)
         {
-            return token.Tag == TokenTag.BOOL ||
-                token.Tag == TokenTag.BYTE ||
-                token.Tag == TokenTag.CHAR ||
-                token.Tag == TokenTag.DECIMAL ||
-                token.Tag == TokenTag.DOUBLE ||
-                token.Tag == TokenTag.FLOAT ||
-                token.Tag == TokenTag.INT ||
-                token.Tag == TokenTag.LONG ||
-                token.Tag == TokenTag.OBJECT ||
-                token.Tag == TokenTag.SBYTE ||
-                token.Tag == TokenTag.SHORT ||
-                token.Tag == TokenTag.STRING ||
-                token.Tag == TokenTag.UINT ||
-                token.Tag == TokenTag.ULONG ||
-                token.Tag == TokenTag.USHORT;
+            return PrimitiveType.IsPrimitiveType(token);
         }
 
         public static bool IsUnaryToken(this Token token)
         {
             return token.Tag == TokenTag.MINUS ||
                 token.Tag == TokenTag.NOT ||
-                token.Tag == TokenTag.MULTIPLY ||
                 token.Tag == TokenTag.INCREMENT ||
                 token.Tag == TokenTag.DECREMENT;
         }

@@ -43,7 +43,34 @@
     <Compile Include="DictionaryComparer.cs" />
     <Compile Include="ExtenstionMethods.cs" />
     <Compile Include="Enumerator.cs" />
-    <Compile Include="Syntax\ParseException.cs" />
+    <Compile Include="Syntax\Ast\AstBuilder.cs" />
+    <Compile Include="Syntax\Ast\AstNode.cs" />
+    <Compile Include="Syntax\Ast\Argument.cs" />
+    <Compile Include="Syntax\Ast\Expressions\AsOperation.cs" />
+    <Compile Include="Syntax\Ast\Expressions\CastExpression.cs" />
+    <Compile Include="Syntax\Ast\Expressions\BinaryOperation.cs" />
+    <Compile Include="Syntax\Ast\Expressions\InvokeExpression.cs" />
+    <Compile Include="Syntax\Ast\Expressions\TernaryOperation.cs" />
+    <Compile Include="Syntax\Ast\Expressions\UnaryOperation.cs" />
+    <Compile Include="Syntax\Ast\Expressions\Literal.cs" />
+    <Compile Include="Syntax\Ast\Expressions\IsOperation.cs" />
+    <Compile Include="Syntax\Ast\VarDeclaration.cs" />
+    <Compile Include="Syntax\Ast\Expressions\VarLocation.cs" />
+    <Compile Include="Syntax\Ast\Types\TypeRegistry.cs" />
+    <Compile Include="Syntax\Ast\VarDeclarator.cs" />
+    <Compile Include="Syntax\Ast\Statements\DeclarationStmt.cs" />
+    <Compile Include="Syntax\Ast\SyntaxTree.cs" />
+    <Compile Include="Syntax\Ast\Types\AstType.cs" />
+    <Compile Include="Syntax\Ast\Expressions\Expression.cs" />
+    <Compile Include="Syntax\Ast\Statements\ExpressionStmt.cs" />
+    <Compile Include="Syntax\Ast\Statements\Stmt.cs" />
+    <Compile Include="Syntax\Ast\Types\PrimitiveType.cs" />
+    <Compile Include="Semantics\SemanticException.cs" />
+    <Compile Include="Semantics\TypeSystem\TypeInference.cs" />
+    <Compile Include="Semantics\TypeSystem\TypeInferenceException.cs" />
+    <Compile Include="Semantics\TypeSystem\UnknownTypeException.cs" />
+    <Compile Include="Syntax\ParseTree.cs" />
+    <Compile Include="Syntax\SyntaxException.cs" />
     <Compile Include="Syntax\ParseNode.cs" />
     <Compile Include="Syntax\ParseNodeTag.cs" />
     <Compile Include="Syntax\Parser.cs" />
@@ -71,6 +98,9 @@
     <Compile Include="Lexica\Regexp\Transition.cs" />
     <Compile Include="Lexica\Regexp\TransitionTable.cs" />
     <Compile Include="Lexica\Regexp\TransitionTableReader.cs" />
+    <Compile Include="Semantics\TypeSystem\IType.cs" />
+    <Compile Include="Semantics\TypeSystem\KnownType.cs" />
+    <Compile Include="Semantics\TypeSystem\KnownTypeCode.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="vocabulary.txt" />
@@ -81,9 +111,7 @@
   <ItemGroup>
     <EmbeddedResource Include="vocabulary.bin" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Semantic\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

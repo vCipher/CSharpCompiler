@@ -9,9 +9,8 @@
         DeclarationStmt,
         Block,
         VarDeclaration,
-        TypeName,
-        PredefinedTypeName,
-        VarInitializer,
+        Type,
+        PrimitiveType,
         ExpressionStmt,
         Expression,
         ArithmeticExpression,
@@ -23,14 +22,15 @@
         Literal,
         PrimaryExpression,
         ParenthesisExpression,
-        InvocationExpression,
+        InvokeExpression,
         ArgumentList,
         Argument,
-        VarAccess,
+        VarLocation,
         ElementAccess,
         ExpressionList,
         PostfixDecrement,
         PostfixIncrement,
-        ObjectCreation
+        ObjectCreation,
+        VarDeclarator
     }
 }

@@ -1,17 +1,22 @@
 ﻿using Xunit;
 using CSharpCompiler.Tests;
+using Xunit.Abstractions;
+using CSharpCompiler.Tests.Assertions;
 
 namespace CSharpCompiler.Lexica.Regexp.Tests
 {
-    public class NfaTests
+    public class NfaTests : TestCase
     {
+        public NfaTests(ITestOutputHelper output) : base(output)
+        { }
+
         [Fact]
         public void ParseTest_Trivial()
         {
             Nfa expected = Nfa.Create('a');
             Nfa actual = Nfa.Parse("a");
 
-            Assert.Equal(expected, actual, new JsonEqualityComparer<Nfa>());
+            actual.Should().Be(expected, Output);
         }
 
         [Fact]
@@ -20,7 +25,7 @@ namespace CSharpCompiler.Lexica.Regexp.Tests
             Nfa expected = Nfa.Create('a').Concat(builder => builder.Create('b'));
             Nfa actual = Nfa.Parse("ab");
 
-            Assert.Equal(expected, actual, new JsonEqualityComparer<Nfa>());
+            actual.Should().Be(expected, Output);
         }
 
         [Fact]
@@ -29,7 +34,7 @@ namespace CSharpCompiler.Lexica.Regexp.Tests
             Nfa expected = Nfa.Create('a').Union(builder => builder.Create('b'));
             Nfa actual = Nfa.Parse("a|b");
 
-            Assert.Equal(expected, actual, new JsonEqualityComparer<Nfa>());
+            actual.Should().Be(expected, Output);
         }
 
         [Fact]
@@ -38,7 +43,7 @@ namespace CSharpCompiler.Lexica.Regexp.Tests
             Nfa expected = Nfa.Create('a').KleeneClosure();
             Nfa actual = Nfa.Parse("a*");
 
-            Assert.Equal(expected, actual, new JsonEqualityComparer<Nfa>());
+            actual.Should().Be(expected, Output);
         }
         
         [Fact]
@@ -47,7 +52,7 @@ namespace CSharpCompiler.Lexica.Regexp.Tests
             Nfa expected = Nfa.Create('|');
             Nfa actual = Nfa.Parse("\\|");
 
-            Assert.Equal(expected, actual, new JsonEqualityComparer<Nfa>());
+            actual.Should().Be(expected, Output);
         }
 
         [Fact]
@@ -60,7 +65,7 @@ namespace CSharpCompiler.Lexica.Regexp.Tests
             );
             Nfa actual = Nfa.Parse("a(a|b)*");
 
-            Assert.Equal(expected, actual, new JsonEqualityComparer<Nfa>());
+            actual.Should().Be(expected, Output);
         }
     }
 }

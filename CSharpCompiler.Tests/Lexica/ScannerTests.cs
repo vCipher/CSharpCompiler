@@ -1,14 +1,19 @@
 ﻿using CSharpCompiler.Lexica.Regexp;
 using CSharpCompiler.Lexica.Tokens;
+using CSharpCompiler.Tests;
 using System.Collections.Generic;
 using Xunit;
 
 using static CSharpCompiler.Lexica.Tokens.Tokens;
+using Xunit.Abstractions;
 
 namespace CSharpCompiler.Lexica.Tests
 {
-    public class ScannerTests
+    public class ScannerTests : TestCase
     {
+        public ScannerTests(ITestOutputHelper output) : base(output)
+        { }
+
         [Fact]
         public void ScanTest_DefaultVocabulary()
         {
