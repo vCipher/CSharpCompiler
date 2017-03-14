@@ -4,9 +4,8 @@ using System.Runtime.Serialization;
 namespace CSharpCompiler.Semantics.TypeSystem
 {
     [Serializable]
-    public sealed class UnknownTypeException : Exception
+    public sealed class UnknownTypeException : SemanticException
     {
-        public UnknownTypeException(string typeName) : base(string.Format("Unknown type: {0}", typeName))
-        { }
+        public UnknownTypeException(string typeName) : base("Unknown type: {0}", typeName) { }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using CSharpCompiler.Lexica.Tokens;
-using CSharpCompiler.Syntax.Ast.Types;
 using CSharpCompiler.Semantics.TypeSystem;
+using CSharpCompiler.Semantics.Metadata;
 
 namespace CSharpCompiler.Syntax.Ast.Expressions
 {
@@ -13,22 +13,14 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             Value = value;
         }
 
-        private static PrimitiveType GetType(Token value)
+        public override IType InferType()
         {
-            switch (value.Tag)
-            {
-                case TokenTag.INT_CONST:
-                    return PrimitiveType.INT;
-                case TokenTag.FLOAT_CONST:
-                    return PrimitiveType.FLOAT;
-                case TokenTag.DOUBLE_CONST:
-                    return PrimitiveType.DOUBLE;
-                case TokenTag.TRUE:
-                case TokenTag.FALSE:
-                    return PrimitiveType.BOOL;
-                default:
-                    throw new TypeInferenceException(value);
-            }
+            return TypeInference.InferType(this);
+        }
+
+        public override void Build(MethodBuilder builder)
+        {
+            builder.Build(this);
         }
     }
 }

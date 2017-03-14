@@ -25,34 +25,49 @@ namespace CSharpCompiler.Tests.Syntax.Ast
                   int b = 1;
                   writeLine(a + b);";
 
+            TokenEnumerable tokens = Scanner.Scan(content);
+            ParseTree parseTree = Parser.Parse(tokens);
+
+            SyntaxTree expected = GetExpectedSyntaxTree();
+            SyntaxTree syntaxTree = AstBuilder.Build(parseTree);
+
+            syntaxTree.Should().Be(expected, Output);
+        }
+
+        private static SyntaxTree GetExpectedSyntaxTree()
+        {
+            VarScope scope = new VarScope();
             SyntaxTree expected = new SyntaxTree(
                 new DeclarationStmt(
                     new VarDeclaration(
-                        PrimitiveType.INT, 
-                        new VarDeclarator(new VarLocation("a"), new Literal(Tokens.INT_CONST("1")))
+                        new PrimitiveType(Tokens.INT),
+                        "a",
+                        new Literal(Tokens.INT_LITERAL("1")),
+                        scope
                     )
                 ),
                 new DeclarationStmt(
                     new VarDeclaration(
-                        PrimitiveType.INT,
-                        new VarDeclarator(new VarLocation("b"), new Literal(Tokens.INT_CONST("1")))
+                        new PrimitiveType(Tokens.INT),
+                        "b",
+                        new Literal(Tokens.INT_LITERAL("1")),
+                        scope
                     )
                 ),
                 new ExpressionStmt(
                     new InvokeExpression(
                         "writeLine",
                         new Argument(
-                            new BinaryOperation(Tokens.PLUS, new VarLocation("a"), new VarLocation("b"))
+                            new BinaryOperation(
+                                Tokens.PLUS,
+                                new VarAccess("a", scope),
+                                new VarAccess("b", scope)
+                            )
                         )
                     )
                 )
             );
-
-            List<Token> tokens = Scanner.Scan(content);
-            ParseTree parseTree = Parser.Parse(tokens);
-            SyntaxTree syntaxTree = AstBuilder.Build(parseTree);
-
-            syntaxTree.Should().Be(expected, Output);
+            return expected;
         }
     }
 }

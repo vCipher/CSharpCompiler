@@ -40,31 +40,31 @@ namespace CSharpCompiler.Lexica.Regexp
             Character = character;
         }
 
-        public bool Equals(Transition<TState> other)
-        {
-            return From.Equals(other.From) &&
-                To.Equals(other.To) &&
-                Character == other.Character;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (!(obj is Transition<TState>))
-                return false;
-
-            return Equals((Transition<TState>)obj);
-        }
-
         public override int GetHashCode()
         {
             unchecked
             {
                 int res = 31;
-                res ^= From?.GetHashCode() ?? 0;
-                res ^= To?.GetHashCode() ?? 0;
+                res ^= (From == null) ? 0 : From.GetHashCode();
+                res ^= (To == null) ? 0 : To.GetHashCode();
                 res ^= Character.GetHashCode();
                 return res;
             }
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Transition<TState>)
+                return Equals((Transition<TState>)obj);
+
+            return false;
+        }
+
+        public bool Equals(Transition<TState> other)
+        {
+            return From.Equals(other.From) &&
+                To.Equals(other.To) &&
+                Character == other.Character;
         }
     }
 }

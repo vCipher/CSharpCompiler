@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CSharpCompiler.Semantics.TypeSystem
+﻿namespace CSharpCompiler.Semantics.TypeSystem
 {
     public enum KnownTypeCode
     {
@@ -32,7 +26,8 @@ namespace CSharpCompiler.Semantics.TypeSystem
         /// byte (System.Byte)
         /// </summary>
         Byte,
-        /// <summary>short (System.Int16)
+        /// <summary>
+        /// short (System.Int16)
         /// </summary>
         Int16,
         /// <summary>
@@ -98,6 +93,6 @@ namespace CSharpCompiler.Semantics.TypeSystem
         /// <summary>
         /// System.Delegate
         /// </summary>
-        Delegate,
+        Delegate
     }
 }

@@ -65,10 +65,29 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assertions\AssertExtensions.cs" />
-    <Compile Include="Assertions\ObjectAssersions.cs" />
+    <Compile Include="Assertions\ByteBufferAssertions.cs" />
+    <Compile Include="Assertions\EnumerableAssertions.cs" />
+    <Compile Include="Assertions\DictionaryComparer.cs" />
+    <Compile Include="Assertions\ObjectAssertions.cs" />
+    <Compile Include="Assertions\StreamAssertions.cs" />
+    <Compile Include="Assertions\StreamComparer.cs" />
     <Compile Include="Assertions\TransitionTableAssertions.cs" />
+    <Compile Include="Assertions\TransitionTableComparer.cs" />
+    <Compile Include="Data\ByteBufferConverter.cs" />
+    <Compile Include="Data\DataConverterFactory.cs" />
+    <Compile Include="Data\GuidConverter.cs" />
+    <Compile Include="Data\IDataConverter.cs" />
+    <Compile Include="Data\ObjectConverter.cs" />
+    <Compile Include="Data\StringConverter.cs" />
     <Compile Include="Helpers\NfaBuilderHelper.cs" />
     <Compile Include="Helpers\ParserHelper.cs" />
+    <Compile Include="Data\FileDataAttribute.cs" />
+    <Compile Include="CodeGen\Metadata\TableHeapTests.cs" />
+    <Compile Include="CodeGen\PEWriterTests.cs" />
+    <Compile Include="CodeGen\Metadata\BlobHeapTests.cs" />
+    <Compile Include="CodeGen\Metadata\GuidHeapTests.cs" />
+    <Compile Include="CodeGen\Metadata\StringHeapTests.cs" />
+    <Compile Include="CodeGen\Metadata\UserStringHeapTests.cs" />
     <Compile Include="Syntax\Ast\AstBuilderTests.cs" />
     <Compile Include="Syntax\ParserTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -76,10 +95,46 @@
     <Compile Include="Lexica\Regexp\NfaTests.cs" />
     <Compile Include="Lexica\Regexp\TransitionTableTests.cs" />
     <Compile Include="Lexica\ScannerTests.cs" />
+    <Content Include="Content\Tests\PEWriter\Expressions.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Tests\PEWriter\Strings.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Tests\PEWriter\Simple.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Tests\StringHeap\Strings.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Tests\TableHeap\Strings.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Tests\UserStringHeap\Strings.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Tests\BlobHeap\Strings.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\Tests\GuidHeap\Simple.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Target.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Compile Include="TestCase.cs" />
+    <Content Include="WriteTest_Strings.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <Content Include="WriteTest_Expressions.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="WriteTest_Simple.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CSharpCompiler\CSharpCompiler.csproj">
@@ -91,7 +146,7 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="vocabulary.txt">
+    <Content Include="Content\vocabulary.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

@@ -1,11 +1,12 @@
 ﻿using CSharpCompiler.Lexica.Regexp;
 using CSharpCompiler.Lexica.Tokens;
 using CSharpCompiler.Tests;
-using System.Collections.Generic;
+using CSharpCompiler.Tests.Assertions;
+using System.Linq;
 using Xunit;
+using Xunit.Abstractions;
 
 using static CSharpCompiler.Lexica.Tokens.Tokens;
-using Xunit.Abstractions;
 
 namespace CSharpCompiler.Lexica.Tests
 {
@@ -18,15 +19,16 @@ namespace CSharpCompiler.Lexica.Tests
         public void ScanTest_DefaultVocabulary()
         {
             string content = "int a = 1;";
-            List<Token> tokens = Scanner.Scan(content);
 
-            Assert.Equal(new[] {
+            TokenEnumerable tokens = Scanner.Scan(content);
+
+            tokens.Should().Be(new[] {
                 INT,
                 ID("a"),
                 ASSIGN,
-                INT_CONST("1"),
+                INT_LITERAL("1"),
                 SEMICOLON
-            }, tokens);
+            });
         }
 
         [Fact]
@@ -37,29 +39,43 @@ namespace CSharpCompiler.Lexica.Tests
                 @"int INT
                 \w+ ID
                 = ASSIGN
-                \d+ INT_CONST
+                \d+ INT_LITERAL
                 ; SEMICOLON";
 
             TransitionTable table = TransitionTable.FromString(vocabulary);
-            List<Token> tokens = Scanner.Scan(content, table);
-                        
-            Assert.Equal(new[] {
+            TokenEnumerable tokens = Scanner.Scan(content, table);
+
+            tokens.Should().Be(new[] {
                 INT,
                 ID("a"),
                 ASSIGN,
-                INT_CONST("1"),
+                INT_LITERAL("1"),
                 SEMICOLON
-            }, tokens);
+            });
         }
 
         [Fact]
         public void ScanTest_NotAcceptInputString()
         {
-            string content = "1";
+            string content = "#";
             string vocabulary = "\\w ID";
 
             TransitionTable table = TransitionTable.FromString(vocabulary);
-            Assert.Throws<NotAcceptLexemeException>(() => Scanner.Scan(content, table));
+            TokenEnumerable tokens = Scanner.Scan(content, table);
+
+            tokens.Should().Throw<NotAcceptLexemeException>();
+        }
+
+        [Fact]
+        public void ScanTest_StringLiteral()
+        {
+            string content = "\"hello, world!\"";
+            string vocabulary = "\"\\.*\" STRING_LITERAL";
+
+            TransitionTable table = TransitionTable.FromString(vocabulary);
+            TokenEnumerable tokens = Scanner.Scan(content, table);
+
+            tokens.Should().Single(STRING_LITERAL("hello, world!"));
         }
     }
 }

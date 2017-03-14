@@ -1,0 +1,15 @@
+﻿# test
+## param (content)
+int a = 13;
+int b = 31;
+int x = (a % 2) ^ b;
+writeLine(x);
+
+## param (expectedFile)
+WriteTest_Expressions.exe
+
+## param (options)
+{
+    "TimeStamp": 0x58DE6839,
+    "Mvid": "cee78dec-78be-4e56-bba8-c798fa1c8f71"
+}

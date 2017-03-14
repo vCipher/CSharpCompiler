@@ -2,7 +2,6 @@
 using CSharpCompiler.Lexica.Tokens;
 using CSharpCompiler.Tests;
 using CSharpCompiler.Tests.Assertions;
-using System.Collections.Generic;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -26,15 +25,15 @@ namespace CSharpCompiler.Syntax.Tests
 
             ParseTree expected = new ParseTree(
                 new ParseNode(ParseNodeTag.StmtSeq,
-                    DeclarationStmt(INT, ID("a"), INT_CONST("1")),
-                    DeclarationStmt(INT, ID("b"), INT_CONST("1")),
+                    DeclarationStmt(INT, ID("a"), INT_LITERAL("1")),
+                    DeclarationStmt(INT, ID("b"), INT_LITERAL("1")),
                     InvokeMethod(ID("writeLine"), Plus(Var("a"), Var("b")))
                 )
             );
 
-            List<Token> tokens = Scanner.Scan(content);
+            TokenEnumerable tokens = Scanner.Scan(content);
             ParseNode actual = Parser.Parse(tokens);
-
+            
             actual.Should().Be(expected, Output);
         }
     }

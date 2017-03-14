@@ -1,5 +1,8 @@
-﻿using CSharpCompiler.Lexica.Tokens;
+﻿using CSharpCompiler.Semantics.TypeSystem;
 using System.Collections.Generic;
+using CSharpCompiler.Semantics.Metadata;
+using System;
+using CSharpCompiler.Semantic.Cil;
 
 namespace CSharpCompiler.Syntax.Ast.Expressions
 {
@@ -19,6 +22,16 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
         {
             MethodName = methodName;
             Arguments = new List<Argument>(arguments);
+        }
+
+        public override IType InferType()
+        {
+            return KnownType.Void;
+        }
+
+        public override void Build(MethodBuilder builder)
+        {
+            builder.Build(this);
         }
     }
 }

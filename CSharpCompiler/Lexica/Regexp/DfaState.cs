@@ -28,22 +28,6 @@ namespace CSharpCompiler.Lexica.Regexp
             IsAccepting = false;
             Alias = null;
         }
-        
-        public bool Equals(DfaState other)
-        {
-            if (other == null)
-                return false;
-
-            return Id == other.Id;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (!(obj is DfaState))
-                return false;
-
-            return Equals((DfaState)obj);
-        }
 
         public override int GetHashCode()
         {
@@ -53,6 +37,22 @@ namespace CSharpCompiler.Lexica.Regexp
                 res ^= Id.GetHashCode();
                 return res;
             }
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is DfaState)
+                return Equals((DfaState)obj);
+
+            return false;
+        }
+
+        public bool Equals(DfaState other)
+        {
+            if (other == null)
+                return false;
+
+            return Id == other.Id;
         }
     }
 }

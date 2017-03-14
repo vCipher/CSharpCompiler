@@ -1,0 +1,12 @@
+﻿# test (PE with strings)
+## param (content)
+writeLine("hello, world!");
+
+## param (expectedFile)
+WriteTest_Strings.exe
+
+## param (options)
+{
+    "TimeStamp": 1490884259,
+    "Mvid": "3fd69317-673a-409e-93e1-a41e49aaa8b6"
+}

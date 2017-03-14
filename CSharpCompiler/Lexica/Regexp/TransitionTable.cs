@@ -8,7 +8,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 namespace CSharpCompiler.Lexica.Regexp
 {
     [Serializable]
-    public sealed class TransitionTable : IEquatable<TransitionTable>
+    public sealed class TransitionTable
     {
         public const int UNKNOWN_STATE = -1;
         
@@ -67,14 +67,6 @@ namespace CSharpCompiler.Lexica.Regexp
                 return tReader.Read();
         }
 
-        private static TransitionTable GetSourceTransitionTable()
-        {
-            var assembly = Assembly.GetExecutingAssembly();
-
-            using (var stream = assembly.GetManifestResourceStream("CSharpCompiler.vocabulary.txt"))
-                return (TransitionTable)new BinaryFormatter().Deserialize(stream);
-        }
-
         private static TransitionTable GetDefaultTransitionTable()
         {
             var assembly = Assembly.GetExecutingAssembly();
@@ -98,49 +90,6 @@ namespace CSharpCompiler.Lexica.Regexp
         public string GetTokenAlias(int state)
         {
             return Aliases[state];
-        }
-
-        public bool Equals(TransitionTable other)
-        {
-            return Head == other.Head &&
-                Equals(Accepting, other.Accepting) &&
-                Equals(Aliases, other.Aliases) &&
-                Equals(Transitions, other.Transitions);
-        }
-
-        private bool Equals(int[] @this, int[] other)
-        {
-            return @this.SequenceEqual(other);
-        }
-
-        private bool Equals(Dictionary<int, string> @this, Dictionary<int, string> other)
-        {
-            return new DictionaryComparer<int, string>()
-                .Equals(@this, other);
-        }
-
-        private bool Equals(Dictionary<int, Dictionary<char, int>> @this, Dictionary<int, Dictionary<char, int>> other)
-        {
-            return new DictionaryComparer<int, Dictionary<char, int>>(new DictionaryComparer<char, int>())
-                .Equals(@this, other);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (!(obj is TransitionTable))
-                return false;
-
-            return Equals((TransitionTable)obj);
-        }
-
-        public override int GetHashCode()
-        {
-            int res = 31;
-            res ^= Head.GetHashCode();
-            res ^= Accepting.GetHashCode();
-            res ^= Aliases.GetHashCode();
-            res ^= Transitions.GetHashCode();
-            return res;
         }
     }
 }

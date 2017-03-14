@@ -21,19 +21,6 @@ namespace CSharpCompiler.Lexica.Regexp
             Alias = null;
         }
 
-        public bool Equals(NfaState other)
-        {
-            return Id == other.Id;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (!(obj is NfaState))
-                return false;
-
-            return Equals((NfaState)obj);
-        }
-
         public override int GetHashCode()
         {
             unchecked
@@ -42,6 +29,19 @@ namespace CSharpCompiler.Lexica.Regexp
                 res ^= Id.GetHashCode();
                 return res;
             }
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is NfaState)
+                return Equals((NfaState)obj);
+
+            return false;
+        }
+
+        public bool Equals(NfaState other)
+        {
+            return Id == other.Id;
         }
     }
 }

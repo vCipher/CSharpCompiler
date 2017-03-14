@@ -1,9 +1,9 @@
-﻿using CSharpCompiler.Syntax.Ast;
+﻿using CSharpCompiler.Semantics.Metadata;
 
 namespace CSharpCompiler.Syntax.Ast.Statements
 {
-    public class Stmt : AstNode
+    public abstract class Stmt : AstNode
     {
-        public static readonly Stmt Empty = new Stmt();
+        public abstract void Build(MethodBuilder builder);
     }
 }

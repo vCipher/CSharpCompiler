@@ -10,10 +10,6 @@ namespace CSharpCompiler.Cli
     {
         static void Main(string[] args)
         {
-            //var scanner = new Scanner(TransitionTable.Default);
-            //var parser = new Parser(scanner);
-            //var parseNode = parser.Parse("int a = 1 + 1;");
-
             using (var stream = new FileStream("vocabulary.bin", FileMode.OpenOrCreate))
                 new BinaryFormatter().Serialize(stream, TransitionTable.Default);
         }

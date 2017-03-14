@@ -4,15 +4,9 @@ using System;
 namespace CSharpCompiler.Semantics.TypeSystem
 {
     [Serializable]
-    public class TypeInferenceException : Exception
+    public class TypeInferenceException : SemanticException
     {
-        public TypeInferenceException(Token literalValue) : base(GetMessage(literalValue)) { }
-
-        public TypeInferenceException(string message) : base(message) { }
-
-        private static string GetMessage(Token literalValue)
-        {
-            return string.Format("Can't inference type from literal: {0}", literalValue);
-        }
+        public TypeInferenceException(string format, params object[] args) : base(format, args)
+        { }
     }
 }

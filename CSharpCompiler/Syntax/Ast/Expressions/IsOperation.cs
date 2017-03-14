@@ -1,4 +1,7 @@
 ﻿using CSharpCompiler.Syntax.Ast.Types;
+using CSharpCompiler.Semantics.TypeSystem;
+using CSharpCompiler.Semantics.Metadata;
+using System;
 
 namespace CSharpCompiler.Syntax.Ast.Expressions
 {
@@ -12,6 +15,16 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
         {
             Operand = operand;
             Type = type;
+        }
+
+        public override IType InferType()
+        {
+            return KnownType.Boolean;
+        }
+
+        public override void Build(MethodBuilder builder)
+        {
+            builder.Build(this);
         }
     }
 }

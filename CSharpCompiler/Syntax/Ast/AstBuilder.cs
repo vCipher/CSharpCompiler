@@ -3,25 +3,39 @@ using CSharpCompiler.Syntax.Ast.Expressions;
 using CSharpCompiler.Syntax.Ast.Statements;
 using CSharpCompiler.Syntax.Ast.Types;
 using System.Linq;
-using System;
+using System.Collections.Generic;
+using CSharpCompiler.Utility;
 
 namespace CSharpCompiler.Syntax.Ast
 {
     public sealed class AstBuilder
     {
-        public static SyntaxTree Build(ParseTree parseTree)
+        private ParseTree _parseTree;
+        private Stack<VarScope> _scopes;
+
+        public AstBuilder(ParseTree parseTree)
         {
-            return new AstBuilder().SyntaxTree(parseTree);
+            _parseTree = parseTree;
+            _scopes = new Stack<VarScope>();
         }
 
-        private SyntaxTree SyntaxTree(ParseTree parseTree)
+        public static SyntaxTree Build(ParseTree parseTree)
         {
-            var stmts = parseTree.Children
+            return new AstBuilder(parseTree).SyntaxTree();
+        }
+
+        private SyntaxTree SyntaxTree()
+        {
+            _scopes.Push(new VarScope());
+
+            var stmts = _parseTree.Children
                 .EmptyIfNull()
                 .Where(child => child.Tag == ParseNodeTag.StmtSeq)
                 .SelectMany(child => child.Children)
-                .Select(child => Stmt(child));
+                .Select(child => Stmt(child))
+                .ToList();
 
+            //return new SyntaxTree(_scopes.Pop(), stmts);
             return new SyntaxTree(stmts);
         }
 
@@ -36,39 +50,78 @@ namespace CSharpCompiler.Syntax.Ast
                     return ExpressionStmt(node);
             }
 
-            throw new SyntaxException(string.Format("Unsupported statement: {0}", node));
+            throw new SyntaxException("Unsupported statement: {0}", node);
         }
 
         private DeclarationStmt DeclarationStmt(ParseNode node)
         {
-            var declaration = VarDeclaration(node.Children[0]);
-            return new DeclarationStmt(declaration);
+            var scope = _scopes.Peek();
+            var declarations = VarDeclarations(node.Children[0]);
+
+            foreach (var declaration in declarations)
+                scope.Register(declaration.VarName, declaration);
+
+            return new DeclarationStmt(declarations);
+        }
+
+        private List<VarDeclaration> VarDeclarations(ParseNode node)
+        {
+            var typeNode = node.Children[0];
+            if (typeNode.Token == Tokens.VAR)
+            {
+                return node.Children
+                    .Where(child => child.Tag == ParseNodeTag.VarDeclarator)
+                    .Select(child => VarDeclaration(child))
+                    .ToList();
+            }
+
+            var type = Type(typeNode);
+            return node.Children
+                .Where(child => child.Tag == ParseNodeTag.VarDeclarator)
+                .Select(child => VarDeclaration(type, child))
+                .ToList();
         }
 
         private VarDeclaration VarDeclaration(ParseNode node)
         {
-            var typeNode = node.Children[0];
-            var declarators = node.Children
-                .Where(child => child.Tag == ParseNodeTag.VarDeclarator)
-                .Select(child => VarDeclarator(child));
+            var varName = node.Children[0].Token.Lexeme;
 
-            if (typeNode.Token == Tokens.VAR)
-                return new VarDeclaration(declarators);
+            VarDeclaration declaration;
+            if (SeekVariable(varName, out declaration))
+                throw new DublicateVariableDeclarationException(varName);
 
-            var type = Type(typeNode);
-            return new VarDeclaration(type, declarators);
+            // todo: implement uninitialized variables
+            var initializer = Expression(node.Children[2]);
+            var scope = _scopes.Peek();
+            return new VarDeclaration(varName, initializer, scope);
         }
 
-        private VarDeclarator VarDeclarator(ParseNode parse)
+        private VarDeclaration VarDeclaration(AstType type, ParseNode node)
         {
-            var name = VarLocation(parse.Children[0]);
-            var value = Expression(parse.Children[2]);
-            return new VarDeclarator(name, value);
+            var varName = node.Children[0].Token.Lexeme;
+
+            VarDeclaration declaration;
+            if (SeekVariable(varName, out declaration))
+                throw new DublicateVariableDeclarationException(varName);
+
+            // todo: implement uninitialized variables
+            var initializer = Expression(node.Children[2]);
+            var scope = _scopes.Peek();
+            return new VarDeclaration(type, varName, initializer, scope);
         }
 
-        private VarLocation VarLocation(ParseNode node)
+        private VarAccess VarAccess(ParseNode node)
         {
-            return new VarLocation(node.Children[0].Token.Lexeme);
+            var varName = node.Children[0].Token.Lexeme;
+            var currentScope = _scopes.Peek();
+            
+            VarDeclaration declaration;
+            if (SeekVariable(varName, out declaration))
+            {
+                return new VarAccess(varName, currentScope);
+            }
+
+            throw new UndefinedVariableException(varName);
         }
 
         private ExpressionStmt ExpressionStmt(ParseNode node)
@@ -83,9 +136,12 @@ namespace CSharpCompiler.Syntax.Ast
             {
                 case ParseNodeTag.ArithmeticExpression:
                 case ParseNodeTag.FactorExpression:
-                case ParseNodeTag.ConditionExpression:
                 case ParseNodeTag.RelationExpression:
                     return BinaryOperation(node);
+
+                // todo: implement
+                //case ParseNodeTag.ConditionExpression:
+                //    return ConditionExpression(node);
 
                 case ParseNodeTag.UnaryExpression:
                     return UnaryOperation(node);
@@ -96,8 +152,8 @@ namespace CSharpCompiler.Syntax.Ast
                 case ParseNodeTag.Literal:
                     return Literal(node);
 
-                case ParseNodeTag.VarLocation:
-                    return VarLocation(node);
+                case ParseNodeTag.VarAccess:
+                    return VarAccess(node);
 
                 case ParseNodeTag.InvokeExpression:
                     return InvocationExpression(node);
@@ -115,7 +171,10 @@ namespace CSharpCompiler.Syntax.Ast
                     return TernaryOperation(node);
             }
 
-            throw new SyntaxException(string.Format("Unsupported expression: {0}", node));
+            if (node.Tag == ParseNodeTag.ParenthesisExpression)
+                return Expression(node.Children[1]);
+
+            throw new SyntaxException("Unsupported expression: {0}", node);
         }
 
         private InvokeExpression InvocationExpression(ParseNode node)
@@ -197,12 +256,18 @@ namespace CSharpCompiler.Syntax.Ast
                     return PrimitiveType(node);
             }
 
-            throw new SyntaxException(string.Format("Unsupported type: {0}", node));
+            throw new SyntaxException("Unsupported type: {0}", node);
         }
 
         private PrimitiveType PrimitiveType(ParseNode node)
         {
             return new PrimitiveType(node.Children[0].Token);
+        }
+
+        private bool SeekVariable(string varName, out VarDeclaration declaration)
+        {
+            // todo: implement scope backward seek
+            return _scopes.Peek().TryResolve(varName, out declaration);
         }
     }
 }

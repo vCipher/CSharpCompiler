@@ -1,4 +1,6 @@
-﻿using CSharpCompiler.Syntax.Ast.Expressions;
+﻿using System;
+using CSharpCompiler.Semantics.Metadata;
+using CSharpCompiler.Syntax.Ast.Expressions;
 
 namespace CSharpCompiler.Syntax.Ast.Statements
 {
@@ -19,6 +21,11 @@ namespace CSharpCompiler.Syntax.Ast.Statements
         public static implicit operator ExpressionStmt(Expression expr)
         {
             return new ExpressionStmt(expr);
+        }
+
+        public override void Build(MethodBuilder builder)
+        {
+            Expression.Build(builder);
         }
     }
 }

@@ -12,44 +12,44 @@ namespace CSharpCompiler.Lexica
         private int _state;
         private Stack<int> _states;
         private TransitionTable _table;
-        private List<Token> _tokens;
         private StringBuilder _lexeme;
         private CharEnumerator _enumerator;
 
-        private Scanner(string content, TransitionTable table)
+        internal Scanner(string content, TransitionTable table)
         {
             _enumerator = new CharEnumerator(content);
             _table = table;
-            _tokens = new List<Token>();
             _states = new Stack<int>();
             _lexeme = new StringBuilder();
         }
 
-        public static List<Token> Scan(string content)
+        public static TokenEnumerable Scan(string content)
         {
             return Scan(content, TransitionTable.Default);
         }
 
-        public static List<Token> Scan(string content, TransitionTable table)
+        public static TokenEnumerable Scan(string content, TransitionTable table)
         {
-            return new Scanner(content, table).Scan();
+            return new TokenEnumerable(new Scanner(content, table));
         }
 
-        public List<Token> Scan()
+        internal List<Token> Scan()
         {
+            var tokens = new List<Token>();
+
             while (_enumerator.MoveNext())
             {
-                if (IsEmpty(_enumerator.Current))
+                if (IsWhiteSpace(_enumerator.Current) || IsNewLine(_enumerator.Current))
                     continue;
 
                 PrepareForNextLexeme();
                 ScanNextLexeme();
                 RollbackIfNotAcceptLexeme();
 
-                _tokens.Add(CreateToken());
+                tokens.Add(CreateToken());
             }
 
-            return _tokens;
+            return tokens;
         }
 
         private void PrepareForNextLexeme()
@@ -96,9 +96,14 @@ namespace CSharpCompiler.Lexica
             return Tokens.Tokens.GetToken(alias, _lexeme.ToString());
         }
 
-        private bool IsEmpty(char ch)
+        private bool IsWhiteSpace(char ch)
         {
-            return ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n';
+            return ch == ' ' || ch == '\t';
+        }
+
+        private bool IsNewLine(char ch)
+        {
+            return ch == '\r' || ch == '\n';
         }
     }
 }

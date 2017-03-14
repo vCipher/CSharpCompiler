@@ -1,5 +1,5 @@
-﻿using System;
-using CSharpCompiler.Syntax.Ast.Types;
+﻿using CSharpCompiler.Semantics.Metadata;
+using CSharpCompiler.Semantics.TypeSystem;
 
 namespace CSharpCompiler.Syntax.Ast.Expressions
 {
@@ -16,6 +16,18 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             Condition = condition;
             TrueBranch = trueBranch;
             FalseBranch = falseBranch;
+        }
+
+        public override IType InferType()
+        {
+            var trueType = TrueBranch.InferType();
+            var falseType = FalseBranch.InferType();
+            return TypeInference.InferType(trueType, falseType);
+        }
+
+        public override void Build(MethodBuilder builder)
+        {
+            builder.Build(this);
         }
     }
 }

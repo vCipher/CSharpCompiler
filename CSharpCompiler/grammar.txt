@@ -161,9 +161,10 @@ object_creation
 
 /************************************************* Literals *************************************************/
 literal
-    : INT_CONST
-    | FLOAT_CONST
-    | DOUBLE_CONST
+    : INT_LITERAL
+    | FLOAT_LITERAL
+    | DOUBLE_LITERAL
+    | STRING_LITERAL
     | TRUE
     | FALSE
     ;

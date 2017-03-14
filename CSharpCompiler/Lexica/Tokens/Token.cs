@@ -28,19 +28,6 @@ namespace CSharpCompiler.Lexica.Tokens
             return string.Format("<{0}, {1}>", Tag, Lexeme);
         }
 
-        public bool Equals(Token other)
-        {
-            return Tag == other.Tag && string.Equals(Lexeme, other.Lexeme);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (!(obj is Token))
-                return false;
-
-            return Equals((Token)obj);
-        }
-
         public override int GetHashCode()
         {
             unchecked
@@ -50,6 +37,19 @@ namespace CSharpCompiler.Lexica.Tokens
                 res ^= (Lexeme == null ? 0 : Lexeme.GetHashCode());
                 return res;
             }
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Token)
+                return Equals((Token)obj);
+
+            return false;
+        }
+
+        public bool Equals(Token other)
+        {
+            return Tag == other.Tag && string.Equals(Lexeme, other.Lexeme);
         }
 
         public static bool operator ==(Token first, Token second)

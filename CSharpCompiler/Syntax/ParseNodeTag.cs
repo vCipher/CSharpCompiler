@@ -25,7 +25,7 @@
         InvokeExpression,
         ArgumentList,
         Argument,
-        VarLocation,
+        VarAccess,
         ElementAccess,
         ExpressionList,
         PostfixDecrement,

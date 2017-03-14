@@ -1,0 +1,55 @@
+﻿using System;
+using System.Runtime.InteropServices;
+
+namespace CSharpCompiler.Semantics.Metadata
+{
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct MetadataToken : IEquatable<MetadataToken>
+    {
+        public static readonly MetadataToken Zero = new MetadataToken(0);
+
+        private readonly uint _value;
+
+        public uint RID
+        {
+            get { return _value & 0x00ffffff; }
+        }
+        public MetadataTokenType Type
+        {
+            get { return (MetadataTokenType)(_value & 0xff000000); }
+        }
+
+        public MetadataToken(MetadataTokenType type, uint rid)
+        {
+            _value = (uint)type | rid;
+        }
+
+        public MetadataToken(uint value)
+        {
+            _value = value;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int res = 31;
+                res ^= (int)_value;
+                return res;
+            }
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is MetadataToken)
+                return Equals((MetadataToken)obj);
+
+            return false;
+        }
+
+        public bool Equals(MetadataToken other)
+        {
+            return _value == other._value;
+        }
+    }
+}

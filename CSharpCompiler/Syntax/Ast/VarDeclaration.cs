@@ -1,52 +1,32 @@
-﻿using CSharpCompiler.Syntax.Ast.Types;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using CSharpCompiler.Syntax.Ast.Expressions;
+using CSharpCompiler.Syntax.Ast.Types;
 
 namespace CSharpCompiler.Syntax.Ast
 {
     public sealed class VarDeclaration : AstNode
     {
         public AstType Type { get; private set; }
-
-        public List<VarDeclarator> Declarators { get; private set; }
-
-        /// <summary>
-        /// Create a local variable declaration with the implicit typification.
-        /// </summary>
-        public VarDeclaration(IEnumerable<VarDeclarator> declarators)
-        {
-            Type = null;
-            Declarators = new List<VarDeclarator>(declarators);
-        }
+        public string VarName { get; private set; }
+        public Expression Initializer { get; private set; }
+        public VarScope Scope { get; private set; }
+        public bool IsImplicit { get { return Type == null; } }
 
         /// <summary>
         /// Create a local variable declaration with the implicit typification.
         /// </summary>
-        public VarDeclaration(params VarDeclarator[] declarators)
-        {
-            Type = null;
-            Declarators = new List<VarDeclarator>(declarators);
-        }
+        public VarDeclaration(string varName, Expression initializer, VarScope scope)
+            : this(null, varName, initializer, scope)
+        { }
 
         /// <summary>
         /// Create a local variable declaration with the explicit typification.
         /// </summary>
-        public VarDeclaration(AstType type, IEnumerable<VarDeclarator> declarators)
+        public VarDeclaration(AstType type, string varName, Expression initializer, VarScope scope)
         {
             Type = type;
-            Declarators = new List<VarDeclarator>(declarators);
-        }
-
-        /// <summary>
-        /// Create a local variable declaration with the explicit typification.
-        /// </summary>
-        public VarDeclaration(AstType type, params VarDeclarator[] declarators)
-        {
-            Type = type;
-            Declarators = new List<VarDeclarator>(declarators);
+            VarName = varName;
+            Initializer = initializer;
+            Scope = scope;
         }
     }
 }

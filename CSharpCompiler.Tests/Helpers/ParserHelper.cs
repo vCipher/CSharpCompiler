@@ -30,9 +30,7 @@ namespace CSharpCompiler.Tests.Helpers
                 new ParseNode(ParseNodeTag.VarDeclaration,
                     PrimitiveType(typeName),
                     new ParseNode(ParseNodeTag.VarDeclarator,
-                        new ParseNode(ParseNodeTag.VarLocation,
-                            new ParseNode(id)
-                        ),
+                        new ParseNode(id),
                         new ParseNode(Tokens.ASSIGN),
                         Literal(constant)
                     )
@@ -66,7 +64,7 @@ namespace CSharpCompiler.Tests.Helpers
 
         public static ParseNode Var(string name)
         {
-            return new ParseNode(ParseNodeTag.VarLocation,
+            return new ParseNode(ParseNodeTag.VarAccess,
                 new ParseNode(Tokens.ID(name))
             );
         }

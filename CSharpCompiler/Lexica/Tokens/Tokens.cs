@@ -149,9 +149,10 @@ namespace CSharpCompiler.Lexica.Tokens
         public static readonly Token VOID = new Token("void", TokenTag.VOID);
         
         // token fabric methods
-        public static Func<string, Token> INT_CONST = val => new Token(val, TokenTag.INT_CONST);
-        public static Func<string, Token> FLOAT_CONST = val => new Token(val, TokenTag.FLOAT_CONST);
-        public static Func<string, Token> DOUBLE_CONST = val => new Token(val, TokenTag.DOUBLE_CONST);
+        public static Func<string, Token> INT_LITERAL = val => new Token(val, TokenTag.INT_LITERAL);
+        public static Func<string, Token> FLOAT_LITERAL = val => new Token(val, TokenTag.FLOAT_LITERAL);
+        public static Func<string, Token> DOUBLE_LITERAL = val => new Token(val, TokenTag.DOUBLE_LITERAL);
+        public static Func<string, Token> STRING_LITERAL = val => new Token(val.Trim('"'), TokenTag.STRING_LITERAL);
         public static Func<string, Token> ID = val => new Token(val, TokenTag.ID);
 
         private static Dictionary<string, Token> _tokenMap = GetFieldMap<Token>();

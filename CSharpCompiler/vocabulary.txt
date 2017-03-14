@@ -131,10 +131,11 @@ while                   WHILE
 ]                       CLOSE_SQUARE_BRACE
 :                       COLON
 ;                       SEMICOLON
-\.                      DOT
+.                       DOT
 ,                       COMMA
 
 # constants and identifiers
--?\d+                       INT_CONST
--?\d+(.\d+)?(E(\+|-)?\d+)?  FLOAT_CONST
+-?\d+                       INT_LITERAL
+-?\d+(.\d+)?(E(\+|-)?\d+)?  FLOAT_LITERAL
+"\.*"                       STRING_LITERAL
 \w(\w|\d)*                  ID

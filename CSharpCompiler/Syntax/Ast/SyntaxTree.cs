@@ -7,12 +7,12 @@ namespace CSharpCompiler.Syntax.Ast
     {
         public List<Stmt> Statements { get; private set; }
 
-        public SyntaxTree(params Stmt[] statements)
+        public SyntaxTree(List<Stmt> statements)
         {
-            Statements = new List<Stmt>(statements);
+            Statements = statements;
         }
 
-        public SyntaxTree(IEnumerable<Stmt> statements)
+        public SyntaxTree(params Stmt[] statements)
         {
             Statements = new List<Stmt>(statements);
         }

@@ -26,7 +26,7 @@ namespace CSharpCompiler.Lexica.Regexp.Tests
                     [3] = "ID"
                 }
             );
-            var actual = TransitionTable.FromFile("vocabulary.txt");
+            var actual = TransitionTable.FromFile("Content/vocabulary.txt");
 
             actual.Should().Be(expected);
         }

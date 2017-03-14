@@ -1,4 +1,6 @@
 ﻿using CSharpCompiler.Lexica.Tokens;
+using CSharpCompiler.Semantics.TypeSystem;
+using CSharpCompiler.Syntax.Ast.Expressions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,14 +11,19 @@ namespace CSharpCompiler.Syntax
     {
         private TokenEnumerator _enumerator;
 
-        public Parser(IReadOnlyList<Token> tokens)
+        private Parser(TokenEnumerator enumerator)
         {
-            _enumerator = new TokenEnumerator(tokens);
+            _enumerator = enumerator;
+        }
+
+        public static ParseTree Parse(TokenEnumerable tokens)
+        {
+            return new Parser((TokenEnumerator)tokens.GetEnumerator()).Parse();
         }
 
         public static ParseTree Parse(IReadOnlyList<Token> tokens)
         {
-            return new Parser(tokens).Parse();
+            return new Parser(new TokenEnumerator(tokens)).Parse();
         }
 
         #region grammar methods
@@ -76,7 +83,7 @@ namespace CSharpCompiler.Syntax
         private ParseNode VarDeclarator()
         {
             var varDeclr = new ParseNode(ParseNodeTag.VarDeclarator);
-            varDeclr.AddChild(VarLocation());
+            varDeclr.AddChild(Terminal(TokenTag.ID));
             varDeclr.AddChild(Terminal(TokenTag.ASSIGN));
             varDeclr.AddChild(Expression());
             return varDeclr;
@@ -88,7 +95,7 @@ namespace CSharpCompiler.Syntax
             if (TryAddChild(type, PrimitiveType, IsPrimitiveType))
                 return Unwrap(type);
 
-            throw new SyntaxException(string.Format("Not supported type {0}", _enumerator.Lookahead()));
+            throw new SyntaxException("Not supported type {0}", _enumerator.Lookahead());
         }
         
         private ParseNode PrimitiveType()
@@ -213,7 +220,7 @@ namespace CSharpCompiler.Syntax
             if (TryAddChild(expr, ElementAccess, IsElementAccess)) return Unwrap(expr);
             if (TryAddChild(expr, PostfixIncrement, IsPostfixIncrement)) return Unwrap(expr);
             if (TryAddChild(expr, PostfixDecrement, IsPostfixDecrement)) return Unwrap(expr);
-            if (TryAddChild(expr, VarLocation, TokenTag.ID)) return Unwrap(expr);
+            if (TryAddChild(expr, VarAccess, TokenTag.ID)) return Unwrap(expr);
             if (TryAddChild(expr, ObjectCreation, TokenTag.NEW)) return Unwrap(expr);
             return expr;
         }
@@ -326,9 +333,9 @@ namespace CSharpCompiler.Syntax
             return expr;
         }
         
-        private ParseNode VarLocation()
+        private ParseNode VarAccess()
         {
-            var expr = new ParseNode(ParseNodeTag.VarLocation);
+            var expr = new ParseNode(ParseNodeTag.VarAccess);
             expr.AddChild(Terminal(TokenTag.ID));
             return expr;
         }
@@ -368,7 +375,7 @@ namespace CSharpCompiler.Syntax
         private ParseNode Terminal()
         {
             if (!_enumerator.MoveNext())
-                throw new SyntaxException($"Input stream finished");
+                throw new SyntaxException("Input stream finished");
 
             return new ParseNode(_enumerator.Current);
         }
@@ -394,7 +401,7 @@ namespace CSharpCompiler.Syntax
 
             var currToken = _enumerator.Current;
             if (currToken.Tag != reqTokenTag)
-                throw new UnexpectedTokenException(reqTokenTag, currToken);
+                throw new SyntaxException("Expected {0} tokens. But actual is {1}", reqTokenTag, currToken);
 
             return currToken;
         }
@@ -428,7 +435,8 @@ namespace CSharpCompiler.Syntax
         private bool IsPrimitiveType()
         {
             return _enumerator.Lookahead()
-                .IsPrimitiveTypeToken();
+                .Tag
+                .IsPrimitiveType();
         }
 
         private bool IsUnaryExpression()
@@ -472,7 +480,7 @@ namespace CSharpCompiler.Syntax
             // todo: implement checking for general type names 
             // instead of known types
             if (_enumerator.Lookahead(1).Tag != TokenTag.OPEN_PAREN) return false;
-            if (!_enumerator.Lookahead(2).IsPrimitiveTypeToken()) return false;
+            if (!_enumerator.Lookahead(2).Tag.IsPrimitiveType()) return false;
             if (_enumerator.Lookahead(3).Tag != TokenTag.CLOSE_PAREN) return false;
             return true;
         }

@@ -1,0 +1,14 @@
+﻿# test
+## param (content)
+int a = 1;
+int b = 1;
+writeLine(a + b);
+
+## param (expectedFile)
+WriteTest_Simple.exe
+
+## param (options)
+{
+    "TimeStamp": 0x58dd1669,
+    "Mvid": "2ce20808-03b0-45bb-a4cb-f3f8a41dca8d"
+}

@@ -128,9 +128,10 @@
         QUESTION,
         COLON,
         SEMICOLON,
-        INT_CONST,
-        FLOAT_CONST,
-        DOUBLE_CONST,
+        INT_LITERAL,
+        FLOAT_LITERAL,
+        DOUBLE_LITERAL,
+        STRING_LITERAL,
         ID
     }
 }

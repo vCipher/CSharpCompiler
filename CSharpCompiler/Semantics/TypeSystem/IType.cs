@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using CSharpCompiler.Semantics.Metadata;
 
 namespace CSharpCompiler.Semantics.TypeSystem
 {
     public interface IType
     {
+        ElementType ElementType { get; }
     }
 }

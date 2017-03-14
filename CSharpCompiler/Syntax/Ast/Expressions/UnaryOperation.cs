@@ -1,4 +1,7 @@
-﻿using CSharpCompiler.Lexica.Tokens;
+﻿using System;
+using CSharpCompiler.Lexica.Tokens;
+using CSharpCompiler.Semantics.Metadata;
+using CSharpCompiler.Semantics.TypeSystem;
 
 namespace CSharpCompiler.Syntax.Ast.Expressions
 {
@@ -12,6 +15,16 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
         {
             Operator = @operator;
             Operand = operand;
+        }
+
+        public override IType InferType()
+        {
+            return Operand.InferType();
+        }
+
+        public override void Build(MethodBuilder builder)
+        {
+            builder.Build(this);
         }
     }
 }

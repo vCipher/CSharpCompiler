@@ -7,11 +7,12 @@ namespace CSharpCompiler.Lexica.Regexp
     public sealed class NfaBuilder
     {
         private const string NUMBER_PATTERN = "0|1|2|3|4|5|6|7|8|9";
-        private const string WORD_PATTERN = "a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|_";        
-        private static readonly string SPACE_PATTERN = new string(new char[] { ' ', '\t', '\r', '\n' });
+        private const string WORD_PATTERN = "a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|_";
+        private const string WHITE_SPACE_PATTERN = " |\t";
+        private const string ANY_CHAR_PATTERN = "\\w|\\d|\\s|!|\"|#|$|%|&|\\(|\\)|\\*|\\+|,|\\-|.|/|:|;|<|=|>|\\?|@|[|\\\\|]|^|_|`|{|\\||}|~";
 
         private readonly Dictionary<char, Func<CharEnumerator, Nfa, Nfa>> _mappers;
-        private readonly Dictionary<char, Lazy<Nfa>> _macros;
+        private readonly Dictionary<char, Func<Nfa>> _macros;
         private int _stateCounter;
         
         public NfaBuilder()
@@ -26,10 +27,11 @@ namespace CSharpCompiler.Lexica.Regexp
             _mappers.Add('+', (enumerator, nfa) => OneOrMore(nfa));
             _mappers.Add('?', (enumerator, nfa) => OneOrNothing(nfa));
 
-            _macros = new Dictionary<char, Lazy<Nfa>>();
-            _macros.Add('d', new Lazy<Nfa>(() => Parse(NUMBER_PATTERN)));
-            _macros.Add('w', new Lazy<Nfa>(() => Parse(WORD_PATTERN)));
-            _macros.Add('s', new Lazy<Nfa>(() => Parse(SPACE_PATTERN)));
+            _macros = new Dictionary<char, Func<Nfa>>();
+            _macros.Add('d', () => Parse(NUMBER_PATTERN));
+            _macros.Add('w', () => Parse(WORD_PATTERN));
+            _macros.Add('s', () => Parse(WHITE_SPACE_PATTERN));
+            _macros.Add('.', () => Parse(ANY_CHAR_PATTERN));
         }
 
         public Nfa Parse(string regexp)
@@ -172,9 +174,9 @@ namespace CSharpCompiler.Lexica.Regexp
             if (!enumerator.MoveNext())
                 throw new ScanException("Unexpected end of input stream");
 
-            Lazy<Nfa> macrosNfa;
-            if (_macros.TryGetValue(enumerator.Current, out macrosNfa))
-                return Concat(nfa, CheckForClosure(enumerator, macrosNfa.Value));
+            Func<Nfa> macros;
+            if (_macros.TryGetValue(enumerator.Current, out macros))
+                return Concat(nfa, CheckForClosure(enumerator, macros()));
 
             Nfa escapeCharNfa = Concat(nfa, CheckForClosure(enumerator, Create(enumerator.Current)));
             return escapeCharNfa;
