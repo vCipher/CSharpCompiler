@@ -1,9 +1,4 @@
-﻿using System;
-using CSharpCompiler.Semantics.Metadata;
-using CSharpCompiler.Semantics.TypeSystem;
-using CSharpCompiler.Semantics.Cil;
-
-namespace CSharpCompiler.Syntax.Ast.Expressions
+﻿namespace CSharpCompiler.Syntax.Ast.Expressions
 {
     public sealed class PrefixDecrement : Expression
     {
@@ -16,28 +11,9 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             IsStatementExpression = isStatementExpression;
         }
 
-        public override void Build(MethodBuilder builder)
+        public override void Accept(IExpressionVisitor visitor)
         {
-            if (Operand is VarAccess)
-            {
-                var varAccess = (VarAccess)Operand;
-                var declaration = varAccess.Resolve();
-                var varDef = builder.GetVarDefinition(declaration);
-
-                builder.Emit(OpCodes.Ldloc, varDef);
-                builder.Emit(OpCodes.Ldc_I4_1);
-                builder.Emit(OpCodes.Sub);
-                if (!IsStatementExpression) builder.Emit(OpCodes.Dup);
-                builder.Emit(OpCodes.Stloc, varDef);
-                return;
-            }
-
-            throw new NotSupportedException("Prefix decrement is supported only for variables");
-        }
-
-        public override ITypeInfo InferType()
-        {
-            return Operand.InferType();
+            visitor.VisitPrefixDecrement(this);
         }
     }
 }

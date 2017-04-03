@@ -1,6 +1,4 @@
-﻿using CSharpCompiler.Semantics.Metadata;
-
-namespace CSharpCompiler.Syntax.Ast.Types
+﻿namespace CSharpCompiler.Syntax.Ast.Types
 {
     public sealed class ArrayTypeNode : TypeNode
     {
@@ -13,9 +11,9 @@ namespace CSharpCompiler.Syntax.Ast.Types
             Rank = rank;
         }
 
-        public override ITypeInfo ToType()
+        public override void Accept(ITypeVisitor visitor)
         {
-            return new ArrayType(ContainedType.ToType(), Rank);
+            visitor.VisitArrayType(this);
         }
     }
 }

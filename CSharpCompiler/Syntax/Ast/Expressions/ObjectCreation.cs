@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using CSharpCompiler.Semantics.Metadata;
-using CSharpCompiler.Semantics.TypeSystem;
+﻿using System.Collections.Generic;
 using CSharpCompiler.Syntax.Ast.Types;
 
 namespace CSharpCompiler.Syntax.Ast.Expressions
@@ -19,14 +16,9 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             IsStatementExpression = isStatementExpression;
         }
 
-        public override void Build(MethodBuilder builder)
+        public override void Accept(IExpressionVisitor visitor)
         {
-            throw new NotImplementedException();
-        }
-
-        public override ITypeInfo InferType()
-        {
-            return Type.ToType();
+            visitor.VisitObjectCreation(this);
         }
     }
 }

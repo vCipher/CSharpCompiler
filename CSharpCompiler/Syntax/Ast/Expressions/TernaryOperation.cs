@@ -1,8 +1,4 @@
-﻿using CSharpCompiler.Semantics.Metadata;
-using CSharpCompiler.Semantics.TypeSystem;
-using System;
-
-namespace CSharpCompiler.Syntax.Ast.Expressions
+﻿namespace CSharpCompiler.Syntax.Ast.Expressions
 {
     public sealed class TernaryOperation : Expression
     {
@@ -17,23 +13,9 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             FalseBranch = falseBranch;
         }
 
-        public override ITypeInfo InferType()
+        public override void Accept(IExpressionVisitor visitor)
         {
-            if (!KnownType.Boolean.Equals(Condition.InferType()))
-                throw new TypeInferenceException("Condition of a ternary operation must have a boolean type");
-
-            var trueBranchType = TrueBranch.InferType();
-            var falseBranchType = FalseBranch.InferType();
-
-            if (trueBranchType.Equals(falseBranchType))
-                return trueBranchType;
-
-            throw new TypeInferenceException("Can't infer a type for: {0} and for: {1}", trueBranchType, falseBranchType);
-        }
-
-        public override void Build(MethodBuilder builder)
-        {
-            throw new NotImplementedException();
+            visitor.VisitTernaryOperation(this);
         }
     }
 }

@@ -1,8 +1,4 @@
-﻿using CSharpCompiler.Semantics.Cil;
-using CSharpCompiler.Semantics.Metadata;
-using CSharpCompiler.Semantics.TypeSystem;
-
-namespace CSharpCompiler.Syntax.Ast.Expressions
+﻿namespace CSharpCompiler.Syntax.Ast.Expressions
 {
     public sealed class ElementStore : Expression
     {
@@ -19,28 +15,9 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             IsStatementExpression = isStatementExpression;
         }
 
-        public override ITypeInfo InferType()
+        public override void Accept(IExpressionVisitor visitor)
         {
-            var arrayType = Array.InferType() as ArrayType;
-            var valueType = Value.InferType();
-
-            if (arrayType == null) throw new TypeInferenceException("Array access expression must have an array type");
-            if (Index.InferType() != KnownType.Int32) throw new TypeInferenceException("Array element store index must have only a int32 type");
-            if (!arrayType.ContainedType.Equals(valueType)) throw new TypeInferenceException("Array contained type must be assignable from a value type");
-            
-            return arrayType;
-        }
-
-        public override void Build(MethodBuilder builder)
-        {
-            Array.Build(builder);
-            Index.Build(builder);
-            Value.Build(builder);
-
-            if (!IsStatementExpression)
-                builder.Emit(OpCodes.Dup);
-
-            builder.Emit(OpCodes.Stelem_I4);
+            visitor.VisitElementStore(this);
         }
     }
 }

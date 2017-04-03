@@ -7,11 +7,6 @@ namespace CSharpCompiler.Syntax.Ast.Statements
         /// <summary>
         /// Refence to first instruction after enclosure statement
         /// </summary>
-        public InstructionReference AfterRefence { get; private set; }
-
-        public LoopStatement()
-        {
-            AfterRefence = new InstructionReference();
-        }
+        public InstructionReference AfterRefence { get; protected set; }
     }
 }

@@ -1,6 +1,4 @@
-﻿using System;
-using CSharpCompiler.Semantics.Cil;
-using CSharpCompiler.Semantics.Metadata;
+﻿using CSharpCompiler.Semantics.Cil;
 using CSharpCompiler.Syntax.Ast.Expressions;
 
 namespace CSharpCompiler.Syntax.Ast.Statements
@@ -18,22 +16,9 @@ namespace CSharpCompiler.Syntax.Ast.Statements
             AfterRefence = new InstructionReference();
         }
 
-        public override void Build(MethodBuilder builder)
+        public override void Accept(IStatementVisitor visitor)
         {
-            BuildCondition(builder);
-            BuildBody(builder);
-        }
-
-        private void BuildCondition(MethodBuilder builder)
-        {
-            Condition.Build(builder);
-            builder.Emit(OpCodes.Brfalse, AfterRefence);
-        }
-
-        private void BuildBody(MethodBuilder builder)
-        {
-            Body.Build(builder);
-            builder.ResolveOnNextStep(AfterRefence);
+            visitor.VisitIfStatement(this);
         }
     }
 }

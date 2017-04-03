@@ -1,12 +1,10 @@
 ﻿using CSharpCompiler.Lexica.Tokens;
-using CSharpCompiler.Syntax.Ast.Expressions;
 
-namespace CSharpCompiler.Syntax.Ast
+namespace CSharpCompiler.Syntax.Ast.Expressions
 {
     public sealed class Argument : AstNode
     {
         public Token? Modifier { get; private set; }
-
         public Expression Value { get; private set; }
 
         public Argument(Expression value) : this(null, value)
@@ -16,6 +14,11 @@ namespace CSharpCompiler.Syntax.Ast
         {
             Modifier = modifier;
             Value = value;
+        }
+
+        public void Accept(IArgumentVisitor visitor)
+        {
+            visitor.VisitArgument(this);
         }
     }
 }

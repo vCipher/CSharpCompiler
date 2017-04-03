@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace CSharpCompiler.Syntax.Ast
+namespace CSharpCompiler.Syntax.Ast.Variables
 {
     public sealed class VarScope
     {

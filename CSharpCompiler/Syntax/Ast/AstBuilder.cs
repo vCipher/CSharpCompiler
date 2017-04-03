@@ -1,12 +1,14 @@
 ﻿using CSharpCompiler.Lexica.Tokens;
 using CSharpCompiler.Syntax.Ast.Expressions;
+using CSharpCompiler.Syntax.Ast.Expressions.Conditions;
+using CSharpCompiler.Syntax.Ast.Expressions.Relations;
 using CSharpCompiler.Syntax.Ast.Statements;
 using CSharpCompiler.Syntax.Ast.Types;
-using System.Linq;
-using System.Collections.Generic;
+using CSharpCompiler.Syntax.Ast.Variables;
 using CSharpCompiler.Utility;
 using System;
-using CSharpCompiler.Syntax.Ast.Expressions.Relations;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace CSharpCompiler.Syntax.Ast
 {
@@ -442,7 +444,7 @@ namespace CSharpCompiler.Syntax.Ast
             return RelationOperation(@operator, leftOperand, rightOperand);
         }
 
-        private RelationOperation RelationOperation(Token @operator, Expression leftOperand, Expression rightOperand)
+        private BinaryOperation RelationOperation(Token @operator, Expression leftOperand, Expression rightOperand)
         {
             switch (@operator.Tag)
             {

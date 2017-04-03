@@ -1,7 +1,4 @@
-﻿using CSharpCompiler.Semantics.Cil;
-using CSharpCompiler.Semantics.Metadata;
-using CSharpCompiler.Semantics.TypeSystem;
-using System;
+﻿using CSharpCompiler.Syntax.Ast.Variables;
 
 namespace CSharpCompiler.Syntax.Ast.Expressions
 {
@@ -16,21 +13,15 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             Scope = scope;
         }
 
-        public VarDeclaration Resolve()
+        public override void Accept(IExpressionVisitor visitor)
+        {
+            visitor.VisitVarAccess(this);
+        }
+
+        public VarDeclaration GetVarDeclaration()
         {
             if (Scope == null) throw new UndefinedVariableException(VarName);
             return Scope.Resolve(VarName);
-        }
-
-        public override ITypeInfo InferType()
-        {
-            return Resolve().Type.ToType();
-        }
-
-        public override void Build(MethodBuilder builder)
-        {
-            var varDef = builder.GetVarDefinition(this);
-            builder.Emit(OpCodes.Ldloc, varDef);
         }
     }
 }

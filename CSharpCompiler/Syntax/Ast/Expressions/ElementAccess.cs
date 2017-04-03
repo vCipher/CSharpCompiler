@@ -1,8 +1,4 @@
-﻿using CSharpCompiler.Semantics.Cil;
-using CSharpCompiler.Semantics.Metadata;
-using CSharpCompiler.Semantics.TypeSystem;
-
-namespace CSharpCompiler.Syntax.Ast.Expressions
+﻿namespace CSharpCompiler.Syntax.Ast.Expressions
 {
     public sealed class ElementAccess : Expression
     {
@@ -15,22 +11,9 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             Index = index;
         }
 
-        public override ITypeInfo InferType()
+        public override void Accept(IExpressionVisitor visitor)
         {
-            var arrayType = Array.InferType() as ArrayType;
-            var indexType = Index.InferType();
-
-            if (arrayType == null) throw new TypeInferenceException("Array access expression must be type array");
-            if (indexType != KnownType.Int32) throw new TypeInferenceException("Array element index must be only type int32");
-
-            return indexType;
-        }
-
-        public override void Build(MethodBuilder builder)
-        {
-            Array.Build(builder);
-            Index.Build(builder);
-            builder.Emit(OpCodes.Ldelem_I4);
+            visitor.VisitElementAccess(this);
         }
     }
 }

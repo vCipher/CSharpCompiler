@@ -1,7 +1,4 @@
-﻿using CSharpCompiler.Semantics.Cil;
-using CSharpCompiler.Semantics.Metadata;
-
-namespace CSharpCompiler.Syntax.Ast.Statements
+﻿namespace CSharpCompiler.Syntax.Ast.Statements
 {
     public sealed class BreakStatement : Statement
     {
@@ -12,9 +9,9 @@ namespace CSharpCompiler.Syntax.Ast.Statements
             Enclosure = enclosure;
         }
 
-        public override void Build(MethodBuilder builder)
+        public override void Accept(IStatementVisitor visitor)
         {
-            builder.Emit(OpCodes.Br, Enclosure.AfterRefence);
+            visitor.VisitBreakStatement(this);
         }
     }
 }

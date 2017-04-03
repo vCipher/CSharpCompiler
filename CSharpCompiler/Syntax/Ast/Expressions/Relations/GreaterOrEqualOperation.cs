@@ -1,22 +1,16 @@
 ﻿using CSharpCompiler.Lexica.Tokens;
-using CSharpCompiler.Semantics.Cil;
-using CSharpCompiler.Semantics.Metadata;
 
 namespace CSharpCompiler.Syntax.Ast.Expressions.Relations
 {
-    public sealed class GreaterOrEqualOperation : RelationOperation
+    public sealed class GreaterOrEqualOperation : BinaryOperation
     {
         public GreaterOrEqualOperation(Token @operator, Expression leftOperand, Expression rightOperand) 
             : base(@operator, leftOperand, rightOperand)
         { }
 
-        public override void Build(MethodBuilder builder)
+        public override void Accept(IExpressionVisitor visitor)
         {
-            LeftOperand.Build(builder);
-            RightOperand.Build(builder);
-            builder.Emit(OpCodes.Clt);
-            builder.Emit(OpCodes.Ldc_I4_0);
-            builder.Emit(OpCodes.Ceq);
+            visitor.VisitGreaterOrEqualOperation(this);
         }
     }
 }

@@ -3,6 +3,7 @@ using CSharpCompiler.Lexica.Tokens;
 using CSharpCompiler.Syntax.Ast.Expressions;
 using CSharpCompiler.Syntax.Ast.Statements;
 using CSharpCompiler.Syntax.Ast.Types;
+using CSharpCompiler.Syntax.Ast.Variables;
 using CSharpCompiler.Tests;
 using CSharpCompiler.Tests.Assertions;
 using System.Collections.Generic;

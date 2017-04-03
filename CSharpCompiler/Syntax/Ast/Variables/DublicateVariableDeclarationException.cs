@@ -1,4 +1,4 @@
-﻿namespace CSharpCompiler.Syntax.Ast
+﻿namespace CSharpCompiler.Syntax.Ast.Variables
 {
     public class DublicateVariableDeclarationException : SyntaxException
     {

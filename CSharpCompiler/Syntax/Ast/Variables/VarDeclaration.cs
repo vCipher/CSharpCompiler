@@ -1,10 +1,7 @@
-﻿using CSharpCompiler.Semantics;
-using CSharpCompiler.Semantics.Cil;
-using CSharpCompiler.Semantics.Metadata;
-using CSharpCompiler.Syntax.Ast.Expressions;
+﻿using CSharpCompiler.Syntax.Ast.Expressions;
 using CSharpCompiler.Syntax.Ast.Types;
 
-namespace CSharpCompiler.Syntax.Ast
+namespace CSharpCompiler.Syntax.Ast.Variables
 {
     public sealed class VarDeclaration : AstNode
     {
@@ -33,29 +30,9 @@ namespace CSharpCompiler.Syntax.Ast
             Scope.Register(varName, this);
         }
 
-        public void Build(MethodBuilder builder)
+        public void Accept(IVarDeclarationVisitor visitor)
         {
-            var varDef = builder.GetVarDefinition(this);
-            builder.Register(varDef);
-
-            var initialier = Initializer;
-            if (initialier == null) return;
-
-            initialier.Build(builder);
-            builder.Emit(OpCodes.Stloc, varDef);
-        }
-
-        public ITypeInfo InferType()
-        {
-            if (IsImplicit)
-            {
-                if (Initializer == null)
-                    throw new SemanticException("Can't declare unintialized local variable with implicit typification.");
-
-                return Initializer.InferType();
-            }
-
-            return Type.ToType();
+            visitor.VisitVarDeclaration(this);
         }
 
         public string GetUniqueVarName()

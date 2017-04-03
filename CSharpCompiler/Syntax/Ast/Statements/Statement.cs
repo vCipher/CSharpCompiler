@@ -1,9 +1,7 @@
-﻿using CSharpCompiler.Semantics.Metadata;
-
-namespace CSharpCompiler.Syntax.Ast.Statements
+﻿namespace CSharpCompiler.Syntax.Ast.Statements
 {
     public abstract class Statement : AstNode
     {
-        public abstract void Build(MethodBuilder builder);
+        public abstract void Accept(IStatementVisitor visitor);
     }
 }

@@ -1,5 +1,4 @@
-﻿using CSharpCompiler.Semantics.Cil;
-using CSharpCompiler.Semantics.Metadata;
+﻿using CSharpCompiler.Semantics.Metadata;
 using CSharpCompiler.Semantics.TypeSystem;
 using System;
 using System.Collections.Generic;
@@ -10,50 +9,33 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
 {
     public sealed class InvokeExpression : Expression
     {
-        private Lazy<MethodReference> _methodRef;
-
         public string MethodName { get; private set; }
         public IList<Argument> Arguments { get; private set; }
         public bool IsStatementExpression { get; private set; }
+        public MethodReference MethodReference { get; private set; }
 
         public InvokeExpression(string methodName, IList<Argument> arguments, bool isStatementExpression)
         {
-            _methodRef = new Lazy<MethodReference>(GetMethodReference);
             MethodName = methodName;
             Arguments = arguments;
+            MethodReference = GetMethodReference(methodName, arguments);
             IsStatementExpression = isStatementExpression;
         }
 
-        public override ITypeInfo InferType()
+        public override void Accept(IExpressionVisitor visitor)
         {
-            return _methodRef.Value.ReturnType;
+            visitor.VisitInvokeExpression(this);
         }
 
-        public override void Build(MethodBuilder builder)
+        private MethodReference GetMethodReference(string methodName, IList<Argument> arguments)
         {
-            foreach (var arg in Arguments)
-            {
-                arg.Value.Build(builder);
-            }
+            if (methodName != "writeLine") throw new NotImplementedException();
+            if (arguments.Count != 1) throw new NotImplementedException();
 
-            builder.Emit(OpCodes.Call, _methodRef.Value);
+            var arg = arguments.First().Value;
+            var argType = TypeInference.InferType(arg);
 
-            if (NeedStackBalancing())
-                builder.Emit(OpCodes.Pop);
-        }
-
-        private bool NeedStackBalancing()
-        {
-            return IsStatementExpression && !InferType().Equals(KnownType.Void);
-        }
-
-        private MethodReference GetMethodReference()
-        {
-            if (MethodName != "writeLine") throw new NotImplementedException();
-            if (Arguments.Count != 1) throw new NotImplementedException();
-
-            Expression arg = Arguments.First().Value;
-            switch (arg.InferType().ElementType)
+            switch (argType.ElementType)
             {
                 case ElementType.Int32: return new MethodReference(typeof(Console).GetMethod("WriteLine", new Type[] { typeof(int) }));
                 case ElementType.String: return new MethodReference(typeof(Console).GetMethod("WriteLine", new Type[] { typeof(string) }));

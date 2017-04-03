@@ -16,5 +16,10 @@ namespace CSharpCompiler.Syntax.Ast
         {
             Statements = new List<Statement>(statements);
         }
+
+        public void Accept(ISyntaxTreeVisitor visitor)
+        {
+            visitor.VisitSyntaxTree(this);
+        }
     }
 }

@@ -1,9 +1,6 @@
 ﻿using CSharpCompiler.Lexica.Tokens;
-using CSharpCompiler.Semantics.Metadata;
-using System;
-using CSharpCompiler.Semantics.TypeSystem;
 
-namespace CSharpCompiler.Syntax.Ast.Expressions.Relations
+namespace CSharpCompiler.Syntax.Ast.Expressions.Conditions
 {
     public sealed class AndOperation : BinaryOperation
     {
@@ -11,20 +8,9 @@ namespace CSharpCompiler.Syntax.Ast.Expressions.Relations
             : base(@operator, leftOperand, rightOperand)
         { }
 
-        public override void Build(MethodBuilder builder)
+        public override void Accept(IExpressionVisitor visitor)
         {
-            throw new NotImplementedException();
-        }
-
-        public override ITypeInfo InferType()
-        {
-            var leftType = LeftOperand.InferType();
-            var rightType = RightOperand.InferType();
-
-            if (KnownType.Boolean.Equals(leftType) && KnownType.Boolean.Equals(rightType))
-                return KnownType.Boolean;
-
-            throw new TypeInferenceException("Can't infer a type for: {0} and for: {1}", leftType, rightType);
+            visitor.VisitAndOperation(this);
         }
     }
 }

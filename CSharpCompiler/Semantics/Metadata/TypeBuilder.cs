@@ -46,45 +46,40 @@ namespace CSharpCompiler.Semantics.Metadata
                 KnownType.Object, 
                 _assemblyDef);
 
-            _assemblyDef.EntryPoint = MethodDefinition(_syntaxTree.Statements, typeDef);
+            _assemblyDef.EntryPoint = MethodDefinition(_syntaxTree, typeDef);
             typeDef.Methods.Add(_assemblyDef.EntryPoint);
             typeDef.Methods.Add(CtorDefinition(typeDef));
 
             return typeDef;
         }
 
-        private MethodDefinition MethodDefinition(List<Statement> statements, TypeDefinition typeDef)
+        private MethodDefinition MethodDefinition(SyntaxTree syntaxTree, TypeDefinition typeDef)
         {
-            MethodAttributes attributes = MethodAttributes.Public |
+            var attributes = MethodAttributes.Public |
                 MethodAttributes.Static |
                 MethodAttributes.HideBySig |
                 MethodAttributes.ReuseSlot;
 
-            MethodDefinition methodDef = new MethodDefinition("Main", attributes, typeDef);
-            MethodBuilder builder = methodDef.Body.GetBuilder();
-            
-            foreach (var Statement in statements)
-            {
-                Statement.Build(builder);
-            }
-            builder.Emit(OpCodes.Ret);
+            var methodDef = new MethodDefinition("Main", attributes, typeDef);
+            var builder = new MethodBuilder(methodDef.Body);
+            syntaxTree.Accept(builder);
 
             return methodDef;
         }
 
         private MethodDefinition CtorDefinition(TypeDefinition typeDef)
         {
-            MethodAttributes attributes = MethodAttributes.Public |
+            var attributes = MethodAttributes.Public |
                 MethodAttributes.HideBySig |
                 MethodAttributes.ReuseSlot |
                 MethodAttributes.SpecialName |
                 MethodAttributes.RTSpecialName;
 
-            MethodDefinition methodDef = new MethodDefinition(".ctor", attributes, typeDef);
-            MethodBuilder builder = methodDef.Body.GetBuilder();
-            builder.Emit(OpCodes.Ldarg_0);
-            builder.Emit(OpCodes.Call, new MethodReference(typeof(object).GetConstructor(new Type[0])));
-            builder.Emit(OpCodes.Ret);
+            var methodDef = new MethodDefinition(".ctor", attributes, typeDef);
+            var emitter = new OpCodeEmitter(methodDef.Body);
+            emitter.Emit(OpCodes.Ldarg_0);
+            emitter.Emit(OpCodes.Call, new MethodReference(typeof(object).GetConstructor(new Type[0])));
+            emitter.Emit(OpCodes.Ret);
 
             return methodDef;
         }

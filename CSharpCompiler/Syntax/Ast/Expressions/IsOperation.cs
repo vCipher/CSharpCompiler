@@ -1,14 +1,10 @@
 ﻿using CSharpCompiler.Syntax.Ast.Types;
-using CSharpCompiler.Semantics.TypeSystem;
-using CSharpCompiler.Semantics.Metadata;
-using System;
 
 namespace CSharpCompiler.Syntax.Ast.Expressions
 {
     public sealed class IsOperation : Expression
     {
         public Expression Operand { get; private set; }
-
         public TypeNode Type { get; private set; }
 
         public IsOperation(Expression operand, TypeNode type)
@@ -17,14 +13,9 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             Type = type;
         }
 
-        public override ITypeInfo InferType()
+        public override void Accept(IExpressionVisitor visitor)
         {
-            return KnownType.Boolean;
-        }
-
-        public override void Build(MethodBuilder builder)
-        {
-            throw new NotImplementedException();
+            visitor.VisitIsOperation(this);
         }
     }
 }

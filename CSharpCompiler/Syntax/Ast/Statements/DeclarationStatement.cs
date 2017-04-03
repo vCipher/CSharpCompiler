@@ -1,26 +1,25 @@
-﻿using CSharpCompiler.Semantics.Metadata;
+﻿using CSharpCompiler.Syntax.Ast.Variables;
 using System.Collections.Generic;
 
 namespace CSharpCompiler.Syntax.Ast.Statements
 {
     public sealed class DeclarationStatement : Statement
     {
-        public List<VarDeclaration> Declarations { get; private set; }
+        public IList<VarDeclaration> Declarations { get; private set; }
 
-        public DeclarationStatement(List<VarDeclaration> declarations)
+        public DeclarationStatement(IList<VarDeclaration> declarations)
         {
             Declarations = declarations;
         }
 
         public DeclarationStatement(params VarDeclaration[] declarations)
         {
-            Declarations = new List<VarDeclaration>(declarations);
+            Declarations = declarations;
         }
 
-        public override void Build(MethodBuilder builder)
+        public override void Accept(IStatementVisitor visitor)
         {
-            foreach (var declaration in Declarations)
-                declaration.Build(builder);
+            visitor.VisitDeclarationStatement(this);
         }
     }
 }

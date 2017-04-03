@@ -1,23 +1,19 @@
 ﻿using System.Collections.Generic;
-using CSharpCompiler.Semantics.Metadata;
 
 namespace CSharpCompiler.Syntax.Ast.Statements
 {
     public sealed class BlockStatement : Statement
     {
-        public List<Statement> Statements { get; private set; }
+        public IList<Statement> Statements { get; private set; }
 
-        public BlockStatement(List<Statement> statements)
+        public BlockStatement(IList<Statement> statements)
         {
             Statements = statements;
         }
 
-        public override void Build(MethodBuilder builder)
+        public override void Accept(IStatementVisitor visitor)
         {
-            foreach (var statement in Statements)
-            {
-                statement.Build(builder);
-            }
+            visitor.VisitBlockStatement(this);
         }
     }
 }

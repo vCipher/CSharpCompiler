@@ -1,14 +1,10 @@
-﻿using System;
-using CSharpCompiler.Lexica.Tokens;
-using CSharpCompiler.Semantics.Metadata;
-using CSharpCompiler.Semantics.TypeSystem;
+﻿using CSharpCompiler.Lexica.Tokens;
 
 namespace CSharpCompiler.Syntax.Ast.Expressions
 {
     public sealed class UnaryOperation : Expression
     {
         public Token Operator { get; private set; }
-
         public Expression Operand { get; private set; }
 
         public UnaryOperation(Token @operator, Expression operand)
@@ -17,14 +13,9 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             Operand = operand;
         }
 
-        public override ITypeInfo InferType()
+        public override void Accept(IExpressionVisitor visitor)
         {
-            return Operand.InferType();
-        }
-
-        public override void Build(MethodBuilder builder)
-        {
-            throw new NotImplementedException();
+            visitor.VisitUnaryOperation(this);
         }
     }
 }

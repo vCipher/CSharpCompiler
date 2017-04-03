@@ -1,14 +1,10 @@
-﻿using System;
-using CSharpCompiler.Syntax.Ast.Types;
-using CSharpCompiler.Semantics.TypeSystem;
-using CSharpCompiler.Semantics.Metadata;
+﻿using CSharpCompiler.Syntax.Ast.Types;
 
 namespace CSharpCompiler.Syntax.Ast.Expressions
 {
     public sealed class AsOperation : Expression
     {
         public Expression Operand { get; private set; }
-
         public TypeNode Type { get; private set; }
 
         public AsOperation(Expression operand, TypeNode type)
@@ -17,14 +13,9 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             Type = type;
         }
 
-        public override ITypeInfo InferType()
+        public override void Accept(IExpressionVisitor visitor)
         {
-            return Type.ToType();
-        }
-
-        public override void Build(MethodBuilder builder)
-        {
-            throw new NotImplementedException();
+            visitor.VisitAsOperation(this);
         }
     }
 }

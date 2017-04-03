@@ -1,7 +1,4 @@
-﻿using CSharpCompiler.Semantics.Cil;
-using CSharpCompiler.Semantics.Metadata;
-using CSharpCompiler.Semantics.TypeSystem;
-using CSharpCompiler.Syntax.Ast.Types;
+﻿using CSharpCompiler.Syntax.Ast.Types;
 
 namespace CSharpCompiler.Syntax.Ast.Expressions
 {
@@ -18,18 +15,9 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             IsStatementExpression = isStatementExpression;
         }
 
-        public override void Build(MethodBuilder builder)
+        public override void Accept(IExpressionVisitor visitor)
         {
-            Initializer.Build(builder);
-            builder.Emit(OpCodes.Newarr, ContainedType.ToType());
-
-            if (IsStatementExpression)
-                builder.Emit(OpCodes.Pop);
-        }
-
-        public override ITypeInfo InferType()
-        {
-            return ContainedType.ToType();
+            visitor.VisitArrayCreation(this);
         }
     }
 }

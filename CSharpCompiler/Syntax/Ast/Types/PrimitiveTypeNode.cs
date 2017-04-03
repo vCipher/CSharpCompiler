@@ -1,6 +1,4 @@
-﻿using CSharpCompiler.Semantics.TypeSystem;
-using CSharpCompiler.Lexica.Tokens;
-using CSharpCompiler.Semantics.Metadata;
+﻿using CSharpCompiler.Lexica.Tokens;
 
 namespace CSharpCompiler.Syntax.Ast.Types
 {
@@ -13,9 +11,9 @@ namespace CSharpCompiler.Syntax.Ast.Types
             TypeToken = typeToken;
         }
 
-        public override ITypeInfo ToType()
+        public override void Accept(ITypeVisitor visitor)
         {
-            return KnownType.Get(TypeToken.Tag.GetKnownTypeCode());
+            visitor.VisitPrimitiveType(this);
         }
     }
 }
