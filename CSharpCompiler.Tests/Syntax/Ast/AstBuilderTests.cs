@@ -1,16 +1,14 @@
 ﻿using CSharpCompiler.Lexica;
 using CSharpCompiler.Lexica.Tokens;
-using CSharpCompiler.Syntax;
-using CSharpCompiler.Syntax.Ast;
 using CSharpCompiler.Syntax.Ast.Expressions;
 using CSharpCompiler.Syntax.Ast.Statements;
 using CSharpCompiler.Syntax.Ast.Types;
+using CSharpCompiler.Tests;
 using CSharpCompiler.Tests.Assertions;
-using System.Collections.Generic;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace CSharpCompiler.Tests.Syntax.Ast
+namespace CSharpCompiler.Syntax.Ast.Tests
 {
     public class AstBuilderTests : TestCase
     {

@@ -6,6 +6,7 @@ using CSharpCompiler.Syntax.Ast;
 using CSharpCompiler.Tests;
 using CSharpCompiler.Tests.Assertions;
 using CSharpCompiler.Tests.Data;
+using CSharpCompiler.Utility;
 using System;
 using Xunit;
 using Xunit.Abstractions;
@@ -18,7 +19,7 @@ namespace CSharpCompiler.CodeGen.Metadata.Tests
         { }
 
         [Theory]
-        [FileData("Content/Tests/GuidHeap/Simple.txt")]
+        [FileData("Content/Tests/GuidHeapTest.txt")]
         public void GuidHeapTest(string content, Guid guid, ByteBuffer expected)
         {
             CompilationOptions options = new CompilationOptions { Mvid = guid };

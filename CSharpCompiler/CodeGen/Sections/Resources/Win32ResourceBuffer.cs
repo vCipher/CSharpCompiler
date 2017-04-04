@@ -1,4 +1,6 @@
-﻿namespace CSharpCompiler.CodeGen.Sections.Resources
+﻿using CSharpCompiler.Utility;
+
+namespace CSharpCompiler.CodeGen.Sections.Resources
 {
     public sealed class Win32ResourceBuffer : ByteBuffer
     {

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using CSharpCompiler.Utility;
+using System.Collections.Generic;
 
 namespace CSharpCompiler.Lexica.Tokens
 {

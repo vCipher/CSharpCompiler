@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace CSharpCompiler.CodeGen
+namespace CSharpCompiler.Utility
 {
     public sealed class ByteBufferComparer : IEqualityComparer<ByteBuffer>
     {

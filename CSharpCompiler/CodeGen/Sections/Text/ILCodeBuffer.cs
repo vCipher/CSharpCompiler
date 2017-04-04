@@ -65,18 +65,24 @@ namespace CSharpCompiler.CodeGen.Sections.Text
 
         private FatMethodHeader ComputeFatHeader(MethodDefinition methodDef)
         {
-            var header = new FatMethodHeader();
-            header.Size = 0x30;
-            header.MaxStack = (ushort)methodDef.Body.MaxStack;
-            header.CodeSize = (uint)methodDef.Body.CodeSize;
-            header.LocalVarSigTok = _metadata.StandAloneSigTable
-                .GetStandAloneSigToken(methodDef.Body.Variables);
+            return new FatMethodHeader()
+            {
+                Size = 0x30,
+                MaxStack = (ushort)methodDef.Body.MaxStack,
+                CodeSize = (uint)methodDef.Body.CodeSize,
+                Attributes = GetFatHeaderAttributes(methodDef),
+                LocalVarSigTok = _metadata.StandAloneSigTable
+                    .GetStandAloneSigToken(methodDef.Body.Variables)
+            };
+        }
 
-            header.Attributes = MethodBodyAttributes.FatFormat;
-            if (methodDef.Body.InitLocals) header.Attributes |= MethodBodyAttributes.InitLocals;
-            if (methodDef.Body.HasExceptionHandlers) header.Attributes |= MethodBodyAttributes.MoreSects;
-            
-            return header;
+        private static MethodBodyAttributes GetFatHeaderAttributes(MethodDefinition methodDef)
+        {
+            MethodBodyAttributes attributes = MethodBodyAttributes.FatFormat;
+            if (methodDef.Body.InitLocals) attributes |= MethodBodyAttributes.InitLocals;
+            if (methodDef.Body.HasExceptionHandlers) attributes |= MethodBodyAttributes.MoreSects;
+
+            return attributes;
         }
 
         private void WriteTinyHeader(MethodDefinition methodDef)

@@ -10,26 +10,18 @@ namespace CSharpCompiler.Utility
     {
         internal static void Do<TSrc>(this TSrc src, Action<TSrc> func)
         {
-            if (src == null)
-                return;
-
+            if (src == null) return;
             func(src);
         }
 
         internal static IEnumerable<TSrc> EmptyIfNull<TSrc>(this IEnumerable<TSrc> src)
         {
-            if (src == null)
-                return Enumerable.Empty<TSrc>();
-
-            return src;
+            return (src == null) ? Enumerable.Empty<TSrc>() : src;
         }
 
         internal static TSrc[] EmptyIfNull<TSrc>(this TSrc[] src)
         {
-            if (src == null)
-                return Empty<TSrc>.Array;
-
-            return src;
+            return (src == null) ? Empty<TSrc>.Array : src;
         }
 
         internal static bool IsNullOrEmpty<TSrc>(this IEnumerable<TSrc> src)
@@ -44,11 +36,27 @@ namespace CSharpCompiler.Utility
 
         internal static void ForEach<TSrc>(this IEnumerable<TSrc> src, Action<TSrc> action)
         {
-            if (src == null)
-                return;
+            if (src == null) return;
 
             foreach (var item in src)
                 action?.Invoke(item);
+        }
+
+        internal static void ForEach<TSrc>(this IEnumerable<TSrc> src, Action<TSrc, EnumerationInfo> action)
+        {
+            if (src == null || action == null) return;
+
+            IEnumerator<TSrc> enumerator = src.GetEnumerator();
+            bool isFirst = true;
+            bool hasNext = enumerator.MoveNext();
+
+            for (int index = 0; hasNext; index++)
+            {
+                TSrc current = enumerator.Current;
+                hasNext = enumerator.MoveNext();
+                action(current, new EnumerationInfo(index, isFirst, !hasNext));
+                isFirst = false;
+            }
         }
 
         internal static HashSet<TSrc> ToHashSet<TSrc>(this IEnumerable<TSrc> src)

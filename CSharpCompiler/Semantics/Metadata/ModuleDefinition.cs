@@ -13,10 +13,10 @@ namespace CSharpCompiler.Semantics.Metadata
         public MetadataToken Token { get; private set; }
         public Collection<TypeDefinition> Types { get; set; }
         
-        public ModuleDefinition(Guid guid)
+        public ModuleDefinition(Guid guid, string name)
         {
             Mvid = guid;
-            Name = "Target.exe";
+            Name = name;
             Token = new MetadataToken(MetadataTokenType.Module, 0);
             Types = new Collection<TypeDefinition>();
         }

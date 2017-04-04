@@ -2,7 +2,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace CSharpCompiler.CodeGen
+namespace CSharpCompiler.Utility
 {
     public class ByteBuffer
     {
@@ -30,20 +30,10 @@ namespace CSharpCompiler.CodeGen
             Position = Buffer.Length;
         }
 
-        /// <summary>
-        /// Align up size of byte buffer
-        /// </summary>
-        /// <remarks>Only for power of 2 align</remarks>
-        public static uint Align(uint size, uint align)
-        {
-            align--;
-            return ((size + align) & ~align);
-        }
-
         public static byte[] ConvertToZeroEndBytes(string @string)
         {
             int size = @string.Length + 1;
-            return ConvertToBytes(@string, Align((uint)size, 4u));
+            return ConvertToBytes(@string, BitArithmetic.Align((uint)size, 4u));
         }
 
         public static byte[] ConvertToBytes(string @string)
@@ -228,7 +218,7 @@ namespace CSharpCompiler.CodeGen
         {
             EnsureCapacity(length);
             writer();
-            Length = (int)Align((uint)Math.Max(Position, Length), (uint)_align);
+            Length = BitArithmetic.Align(Math.Max(Position, Length), _align);
         }
 
         private void EnsureCapacity(int value)
@@ -237,7 +227,7 @@ namespace CSharpCompiler.CodeGen
                 return;
 
             int oldLength = Buffer.Length;
-            int length = (int)Align((uint)Math.Max(oldLength + value, oldLength * 2), (uint)_align);
+            int length = BitArithmetic.Align(Math.Max(oldLength + value, oldLength * 2), _align);
 
             byte[] oldBuffer = Buffer;
             byte[] buffer = new byte[length];

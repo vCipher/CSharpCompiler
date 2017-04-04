@@ -131,7 +131,7 @@ namespace CSharpCompiler.CodeGen.Metadata
 
             int index = Array.IndexOf(types, token.Type);
             if (index == -1)
-                throw new UndefinedCodedTokenSchemaException("Schema for coded token: {0} and metadata token: {0} is undefined", type, token.Type);
+                throw new UndefinedCodedTokenSchemaException("Schema for coded token: {0} and metadata token: {1} is undefined", type, token.Type);
 
             uint value = token.RID << GetTagSize(types);
             return new CodedToken(value | (uint)index);

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CSharpCompiler.Cmd": {
+      "commandName": "Project",
+      "commandLineArgs": "sample netcoreapp1.1"
+    }
+  }
+}

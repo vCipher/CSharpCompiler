@@ -1,4 +1,5 @@
 ﻿using CSharpCompiler.CodeGen.Sections.Text;
+using CSharpCompiler.Utility;
 
 namespace CSharpCompiler.CodeGen.Sections.Relocations
 {

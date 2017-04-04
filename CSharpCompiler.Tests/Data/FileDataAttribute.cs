@@ -18,7 +18,7 @@ namespace CSharpCompiler.Tests.Data
 
         public FileDataAttribute(string file)
         {
-            File = file;
+            File = Path.Combine(AppContext.BaseDirectory, file);
         }
 
         public override IEnumerable<object[]> GetData(MethodInfo testMethod)

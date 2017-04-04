@@ -6,7 +6,7 @@ namespace CSharpCompiler.CodeGen.Metadata.Tables.Module
     public struct ModuleRow
     {
         public ushort Generation;
-        public ushort NameIndex;
+        public ushort Name;
         public ushort Mvid;
         public ushort EncId;
         public ushort EncBaseId;

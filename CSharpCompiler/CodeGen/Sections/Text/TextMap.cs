@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using CSharpCompiler.Utility;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace CSharpCompiler.CodeGen.Sections.Text
@@ -12,7 +13,7 @@ namespace CSharpCompiler.CodeGen.Sections.Text
         
         public int Count
         {
-            get { return (int)GetSize(); }
+            get { return _map.Length; }
         }
 
         public DataDirectory this[int index]
@@ -27,7 +28,7 @@ namespace CSharpCompiler.CodeGen.Sections.Text
 
         public void Add(TextSegment segment, uint size, uint align)
         {
-            Add(segment, ByteBuffer.Align(size, align));
+            Add(segment, BitArithmetic.Align(size, align));
         }
 
         public void Add(TextSegment segment, uint size)

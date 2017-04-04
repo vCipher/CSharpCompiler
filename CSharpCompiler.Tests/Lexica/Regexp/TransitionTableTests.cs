@@ -1,6 +1,8 @@
 ﻿using CSharpCompiler.Tests;
 using CSharpCompiler.Tests.Assertions;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -26,7 +28,7 @@ namespace CSharpCompiler.Lexica.Regexp.Tests
                     [3] = "ID"
                 }
             );
-            var actual = TransitionTable.FromFile("Content/vocabulary.txt");
+            var actual = TransitionTable.FromFile(Path.Combine(AppContext.BaseDirectory, "Content/vocabulary.txt"));
 
             actual.Should().Be(expected);
         }

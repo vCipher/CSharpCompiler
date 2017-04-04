@@ -5,6 +5,7 @@ using CSharpCompiler.Syntax.Ast;
 using CSharpCompiler.Syntax.Ast.Expressions;
 using System;
 using System.Linq;
+using System.Reflection;
 
 namespace CSharpCompiler.Semantics.Metadata
 {

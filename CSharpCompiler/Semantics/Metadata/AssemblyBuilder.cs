@@ -1,5 +1,6 @@
 ﻿using CSharpCompiler.Syntax.Ast;
 using System;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace CSharpCompiler.Semantics.Metadata
@@ -27,13 +28,13 @@ namespace CSharpCompiler.Semantics.Metadata
 
         private AssemblyDefinition Build()
         {
-            ModuleDefinition moduleDef = new ModuleDefinition(_options.Mvid);
+            ModuleDefinition moduleDef = new ModuleDefinition(_options.Mvid, _options.AssemblyName);
             AssemblyDefinition assemblyDef = new AssemblyDefinition(_options.AssemblyName, moduleDef);
 
-            assemblyDef.References.Add(new AssemblyReference(typeof(object).Assembly.GetName()));
+            assemblyDef.References.Add(new AssemblyReference(typeof(object).GetTypeInfo().Assembly.GetName()));
             assemblyDef.CustomAttributes.Add(GetCompilationRelaxationsAttribute(assemblyDef));
             assemblyDef.CustomAttributes.Add(GetRuntimeCompatibilityAttribute(assemblyDef));
-            moduleDef.Types.Add(TypeBuilder.Build(_syntaxTree, assemblyDef));
+            moduleDef.Types.Add(TypeBuilder.Build(_syntaxTree, assemblyDef, _options));
 
             return assemblyDef;
         }

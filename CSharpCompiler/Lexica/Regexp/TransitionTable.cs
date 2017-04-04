@@ -2,17 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.Serialization.Formatters.Binary;
 
 namespace CSharpCompiler.Lexica.Regexp
 {
-    [Serializable]
     public sealed class TransitionTable
     {
         public const int UNKNOWN_STATE = -1;
         
-        private static readonly Lazy<TransitionTable> _default = new Lazy<TransitionTable>(() => GetDefaultTransitionTable());
+        private static readonly Lazy<TransitionTable> _default = new Lazy<TransitionTable>(TransitionTableSource.GetTransitionTable);
         public static TransitionTable Default
         {
             get { return _default.Value; }
@@ -20,11 +17,8 @@ namespace CSharpCompiler.Lexica.Regexp
 
 
         public int Head { get; private set; }
-
         public int[] Accepting { get; private set; }
-
         public Dictionary<int, string> Aliases { get; private set; }
-
         public Dictionary<int, Dictionary<char, int>> Transitions { get; private set; }
 
 
@@ -55,31 +49,15 @@ namespace CSharpCompiler.Lexica.Regexp
 
         public static TransitionTable FromFile(string path)
         {
-            using (var fReader = new StreamReader(path))
-            using (var tReader = new TransitionTableReader(fReader))
-                return tReader.Read();
+            using (var stream = File.OpenRead(path))
+            using (var reader = new TransitionTableReader(stream))
+                return reader.Read();
         }
 
         public static TransitionTable FromString(string content)
         {
-            using (var sReader = new StringReader(content))
-            using (var tReader = new TransitionTableReader(sReader))
-                return tReader.Read();
-        }
-
-        private static TransitionTable GetDefaultTransitionTable()
-        {
-            var assembly = Assembly.GetExecutingAssembly();
-
-#if FROM_SOURCE
-            using (var stream = assembly.GetManifestResourceStream("CSharpCompiler.vocabulary.txt"))
-            using (var reader = new StreamReader(stream))
-            using (var tReader = new TransitionTableReader(reader))
-                return tReader.Read();
-#else
-            using (var stream = assembly.GetManifestResourceStream("CSharpCompiler.vocabulary.bin"))
-                return (TransitionTable)new BinaryFormatter().Deserialize(stream);
-#endif
+            using (var reader = new TransitionTableReader(content))
+                return reader.Read();
         }
 
         public bool IsAcceptingState(int state)

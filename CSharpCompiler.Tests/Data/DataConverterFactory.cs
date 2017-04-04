@@ -1,4 +1,4 @@
-﻿using CSharpCompiler.CodeGen;
+﻿using CSharpCompiler.Utility;
 using System;
 using System.Collections.Generic;
 
@@ -10,10 +10,12 @@ namespace CSharpCompiler.Tests.Data
 
         static DataConverterFactory()
         {
-            _bindings = new Dictionary<Type, IDataConverter>();
-            _bindings.Add(typeof(string), new StringConverter());
-            _bindings.Add(typeof(Guid), new GuidConverter());
-            _bindings.Add(typeof(ByteBuffer), new ByteBufferConverter<ByteBuffer>());
+            _bindings = new Dictionary<Type, IDataConverter>
+            {
+                { typeof(string), new StringConverter() },
+                { typeof(Guid), new GuidConverter() },
+                { typeof(ByteBuffer), new ByteBufferConverter<ByteBuffer>() }
+            };
         }
 
         public static IDataConverter Create(Type dataType)

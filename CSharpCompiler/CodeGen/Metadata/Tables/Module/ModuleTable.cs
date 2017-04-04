@@ -21,7 +21,7 @@ namespace CSharpCompiler.CodeGen.Metadata.Tables.Module
         {
             ModuleRow row = new ModuleRow();
             row.Generation = 0;
-            row.NameIndex = _metadata.RegisterString(moduleDef.Name);
+            row.Name = _metadata.RegisterString(moduleDef.Name);
             row.Mvid = _metadata.RegisterGuid(moduleDef.Mvid);
             row.EncId = 0;
             row.EncBaseId = 0;

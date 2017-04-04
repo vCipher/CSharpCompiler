@@ -1,8 +1,8 @@
-﻿using CSharpCompiler.CodeGen;
+﻿using CSharpCompiler.Utility;
+using System;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System;
 
 namespace CSharpCompiler.Tests.Data
 {

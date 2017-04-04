@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp1.1</TargetFramework>
+        <AssemblyName>CSharpCompiler.Cmd</AssemblyName>
+        <OutputType>Exe</OutputType>
+        <PackageId>CSharpCompiler.Cmd</PackageId>
+        <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
+        <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+        <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+        <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+        <RootNamespace>CSharpCompiler.Cmd</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <None Remove="sample" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="sample">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="Runtimes\netcoreapp1.1.runtimeconfig.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\CSharpCompiler\CSharpCompiler.csproj" />
+    </ItemGroup>
+
+</Project>

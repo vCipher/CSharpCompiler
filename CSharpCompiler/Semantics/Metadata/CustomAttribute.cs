@@ -17,7 +17,7 @@ namespace CSharpCompiler.Semantics.Metadata
             Name = type.Name;
             Namespace = type.Namespace;
             Token = new MetadataToken(MetadataTokenType.CustomAttribute, 0);
-            Assembly = new AssemblyReference(type.Assembly.GetName());
+            Assembly = new AssemblyReference(type.GetTypeInfo().Assembly.GetName());
             Constructor = new MethodReference(ctorInfo);
             Owner = owner;
         }

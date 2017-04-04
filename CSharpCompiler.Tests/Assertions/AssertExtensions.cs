@@ -1,10 +1,10 @@
 ﻿using CSharpCompiler.Lexica.Regexp;
 using CSharpCompiler.Lexica.Tokens;
-using CSharpCompiler.CodeGen;
 using CSharpCompiler.Semantics.Metadata;
 using CSharpCompiler.Syntax;
 using CSharpCompiler.Syntax.Ast;
 using System.IO;
+using CSharpCompiler.Utility;
 
 namespace CSharpCompiler.Tests.Assertions
 {

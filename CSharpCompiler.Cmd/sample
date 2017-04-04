@@ -1,0 +1,5 @@
+﻿int a = 13;
+int b = 31;
+int x = (a % 2) ^ b;
+writeLine(x);
+writeLine("hello, world!");

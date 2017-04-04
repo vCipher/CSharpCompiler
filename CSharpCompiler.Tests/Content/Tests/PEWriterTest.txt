@@ -1,0 +1,17 @@
+﻿# test
+## param (content)
+int a = 13;
+int b = 31;
+int x = (a % 2) ^ b;
+writeLine(x);
+writeLine("hello, world!");
+
+## param (expectedFile)
+Content/sample.dll
+
+## param (options)
+{
+    "TimeStamp": 0x58E5113B,
+    "AssemblyName": "sample.dll",
+    "Mvid": "B0AE4E24-2000-46AC-A172-1B598398965D"
+}

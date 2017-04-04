@@ -11,6 +11,7 @@ using CSharpCompiler.CodeGen.Metadata.Tables.StandAloneSig;
 using CSharpCompiler.CodeGen.Metadata.Tables.TypeRef;
 using CSharpCompiler.CodeGen.Sections.Text;
 using CSharpCompiler.Semantics.Metadata;
+using CSharpCompiler.Utility;
 using System;
 using System.Collections.ObjectModel;
 

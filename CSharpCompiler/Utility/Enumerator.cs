@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace CSharpCompiler.Lexica
+namespace CSharpCompiler.Utility
 {
     public class Enumerator<T> : IEnumerator<T>
     {

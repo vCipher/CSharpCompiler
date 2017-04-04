@@ -9,9 +9,14 @@ namespace CSharpCompiler.Lexica.Regexp
     {
         private TextReader _reader;
 
-        public TransitionTableReader(TextReader reader)
+        public TransitionTableReader(Stream stream)
         {
-            _reader = reader;
+            _reader = new StreamReader(stream);
+        }
+
+        public TransitionTableReader(string content)
+        {
+            _reader = new StringReader(content);
         }
 
         public TransitionTable Read()
@@ -117,7 +122,7 @@ namespace CSharpCompiler.Lexica.Regexp
         }
 
         #region IDisposable Support
-        private bool disposedValue = false; // to detect redundant calls
+        private bool disposedValue = false; // To detect redundant calls
 
         void Dispose(bool disposing)
         {
@@ -131,7 +136,7 @@ namespace CSharpCompiler.Lexica.Regexp
                 disposedValue = true;
             }
         }
-
+        
         public void Dispose()
         {
             Dispose(true);

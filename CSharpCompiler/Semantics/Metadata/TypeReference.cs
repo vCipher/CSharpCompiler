@@ -1,4 +1,5 @@
 ﻿using CSharpCompiler.Semantics.TypeSystem;
+using System.Reflection;
 
 namespace CSharpCompiler.Semantics.Metadata
 {
@@ -16,7 +17,7 @@ namespace CSharpCompiler.Semantics.Metadata
             Namespace = type.Namespace;
             Token = new MetadataToken(MetadataTokenType.TypeRef, 0);
             DeclaringType = TypeFactory.Create(type.GetKnownTypeCode());
-            Assembly = new AssemblyReference(type.Assembly.GetName());
+            Assembly = new AssemblyReference(type.GetTypeInfo().Assembly.GetName());
         }
 
         public void ResolveToken(uint rid)

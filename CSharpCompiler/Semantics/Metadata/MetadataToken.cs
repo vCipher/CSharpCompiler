@@ -51,5 +51,15 @@ namespace CSharpCompiler.Semantics.Metadata
         {
             return _value == other._value;
         }
+
+        public static bool operator ==(MetadataToken @this, MetadataToken other)
+        {
+            return @this.Equals(other);
+        }
+
+        public static bool operator !=(MetadataToken @this, MetadataToken other)
+        {
+            return !@this.Equals(other);
+        }
     }
 }

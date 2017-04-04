@@ -3,6 +3,7 @@ using CSharpCompiler.Syntax.Ast;
 using CSharpCompiler.Syntax.Ast.Statements;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace CSharpCompiler.Semantics.Metadata
 {
@@ -10,16 +11,23 @@ namespace CSharpCompiler.Semantics.Metadata
     {
         private SyntaxTree _syntaxTree;
         private AssemblyDefinition _assemblyDef;
+        private CompilationOptions _options;
 
-        public TypeBuilder(SyntaxTree syntaxTree, AssemblyDefinition assemblyDef)
+        public TypeBuilder(SyntaxTree syntaxTree, AssemblyDefinition assemblyDef, CompilationOptions options)
         {
             _syntaxTree = syntaxTree;
             _assemblyDef = assemblyDef;
+            _options = options;
         }
 
         public static TypeDefinition Build(SyntaxTree syntaxTree, AssemblyDefinition assemblyDef)
         {
-            return new TypeBuilder(syntaxTree, assemblyDef).TypeDefinition();
+            return new TypeBuilder(syntaxTree, assemblyDef, new CompilationOptions()).TypeDefinition();
+        }
+
+        public static TypeDefinition Build(SyntaxTree syntaxTree, AssemblyDefinition assemblyDef, CompilationOptions options)
+        {
+            return new TypeBuilder(syntaxTree, assemblyDef, options).TypeDefinition();
         }
 
         public TypeDefinition TypeDefinition()
@@ -31,7 +39,7 @@ namespace CSharpCompiler.Semantics.Metadata
                 TypeAttributes.BeforeFieldInit;
 
             TypeDefinition typeDef = new TypeDefinition(
-                "Target", "CSharpCompiler", attributes, _assemblyDef);
+                _options.TypeName, _options.Namespace, attributes, _assemblyDef);
 
             _assemblyDef.EntryPoint = MethodDefinition(_syntaxTree.Statements, typeDef);
             typeDef.Methods.Add(_assemblyDef.EntryPoint);

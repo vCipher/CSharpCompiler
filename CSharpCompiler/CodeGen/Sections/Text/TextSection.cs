@@ -1,4 +1,5 @@
 ﻿using CSharpCompiler.CodeGen.Metadata;
+using CSharpCompiler.Utility;
 
 namespace CSharpCompiler.CodeGen.Sections.Text
 {

@@ -1,4 +1,5 @@
 ﻿using CSharpCompiler.Semantics.Metadata;
+using CSharpCompiler.Utility;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
@@ -36,10 +37,10 @@ namespace CSharpCompiler.CodeGen.Metadata.Tables.StandAloneSig
 
         private StandAloneSigRow CreateStandAloneSigRow(SingatureBuffer signature)
         {
-            StandAloneSigRow row = new StandAloneSigRow();
-            row.Signature = _metadata.RegisterBlob(signature);
-
-            return row;
+            return new StandAloneSigRow()
+            {
+                Signature = _metadata.RegisterBlob(signature)
+            };
         }
     }
 }

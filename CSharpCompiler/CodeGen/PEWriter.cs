@@ -6,6 +6,7 @@ using CSharpCompiler.CodeGen.Metadata;
 using CSharpCompiler.Semantics.Metadata;
 using System.IO;
 using System;
+using CSharpCompiler.Utility;
 
 namespace CSharpCompiler.CodeGen
 {
@@ -116,39 +117,40 @@ namespace CSharpCompiler.CodeGen
             MetadataContainer metadata = MetadataBuilder.Build(assemblyDef);
             TextMap map = GetTextMap(metadata, resources, data);
 
-            TextSection section = new TextSection();
-            section.Header = GetTextHeader(map);
-            section.CLRHeader = GetCLRHeader(assemblyDef, map);
-            section.Map = map;
-            section.Metadata = metadata;
-            section.Resources = resources;
-            section.Data = data;
-
-            return section;
+            return new TextSection()
+            {
+                Header = GetTextHeader(map),
+                CLRHeader = GetCLRHeader(assemblyDef, map),
+                Map = map,
+                Metadata = metadata,
+                Resources = resources,
+                Data = data
+            };
         }
 
         private TextMap GetTextMap(MetadataContainer metadata, ByteBuffer resources, ByteBuffer data)
         {
-            TextMap map = new TextMap();
-            map.Add(TextSegment.ImportAddressTable, 8);
-            map.Add(TextSegment.CLRHeader, ByteBuffer.SizeOf<CLRHeader>(), 8);
-            map.Add(TextSegment.ILCode, (uint)metadata.ILCode.Length, 4);
-            map.Add(TextSegment.Resources, (uint)resources.Length, 8);
-            map.Add(TextSegment.Data, (uint)data.Length, 4);
-            map.Add(TextSegment.StrongNameSignature, 0, 4);
-
-            map.Add(TextSegment.MetadataHeader, GetMetadataHeaderLength());
-            map.Add(TextSegment.TableHeap, (uint)metadata.Tables.Length, 4);
-            map.Add(TextSegment.StringHeap, (uint)metadata.Strings.Length, 4);
-            map.Add(TextSegment.UserStringHeap, (uint)metadata.UserStrings.Length, 4);
-            map.Add(TextSegment.GuidHeap, (uint)metadata.Guids.Length, 4);
-            map.Add(TextSegment.BlobHeap, (uint)metadata.Blobs.Length, 4);
-            map.Add(TextSegment.DebugDirectory, 0, 4);
+            TextMap map = new TextMap
+            {
+                { TextSegment.ImportAddressTable, 8 },
+                { TextSegment.CLRHeader, ByteBuffer.SizeOf<CLRHeader>(), 8 },
+                { TextSegment.ILCode, (uint)metadata.ILCode.Length, 4 },
+                { TextSegment.Resources, (uint)resources.Length, 8 },
+                { TextSegment.Data, (uint)data.Length, 4 },
+                { TextSegment.StrongNameSignature, 0, 4 },
+                { TextSegment.MetadataHeader, GetMetadataHeaderLength() },
+                { TextSegment.TableHeap, (uint)metadata.Tables.Length, 4 },
+                { TextSegment.StringHeap, (uint)metadata.Strings.Length, 4 },
+                { TextSegment.UserStringHeap, (uint)metadata.UserStrings.Length, 4 },
+                { TextSegment.GuidHeap, (uint)metadata.Guids.Length, 4 },
+                { TextSegment.BlobHeap, (uint)metadata.Blobs.Length, 4 },
+                { TextSegment.DebugDirectory, 0, 4 }
+            };
 
             uint importDirRVA = map.GetNextVirtualAddress(TextSegment.DebugDirectory);
-            uint importHintRVA = ByteBuffer.Align(importDirRVA + 48u, 16u);
+            uint importHintRVA = BitArithmetic.Align(importDirRVA + 48u, 16u);
             uint importDirLength = (importHintRVA - importDirRVA) + 27u;
-            uint startupStubRVA = 2u + ByteBuffer.Align(importDirRVA + importDirLength, 4u);
+            uint startupStubRVA = 2u + BitArithmetic.Align(importDirRVA + importDirLength, 4u);
 
             map.Add(TextSegment.ImportDirectory, new DataDirectory(importDirRVA, importDirLength));
             map.Add(TextSegment.ImportHintNameTable, new DataDirectory(importHintRVA, 0));
@@ -176,97 +178,101 @@ namespace CSharpCompiler.CodeGen
 
         private SectionHeader GetTextHeader(TextMap map)
         {
-            SectionHeader header = new SectionHeader();
-            header.Name = ".text";
-            header.VirtualSize = map.GetSize();
-            header.VirtualAddress = TEXT_SECTION_BASE;
-            header.SizeOfRawData = ByteBuffer.Align(header.VirtualSize, FILE_ALIGMENT);
-            header.PointerToRawData = GetPEHeaderSize();
-            header.Characteristics = SectionCharacteristic.MEM_READ |
-                SectionCharacteristic.MEM_EXECUTE |
-                SectionCharacteristic.CNT_CODE;
-
-            return header;
+            return new SectionHeader()
+            {
+                Name = ".text",
+                VirtualSize = map.GetSize(),
+                VirtualAddress = TEXT_SECTION_BASE,
+                SizeOfRawData = BitArithmetic.Align(map.GetSize(), FILE_ALIGMENT),
+                PointerToRawData = GetPEHeaderSize(),
+                Characteristics = SectionCharacteristic.MEM_READ |
+                    SectionCharacteristic.MEM_EXECUTE |
+                    SectionCharacteristic.CNT_CODE
+            };
         }
 
         private static CLRHeader GetCLRHeader(AssemblyDefinition assemblyDef, TextMap map)
         {
-            CLRHeader header = new CLRHeader();
-            header.cb = map[TextSegment.CLRHeader].Size;
-            header.MajorRuntimeVersion = 0x0002;
-            header.MinorRuntimeVersion = 0x0005;
-            header.MetaData = new DataDirectory(
-                map[TextSegment.MetadataHeader].VirtualAddress,
-                map.GetOffset(TextSegment.MetadataHeader, TextSegment.DebugDirectory)
-            );
-            header.PEKind = PEFileKinds.ILOnly;
-            header.EntryPointToken = assemblyDef.EntryPoint.Token;
-
-            return header;
+            return new CLRHeader()
+            {
+                cb = map[TextSegment.CLRHeader].Size,
+                MajorRuntimeVersion = 0x0002,
+                MinorRuntimeVersion = 0x0005,
+                MetaData = new DataDirectory(
+                    map[TextSegment.MetadataHeader].VirtualAddress,
+                    map.GetOffset(TextSegment.MetadataHeader, TextSegment.DebugDirectory)
+                ),
+                PEKind = PEFileKinds.ILOnly,
+                EntryPointToken = assemblyDef.EntryPoint.Token
+            };
         }
 
         private RsrcSection GetRsrcSection()
         {
-            RsrcSection section = new RsrcSection();
-            section.Buffer = new Win32ResourceBuffer();
-            section.Header = GetRsrcHeader(section.Buffer);
-            
-            return section;
+            var buffer = new Win32ResourceBuffer();
+            return new RsrcSection()
+            {
+                Buffer = buffer,
+                Header = GetRsrcHeader(buffer)
+            };
         }
 
         private SectionHeader GetRsrcHeader(Win32ResourceBuffer buffer)
         {
-            SectionHeader header = new SectionHeader();
-            header.Name = ".rsrc";
-            header.VirtualSize = (uint)buffer.Length;
-            header.VirtualAddress = GetNextVirtualAddress(_text);
-            header.SizeOfRawData = ByteBuffer.Align(header.VirtualSize, FILE_ALIGMENT);
-            header.PointerToRawData = _text.Header.PointerToRawData + _text.Header.SizeOfRawData;
-            header.Characteristics = SectionCharacteristic.MEM_READ | 
-                SectionCharacteristic.CNT_INITIALIZED_DATA;
-
-            return header;
+            uint rva = GetNextVirtualAddress(_text);
+            return new SectionHeader()
+            {
+                Name = ".rsrc",
+                VirtualSize = (uint)buffer.Length,
+                VirtualAddress = rva,
+                SizeOfRawData = BitArithmetic.Align((uint)buffer.Length, FILE_ALIGMENT),
+                PointerToRawData = _text.Header.PointerToRawData + _text.Header.SizeOfRawData,
+                Characteristics = SectionCharacteristic.MEM_READ |
+                    SectionCharacteristic.CNT_INITIALIZED_DATA
+            };
         }
 
         private RelocSection GetRelocSection()
         {
-            RelocSection section = new RelocSection();
-            section.Buffer = new RelocationBuffer(_text);
-            section.Header = GetRelocHeader(section.Buffer);            
-
-            return section;
+            RelocationBuffer buffer = new RelocationBuffer(_text);
+            return new RelocSection()
+            {
+                Buffer = buffer,
+                Header = GetRelocHeader(buffer)
+            };
         }
 
         private SectionHeader GetRelocHeader(RelocationBuffer buffer)
         {
-            SectionHeader header = new SectionHeader();
-            header.Name = ".reloc";
-            header.VirtualSize = (uint)buffer.Length;
-            header.VirtualAddress = GetNextVirtualAddress(_rsrc);
-            header.SizeOfRawData = ByteBuffer.Align(header.VirtualSize, FILE_ALIGMENT);
-            header.PointerToRawData = _rsrc.Header.PointerToRawData + _rsrc.Header.SizeOfRawData;
-            header.Characteristics = SectionCharacteristic.MEM_READ |
+            uint rva = GetNextVirtualAddress(_rsrc);
+            return new SectionHeader()
+            {
+                Name = ".reloc",
+                VirtualSize = (uint)buffer.Length,
+                VirtualAddress = rva,
+                SizeOfRawData = BitArithmetic.Align((uint)buffer.Length, FILE_ALIGMENT),
+                PointerToRawData = _rsrc.Header.PointerToRawData + _rsrc.Header.SizeOfRawData,
+                Characteristics = SectionCharacteristic.MEM_READ |
                 SectionCharacteristic.CNT_INITIALIZED_DATA |
-                SectionCharacteristic.MEM_DISCARDABLE;
-
-            return header;
+                SectionCharacteristic.MEM_DISCARDABLE
+            };
         }
 
         private DosHeader GetImageDosHeader()
         {
-            DosHeader header = new DosHeader();
-            header.e_magic = DOS_SIGNATURE;
-            header.e_cblp = 0x0090;
-            header.e_cp = 0x0003;
-            header.e_cparhdr = 0x0004;
-            header.e_maxalloc = 0xffff;
-            header.e_sp = 0x00b8;
-            header.e_lfarlc = 0x0040;
-            header.e_res = new ushort[SIZE_OF_DOS_RESERVED_WORDS];
-            header.e_res2 = new ushort[SIZE_OF_DOS_RESERVED_WORDS2];
-            header.e_lfanew = 0x00000080;
-
-            return header;
+            return new DosHeader()
+            {
+                e_magic = DOS_SIGNATURE,
+                e_cblp = 0x0090,
+                e_cp = 0x0003,
+                e_cparhdr = 0x0004,
+                e_maxalloc = 0xffff,
+                e_sp = 0x00b8,
+                e_lfarlc = 0x0040,
+                e_res = new ushort[SIZE_OF_DOS_RESERVED_WORDS],
+                e_res2 = new ushort[SIZE_OF_DOS_RESERVED_WORDS2],
+                e_lfanew = 0x00000080
+            };
         }
 
         private byte[] GetDosStub()
@@ -288,49 +294,49 @@ namespace CSharpCompiler.CodeGen
 
         private NTHeaders32 GetNTHeaders32()
         {
-            NTHeaders32 ntHeaders = new NTHeaders32();
-            ntHeaders.Signature = NT_SIGNATURE;
-            ntHeaders.FileHeader = GetFileHeader();
-            ntHeaders.OptionalHeader = GetOptionHeader32();
-
-            return ntHeaders;
+            return new NTHeaders32()
+            {
+                Signature = NT_SIGNATURE,
+                FileHeader = GetFileHeader(),
+                OptionalHeader = GetOptionHeader32()
+            };
         }
 
         private OptionHeader32 GetOptionHeader32()
         {
-            OptionHeader32 optionHeader = new OptionHeader32();
-            optionHeader.Magic = NT_OPTIONAL_HDR32_MAGIC;
-            optionHeader.MajorLinkerVersion = 0x0b;
-            optionHeader.MinorLinkerVersion = 0x00;
-            optionHeader.SizeOfCode = _text.Header.SizeOfRawData;
-            optionHeader.SizeOfInitializedData = GetInitializedDataSize();
-            optionHeader.AddressOfEntryPoint = _text.Map[TextSegment.StartupStub].VirtualAddress;
-            optionHeader.BaseOfCode = _text.Header.VirtualAddress;
-            optionHeader.BaseOfData = _rsrc.Header.VirtualAddress;
-            optionHeader.ImageBase = IMAGE_BASE;
-            optionHeader.SectionAlignment = SECTION_ALIGMENT;
-            optionHeader.FileAlignment = FILE_ALIGMENT;
-            optionHeader.MajorOperatingSystemVersion = 0x0004;
-            optionHeader.MinorOperatingSystemVersion = 0x0000;
-            optionHeader.MajorImageVersion = 0x0000;
-            optionHeader.MinorImageVersion = 0x0000;
-            optionHeader.MajorSubsystemVersion = 0x0004;
-            optionHeader.MinorSubsystemVersion = 0x0000;
-            optionHeader.SizeOfImage = GetPEImageSize();
-            optionHeader.SizeOfHeaders = GetPEHeaderSize();
-            optionHeader.Subsystem = SUBSYSTEM_WINDOWS_CUI;
-            optionHeader.DllCharacteristics = DllCharacteristics.DYNAMIC_BASE |
+            return new OptionHeader32()
+            {
+                Magic = NT_OPTIONAL_HDR32_MAGIC,
+                MajorLinkerVersion = 0x0b,
+                MinorLinkerVersion = 0x00,
+                SizeOfCode = _text.Header.SizeOfRawData,
+                SizeOfInitializedData = GetInitializedDataSize(),
+                AddressOfEntryPoint = _text.Map[TextSegment.StartupStub].VirtualAddress,
+                BaseOfCode = _text.Header.VirtualAddress,
+                BaseOfData = _rsrc.Header.VirtualAddress,
+                ImageBase = IMAGE_BASE,
+                SectionAlignment = SECTION_ALIGMENT,
+                FileAlignment = FILE_ALIGMENT,
+                MajorOperatingSystemVersion = 0x0004,
+                MinorOperatingSystemVersion = 0x0000,
+                MajorImageVersion = 0x0000,
+                MinorImageVersion = 0x0000,
+                MajorSubsystemVersion = 0x0004,
+                MinorSubsystemVersion = 0x0000,
+                SizeOfImage = GetPEImageSize(),
+                SizeOfHeaders = GetPEHeaderSize(),
+                Subsystem = SUBSYSTEM_WINDOWS_CUI,
+                DllCharacteristics = DllCharacteristics.DYNAMIC_BASE |
                 DllCharacteristics.NX_COMPAT |
                 DllCharacteristics.NO_SEH |
-                DllCharacteristics.TERMINAL_SERVER_AWARE;
-            optionHeader.SizeOfStackReserve = 0x00100000;
-            optionHeader.SizeOfStackCommit = 0x00001000;
-            optionHeader.SizeOfHeapReserve = 0x00100000;
-            optionHeader.SizeOfHeapCommit = 0x00001000;
-            optionHeader.NumberOfRvaAndSizes = NUMBER_OF_DIRECTORY_ENTRIES;
-            optionHeader.DataDirectory = GetDataDirectories();
-
-            return optionHeader;
+                DllCharacteristics.TERMINAL_SERVER_AWARE,
+                SizeOfStackReserve = 0x00100000,
+                SizeOfStackCommit = 0x00001000,
+                SizeOfHeapReserve = 0x00100000,
+                SizeOfHeapCommit = 0x00001000,
+                NumberOfRvaAndSizes = NUMBER_OF_DIRECTORY_ENTRIES,
+                DataDirectory = GetDataDirectories()
+            };
         }
 
         private uint GetInitializedDataSize()
@@ -350,7 +356,7 @@ namespace CSharpCompiler.CodeGen
                 SIZEOF_NT_OPTIONAL32_HEADER +
                 (NUMBER_OF_SECTIONS * SIZEOF_SECTION_HEADER);
 
-            return ByteBuffer.Align(size, FILE_ALIGMENT);
+            return BitArithmetic.Align(size, FILE_ALIGMENT);
         }
 
         private DataDirectory[] GetDataDirectories()
@@ -367,21 +373,21 @@ namespace CSharpCompiler.CodeGen
 
         private FileHeader GetFileHeader()
         {
-            FileHeader fileHeader = new FileHeader();
-            fileHeader.Machine = FILE_MACHINE_I386;
-            fileHeader.NumberOfSections = NUMBER_OF_SECTIONS;
-            fileHeader.TimeDateStamp = _options.TimeStamp;
-            fileHeader.SizeOfOptionalHeader = SIZEOF_NT_OPTIONAL32_HEADER;
-            fileHeader.Characteristics = FileCharacteristics.EXECUTABLE_IMAGE | 
-                FileCharacteristics.MACHINE_32BIT;
-
-            return fileHeader;
+            return new FileHeader()
+            {
+                Machine = FILE_MACHINE_I386,
+                NumberOfSections = NUMBER_OF_SECTIONS,
+                TimeDateStamp = _options.TimeStamp,
+                SizeOfOptionalHeader = SIZEOF_NT_OPTIONAL32_HEADER,
+                Characteristics = FileCharacteristics.EXECUTABLE_IMAGE |
+                FileCharacteristics.MACHINE_32BIT
+            };
         }
 
         private uint GetNextVirtualAddress(ISection section)
         {
             return section.Header.VirtualAddress +
-                ByteBuffer.Align(section.Header.VirtualSize, SECTION_ALIGMENT);
+                BitArithmetic.Align(section.Header.VirtualSize, SECTION_ALIGMENT);
         }
 
         private void WriteDOSHeader()

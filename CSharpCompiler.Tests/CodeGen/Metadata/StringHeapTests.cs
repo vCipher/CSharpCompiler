@@ -6,6 +6,7 @@ using CSharpCompiler.Syntax.Ast;
 using CSharpCompiler.Tests;
 using CSharpCompiler.Tests.Assertions;
 using CSharpCompiler.Tests.Data;
+using CSharpCompiler.Utility;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -17,7 +18,7 @@ namespace CSharpCompiler.CodeGen.Metadata.Tests
         { }
 
         [Theory]
-        [FileData("Content/Tests/StringHeap/Strings.txt")]
+        [FileData("Content/Tests/StringHeapTest.txt")]
         public void StringHeapTest(string content, ByteBuffer expected)
         {
             TokenEnumerable tokens = Scanner.Scan(content);
