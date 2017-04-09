@@ -1,5 +1,9 @@
-﻿using CSharpCompiler.Syntax.Ast.Expressions;
+﻿using System;
+using CSharpCompiler.Semantics.Metadata;
+using CSharpCompiler.Syntax.Ast.Expressions;
 using CSharpCompiler.Syntax.Ast.Types;
+using CSharpCompiler.Semantics.TypeSystem;
+using CSharpCompiler.Semantics;
 
 namespace CSharpCompiler.Syntax.Ast
 {
@@ -27,6 +31,25 @@ namespace CSharpCompiler.Syntax.Ast
             VarName = varName;
             Initializer = initializer;
             Scope = scope;
+            Scope.Register(varName, this);
+        }
+
+        public void Build(MethodBuilder builder)
+        {
+            builder.Build(this);
+        }
+
+        public IType InferType()
+        {
+            if (IsImplicit)
+            {
+                if (Initializer == null)
+                    throw new SemanticException("Can't declare unintialized local variable with implicit typification.");
+
+                return Initializer.InferType();
+            }
+
+            return Type.ToType();
         }
     }
 }

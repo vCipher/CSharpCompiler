@@ -7,22 +7,22 @@ namespace CSharpCompiler.CodeGen.Metadata.Tables.StandAloneSig
 {
     public sealed class StandAloneSigTable : MetadataTable<StandAloneSigRow>
     {
-        private Dictionary<SingatureBuffer, MetadataToken> _standAloneSigMap;
+        private Dictionary<SingatureBuilder, MetadataToken> _standAloneSigMap;
         private MetadataBuilder _metadata;
 
         public StandAloneSigTable(MetadataBuilder metadata)
         {
-            _standAloneSigMap = new Dictionary<SingatureBuffer, MetadataToken>(new ByteBufferComparer());
+            _standAloneSigMap = new Dictionary<SingatureBuilder, MetadataToken>(new ByteBufferComparer());
             _metadata = metadata;
         }
 
         public MetadataToken GetStandAloneSigToken(Collection<VariableDefinition> variables)
         {
-            SingatureBuffer signature = SingatureBuffer.GetVariablesSignature(variables);
+            SingatureBuilder signature = SingatureBuilder.GetVariablesSignature(variables);
             return GetStandAloneSigToken(signature);
         }
 
-        public MetadataToken GetStandAloneSigToken(SingatureBuffer signature)
+        public MetadataToken GetStandAloneSigToken(SingatureBuilder signature)
         {
             MetadataToken token;
             if (_standAloneSigMap.TryGetValue(signature, out token))
@@ -35,7 +35,7 @@ namespace CSharpCompiler.CodeGen.Metadata.Tables.StandAloneSig
             return token;
         }
 
-        private StandAloneSigRow CreateStandAloneSigRow(SingatureBuffer signature)
+        private StandAloneSigRow CreateStandAloneSigRow(SingatureBuilder signature)
         {
             return new StandAloneSigRow()
             {

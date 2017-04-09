@@ -1,4 +1,4 @@
-﻿using CSharpCompiler.Semantic.Cil;
+﻿using CSharpCompiler.Semantics.Cil;
 using CSharpCompiler.Syntax.Ast;
 using CSharpCompiler.Syntax.Ast.Statements;
 using System;

@@ -1,6 +1,5 @@
 ﻿using CSharpCompiler.CodeGen.Metadata;
-using CSharpCompiler.CodeGen.Metadata.Tables;
-using CSharpCompiler.Semantic.Cil;
+using CSharpCompiler.Semantics.Cil;
 using CSharpCompiler.Semantics.Metadata;
 using CSharpCompiler.Utility;
 using System;
@@ -16,25 +15,27 @@ namespace CSharpCompiler.CodeGen.Sections.Text
         public ILCodeBuffer(MetadataBuilder metadata) : base(Empty<byte>.Array, 4)
         {
             _metadata = metadata;
-            _writers = new Dictionary<OperandType, Action<Instruction>>();
-            _writers.Add(OperandType.InlineBrTarget, WriteInlineBrTarget);
-            _writers.Add(OperandType.InlineI, WriteInlineI);
-            _writers.Add(OperandType.InlineI8, WriteInlineI8);
-            _writers.Add(OperandType.InlineR, WriteInlineR);
-            _writers.Add(OperandType.InlineSig, WriteInlineSig);
-            _writers.Add(OperandType.InlineString, WriteInlineString);
-            _writers.Add(OperandType.InlineSwitch, WriteInlineSwitch);            
-            _writers.Add(OperandType.InlineVar, WriteInlineVar);
-            _writers.Add(OperandType.InlineArg, WriteInlineArg);
-            _writers.Add(OperandType.ShortInlineBrTarget, WriteShortInlineBrTarget);
-            _writers.Add(OperandType.ShortInlineI, WriteShortInlineI);
-            _writers.Add(OperandType.ShortInlineR, WriteShortInlineR);
-            _writers.Add(OperandType.ShortInlineVar, WriteShortInlineVar);
-            _writers.Add(OperandType.ShortInlineArg, WriteShortInlineArg);
-            _writers.Add(OperandType.InlineMethod, WriteMetadataToken);
-            _writers.Add(OperandType.InlineField, WriteMetadataToken);
-            _writers.Add(OperandType.InlineTok, WriteMetadataToken);
-            _writers.Add(OperandType.InlineType, WriteMetadataToken);
+            _writers = new Dictionary<OperandType, Action<Instruction>>
+            {
+                { OperandType.InlineBrTarget, WriteInlineBrTarget },
+                { OperandType.InlineI, WriteInlineI },
+                { OperandType.InlineI8, WriteInlineI8 },
+                { OperandType.InlineR, WriteInlineR },
+                { OperandType.InlineSig, WriteInlineSig },
+                { OperandType.InlineString, WriteInlineString },
+                { OperandType.InlineSwitch, WriteInlineSwitch },
+                { OperandType.InlineVar, WriteInlineVar },
+                { OperandType.InlineArg, WriteInlineArg },
+                { OperandType.ShortInlineBrTarget, WriteShortInlineBrTarget },
+                { OperandType.ShortInlineI, WriteShortInlineI },
+                { OperandType.ShortInlineR, WriteShortInlineR },
+                { OperandType.ShortInlineVar, WriteShortInlineVar },
+                { OperandType.ShortInlineArg, WriteShortInlineArg },
+                { OperandType.InlineMethod, WriteMetadataToken },
+                { OperandType.InlineField, WriteMetadataToken },
+                { OperandType.InlineTok, WriteMetadataToken },
+                { OperandType.InlineType, WriteMetadataToken }
+            };
         }
 
         public ILCodeBuffer(byte[] buffer) : base(buffer) { }
@@ -147,7 +148,11 @@ namespace CSharpCompiler.CodeGen.Sections.Text
 
         private void WriteShortInlineBrTarget(Instruction instruction)
         {
-            throw new NotImplementedException();
+            var opCode = instruction.OpCode;
+            var target = (IInstructionReference)instruction.Operand;
+            var currentOffset = (instruction.Offset + opCode.Size + 1);
+            
+            WriteSByte((sbyte)(target.Offset - currentOffset));
         }
 
         private void WriteInlineArg(Instruction instruction)
@@ -184,7 +189,11 @@ namespace CSharpCompiler.CodeGen.Sections.Text
 
         private void WriteInlineBrTarget(Instruction instruction)
         {
-            throw new NotImplementedException();
+            var opCode = instruction.OpCode;
+            var target = (IInstructionReference)instruction.Operand;
+            var currentOffset = (instruction.Offset + opCode.Size + 4);
+            
+            WriteInt32(target.Offset - currentOffset);
         }
 
         private void WriteInlineI(Instruction instruction)

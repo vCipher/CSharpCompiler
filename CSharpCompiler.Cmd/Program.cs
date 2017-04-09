@@ -21,7 +21,7 @@ namespace CSharpCompiler.Cmd
             string filePath = Path.Combine(AppContext.BaseDirectory, file);
 
             if (string.IsNullOrWhiteSpace(runtime)) throw new ArgumentException(nameof(runtime));
-            if (!File.Exists(filePath)) throw new FileNotFoundException("File to compile not found.", filePath);
+            if (!File.Exists(filePath)) throw new FileNotFoundException("File to compile did not found.", filePath);
 
             string fileName = Path.GetFileNameWithoutExtension(filePath);
             CompilationOptions options = new CompilationOptions() { AssemblyName = $"{fileName}.dll" };

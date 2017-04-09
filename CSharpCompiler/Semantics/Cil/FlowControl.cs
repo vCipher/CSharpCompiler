@@ -1,4 +1,4 @@
-﻿namespace CSharpCompiler.Semantic.Cil
+﻿namespace CSharpCompiler.Semantics.Cil
 {
     public enum FlowControl : byte
     {

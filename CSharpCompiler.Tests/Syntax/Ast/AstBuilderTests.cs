@@ -56,7 +56,7 @@ namespace CSharpCompiler.Syntax.Ast.Tests
                     new InvokeExpression(
                         "writeLine",
                         new Argument(
-                            new BinaryOperation(
+                            new ArithmeticOperation(
                                 Tokens.PLUS,
                                 new VarAccess("a", scope),
                                 new VarAccess("b", scope)

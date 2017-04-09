@@ -1,7 +1,5 @@
-﻿using CSharpCompiler.Semantic.Cil;
-using CSharpCompiler.Semantics.Metadata;
+﻿using CSharpCompiler.Semantics.Metadata;
 using System.Collections.Generic;
-using System;
 
 namespace CSharpCompiler.Syntax.Ast.Statements
 {
@@ -22,7 +20,7 @@ namespace CSharpCompiler.Syntax.Ast.Statements
         public override void Build(MethodBuilder builder)
         {
             foreach (var declaration in Declarations)
-                builder.Build(declaration);
+                declaration.Build(builder);
         }
     }
 }

@@ -9,13 +9,10 @@ namespace CSharpCompiler.Syntax.Ast
 
         public Expression Value { get; private set; }
 
-        public Argument(Expression value)
-        {
-            Modifier = null;
-            Value = value;
-        }
+        public Argument(Expression value) : this(null, value)
+        { }
 
-        public Argument(Token modifier, Expression value)
+        public Argument(Token? modifier, Expression value)
         {
             Modifier = modifier;
             Value = value;

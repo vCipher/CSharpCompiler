@@ -1,7 +1,7 @@
 ﻿using CSharpCompiler.Semantics.Metadata;
 using System;
 
-namespace CSharpCompiler.Semantic.Cil
+namespace CSharpCompiler.Semantics.Cil
 {
     public sealed class Instruction
     {
@@ -105,6 +105,18 @@ namespace CSharpCompiler.Semantic.Cil
                 throw new ArgumentException("opCode");
 
             return new Instruction(opCode, variable);
+        }
+
+        public static Instruction Create(OpCode opCode, IInstructionReference instructionRef)
+        {
+            if (instructionRef == null)
+                throw new ArgumentNullException("instructionRef");
+
+            if (opCode.OperandType != OperandType.InlineBrTarget &&
+                opCode.OperandType != OperandType.ShortInlineBrTarget)
+                throw new ArgumentException("opCode");
+
+            return new Instruction(opCode, instructionRef);
         }
 
         public int GetSize()

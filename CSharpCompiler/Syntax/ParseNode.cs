@@ -15,7 +15,7 @@ namespace CSharpCompiler.Syntax
 
         public ParseNode Parent { get; private set; }
 
-        public List<ParseNode> Children { get; private set; }
+        public ParseNodeCollection Children { get; private set; }
 
         public bool IsTerminal
         {
@@ -23,36 +23,48 @@ namespace CSharpCompiler.Syntax
         }
 
         public ParseNode(Token terminal)
-            : this(ParseNodeTag.Terminal, terminal, null, null)
+            : this(ParseNodeTag.Terminal, terminal, null, Empty<ParseNode>.Array)
         { }
 
         public ParseNode(ParseNodeTag tag, params ParseNode[] children)
-            : this(tag, default(Token), null, children.ToList())
+            : this(tag, default(Token), null, children)
         { }
 
-        public ParseNode(ParseNodeTag tag, Token terminal, ParseNode parent, List<ParseNode> children)
+        public ParseNode(ParseNodeTag tag, Token terminal, ParseNode parent, IEnumerable<ParseNode> children)
         {
             Tag = tag;
             Token = terminal;
             Parent = parent;
-            Children = new List<ParseNode>();
-            children.EmptyIfNull().ForEach(AddChild);
+            Children = new ParseNodeCollection(children);
+            Children.ForEach(child => child.Parent = this);
         }
 
-        public void AddChild(ParseNode parseNode)
+        public ParseNode AddChild(ParseNode parseNode)
         {
-            if (parseNode == null)
-                throw new ArgumentNullException("parseNode");
+            if (parseNode == null) throw new ArgumentNullException("parseNode");
 
             parseNode.Parent = this;
             Children.Add(parseNode);
+
+            return this;
+        }
+
+        public ParseNode Unwrap()
+        {
+            return Children.Single();
+        }
+
+        public ParseNode Wrap(ParseNodeTag tag)
+        {
+            return new ParseNode(tag, this);
         }
 
         public override string ToString()
         {
-            var sb = new StringBuilder().AppendFormat("[Tag: {0}", Tag);
+            var sb = new StringBuilder();
+            sb.AppendFormat("Tag: {0}", Tag);
             if (IsTerminal) sb.AppendFormat(", Token: {0}", Token);
-            if (Children.Any()) sb.AppendFormat(", Children: {0}", string.Join(", ", Children));
+
             return sb.ToString();
         }
     }

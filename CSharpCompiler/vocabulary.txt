@@ -1,5 +1,7 @@
 # arithmetic operations
+\+\+                    INCREMENT
 \+                      PLUS
+\-\-                    DECREMENT
 -                       MINUS
 \*                      MULTIPLY
 /                       DIVIDE

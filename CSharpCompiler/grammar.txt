@@ -32,7 +32,19 @@ statement_seq
 statement
     : block
     | declaration_statement
+    | for_statement
     | expression_statement
+    ;
+
+for_statement
+    : FOR OPEN_PAREN var_declaration SEMICOLON expression SEMICOLON expression CLOSE_PAREN statement
+    | FOR OPEN_PAREN var_declaration SEMICOLON expression SEMICOLON CLOSE_PAREN statement
+    | FOR OPEN_PAREN var_declaration SEMICOLON SEMICOLON expression CLOSE_PAREN statement
+    | FOR OPEN_PAREN var_declaration SEMICOLON SEMICOLON CLOSE_PAREN statement
+    | FOR OPEN_PAREN SEMICOLON expression SEMICOLON expression CLOSE_PAREN statement
+    | FOR OPEN_PAREN SEMICOLON expression SEMICOLON CLOSE_PAREN statement
+    | FOR OPEN_PAREN SEMICOLON SEMICOLON expression CLOSE_PAREN statement
+    | FOR OPEN_PAREN SEMICOLON SEMICOLON CLOSE_PAREN statement
     ;
 
 expression_statement

@@ -27,7 +27,10 @@ namespace CSharpCompiler.Syntax.Tests
                 new ParseNode(ParseNodeTag.StmtSeq,
                     DeclarationStmt(INT, ID("a"), INT_LITERAL("1")),
                     DeclarationStmt(INT, ID("b"), INT_LITERAL("1")),
-                    InvokeMethod(ID("writeLine"), Plus(Var("a"), Var("b")))
+                    ExpressionStmt(InvokeMethod(
+                        ID("writeLine"), 
+                        Plus(Var("a"), Var("b"))
+                    ))
                 )
             );
 

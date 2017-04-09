@@ -32,23 +32,11 @@ namespace CSharpCompiler.Semantics.Metadata
             AssemblyDefinition assemblyDef = new AssemblyDefinition(_options.AssemblyName, moduleDef);
 
             assemblyDef.References.Add(new AssemblyReference(typeof(object).GetTypeInfo().Assembly.GetName()));
-            assemblyDef.CustomAttributes.Add(GetCompilationRelaxationsAttribute(assemblyDef));
-            assemblyDef.CustomAttributes.Add(GetRuntimeCompatibilityAttribute(assemblyDef));
+            assemblyDef.CustomAttributes.Add(CustomAttribute.Get<CompilationRelaxationsAttribute>(assemblyDef, typeof(int)));
+            assemblyDef.CustomAttributes.Add(CustomAttribute.Get<RuntimeCompatibilityAttribute>(assemblyDef));
             moduleDef.Types.Add(TypeBuilder.Build(_syntaxTree, assemblyDef, _options));
 
             return assemblyDef;
-        }
-
-        private CustomAttribute GetCompilationRelaxationsAttribute(AssemblyDefinition assemblyDef)
-        {
-            Type type = typeof(CompilationRelaxationsAttribute);
-            return new CustomAttribute(type, type.GetConstructor(new Type[] { typeof(int) }), assemblyDef);
-        }
-
-        private CustomAttribute GetRuntimeCompatibilityAttribute(AssemblyDefinition assemblyDef)
-        {
-            Type type = typeof(RuntimeCompatibilityAttribute);
-            return new CustomAttribute(type, type.GetConstructor(new Type[0]), assemblyDef);
         }
     }
 }

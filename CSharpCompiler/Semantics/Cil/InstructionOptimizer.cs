@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace CSharpCompiler.Semantic.Cil
+namespace CSharpCompiler.Semantics.Cil
 {
     public static class InstructionOptimizer
     {
@@ -10,10 +10,12 @@ namespace CSharpCompiler.Semantic.Cil
 
         static InstructionOptimizer()
         {
-            _optimizations = new Dictionary<OpCode, Func<Instruction, Instruction>>();
-            _optimizations.Add(OpCodes.Ldc_I4, OptimizeLdc_I4);
-            _optimizations.Add(OpCodes.Ldloc, OptimizeLdloc);
-            _optimizations.Add(OpCodes.Stloc, OptimizeStloc);
+            _optimizations = new Dictionary<OpCode, Func<Instruction, Instruction>>
+            {
+                { OpCodes.Ldc_I4, OptimizeLdc_I4 },
+                { OpCodes.Ldloc, OptimizeLdloc },
+                { OpCodes.Stloc, OptimizeStloc }
+            };
         }
 
         public static Instruction Optimize(Instruction instruction)

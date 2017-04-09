@@ -1,4 +1,4 @@
-﻿using CSharpCompiler.Semantic.Cil;
+﻿using CSharpCompiler.Semantics.Cil;
 using CSharpCompiler.Semantics.TypeSystem;
 using System;
 using System.Collections.ObjectModel;

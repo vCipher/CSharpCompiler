@@ -1,16 +1,11 @@
-﻿using System;
-using CSharpCompiler.Lexica.Tokens;
-using CSharpCompiler.Semantics.Metadata;
-using CSharpCompiler.Semantics.TypeSystem;
+﻿using CSharpCompiler.Lexica.Tokens;
 
 namespace CSharpCompiler.Syntax.Ast.Expressions
 {
-    public sealed class BinaryOperation : Expression
+    public abstract class BinaryOperation : Expression
     {
         public Token Operator { get; private set; }
-
-        public Expression LeftOperand { get; private set; }
-        
+        public Expression LeftOperand { get; private set; }        
         public Expression RightOperand { get; private set; }
 
         public BinaryOperation(Token @operator, Expression leftOperand, Expression rightOperand)
@@ -18,18 +13,6 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             Operator = @operator;
             LeftOperand = leftOperand;
             RightOperand = rightOperand;
-        }
-
-        public override IType InferType()
-        {
-            var leftType = LeftOperand.InferType();
-            var rightType = RightOperand.InferType();
-            return TypeInference.InferType(leftType, rightType);
-        }
-
-        public override void Build(MethodBuilder builder)
-        {
-            builder.Build(this);
         }
     }
 }

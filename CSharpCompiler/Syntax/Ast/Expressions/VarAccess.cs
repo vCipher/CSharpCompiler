@@ -1,10 +1,7 @@
-﻿using CSharpCompiler.Semantics.Metadata;
+﻿using CSharpCompiler.Semantics.Cil;
+using CSharpCompiler.Semantics.Metadata;
 using CSharpCompiler.Semantics.TypeSystem;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CSharpCompiler.Syntax.Ast.Expressions
 {
@@ -21,20 +18,19 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
 
         public VarDeclaration Resolve()
         {
-            if (Scope == null)
-                throw new UndefinedVariableException(VarName);
-
+            if (Scope == null) throw new UndefinedVariableException(VarName);
             return Scope.Resolve(VarName);
         }
 
         public override IType InferType()
         {
-            return TypeInference.InferType(this);
+            return Resolve().Type.ToType();
         }
 
         public override void Build(MethodBuilder builder)
         {
-            builder.Build(this);
+            var varDef = builder.GetVarDefinition(this);
+            builder.Emit(OpCodes.Ldloc, varDef);
         }
     }
 }

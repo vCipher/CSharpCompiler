@@ -22,6 +22,18 @@ namespace CSharpCompiler.Semantics.Metadata
             Owner = owner;
         }
 
+        public static CustomAttribute Get<TAttribute>(ICustomAttributeProvider owner) where TAttribute : Attribute
+        {
+            Type type = typeof(TAttribute);
+            return new CustomAttribute(type, type.GetConstructor(new Type[0]), owner);
+        }
+
+        public static CustomAttribute Get<TAttribute>(ICustomAttributeProvider owner, params Type[] types) where TAttribute : Attribute
+        {
+            Type type = typeof(TAttribute);
+            return new CustomAttribute(type, type.GetConstructor(types), owner);
+        }
+
         public void ResolveToken(uint rid)
         {
             Token = new MetadataToken(Token.Type, rid);

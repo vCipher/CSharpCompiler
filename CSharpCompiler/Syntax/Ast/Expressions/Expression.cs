@@ -1,5 +1,4 @@
-﻿using System;
-using CSharpCompiler.Semantics.Metadata;
+﻿using CSharpCompiler.Semantics.Metadata;
 using CSharpCompiler.Semantics.TypeSystem;
 
 namespace CSharpCompiler.Syntax.Ast.Expressions

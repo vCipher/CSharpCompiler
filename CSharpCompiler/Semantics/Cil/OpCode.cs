@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CSharpCompiler.Semantic.Cil
+namespace CSharpCompiler.Semantics.Cil
 {
     public sealed class OpCode : IEquatable<OpCode>
     {

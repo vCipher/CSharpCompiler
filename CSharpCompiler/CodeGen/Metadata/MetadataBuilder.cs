@@ -96,13 +96,13 @@ namespace CSharpCompiler.CodeGen.Metadata
 
         public ushort WriteSignature(IMethodInfo methodInfo)
         {
-            SingatureBuffer signature = SingatureBuffer.GetMethodSignature(methodInfo);
+            SingatureBuilder signature = SingatureBuilder.GetMethodSignature(methodInfo);
             return RegisterBlob(signature);
         }
 
         public ushort WriteSignature(CustomAttribute attribute)
         {
-            SingatureBuffer signature = SingatureBuffer.GetAttributeSignature(attribute);
+            SingatureBuilder signature = SingatureBuilder.GetAttributeSignature(attribute);
             return RegisterBlob(signature);
         }
 
