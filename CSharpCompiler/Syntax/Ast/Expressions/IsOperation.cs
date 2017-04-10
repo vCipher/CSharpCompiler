@@ -24,7 +24,7 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
 
         public override void Build(MethodBuilder builder)
         {
-            builder.Build(this);
+            throw new NotImplementedException();
         }
     }
 }

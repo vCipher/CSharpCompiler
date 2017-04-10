@@ -8,10 +8,12 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
     public sealed class PostfixIncrement : Expression
     {
         public Expression Operand { get; private set; }
-
-        public PostfixIncrement(Expression operand)
+        public bool IsStmtExpression { get; private set; }
+        
+        public PostfixIncrement(Expression operand, bool isStmtExpression)
         {
             Operand = operand;
+            IsStmtExpression = isStmtExpression;
         }
 
         public override void Build(MethodBuilder builder)
@@ -23,6 +25,7 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
                 var varDef = builder.GetVarDefinition(declaration);
 
                 builder.Emit(OpCodes.Ldloc, varDef);
+                if (!IsStmtExpression) builder.Emit(OpCodes.Dup);
                 builder.Emit(OpCodes.Ldc_I4_1);
                 builder.Emit(OpCodes.Add);
                 builder.Emit(OpCodes.Stloc, varDef);

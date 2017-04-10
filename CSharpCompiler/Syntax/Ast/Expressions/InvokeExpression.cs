@@ -10,43 +10,48 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
 {
     public sealed class InvokeExpression : Expression
     {
-        public string MethodName { get; private set; }
-
-        public IList<Argument> Arguments { get; private set; }
-
-        public InvokeExpression(string methodName, IList<Argument> arguments)
+        private Lazy<MethodReference> _methodRef;
+        private string _methodName;
+        private IList<Argument> _arguments;
+        private bool _isStmtExpression;
+        
+        public InvokeExpression(string methodName, IList<Argument> arguments, bool isStmtExpression)
         {
-            MethodName = methodName;
-            Arguments = arguments;
-        }
-
-        public InvokeExpression(string methodName, params Argument[] arguments)
-        {
-            MethodName = methodName;
-            Arguments = arguments;
+            _methodRef = new Lazy<MethodReference>(GetMethodReference);
+            _methodName = methodName;
+            _arguments = arguments;
+            _isStmtExpression = isStmtExpression;
         }
 
         public override IType InferType()
         {
-            return KnownType.Void;
+            return _methodRef.Value
+                .ReturnType
+                .DeclaringType;
         }
 
         public override void Build(MethodBuilder builder)
         {
-            foreach (var arg in Arguments)
+            foreach (var arg in _arguments)
             {
                 arg.Value.Build(builder);
             }
 
-            builder.Emit(OpCodes.Call, GetMethodReference());
+            builder.Emit(OpCodes.Call, _methodRef.Value);
+            if (NeedStackBalancing()) builder.Emit(OpCodes.Pop);
+        }
+
+        private bool NeedStackBalancing()
+        {
+            return _isStmtExpression && !InferType().Equals(KnownType.Void);
         }
 
         private MethodReference GetMethodReference()
         {
-            if (MethodName != "writeLine") throw new NotImplementedException();
-            if (Arguments.Count != 1) throw new NotImplementedException();
+            if (_methodName != "writeLine") throw new NotImplementedException();
+            if (_arguments.Count != 1) throw new NotImplementedException();
 
-            Expression arg = Arguments.First().Value;
+            Expression arg = _arguments.First().Value;
             switch (arg.InferType().ElementType)
             {
                 case ElementType.Int32: return new MethodReference(typeof(Console).GetMethod("WriteLine", new Type[] { typeof(int) }));

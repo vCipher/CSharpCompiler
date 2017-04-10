@@ -41,7 +41,7 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             if (leftType.Equals(rightType))
                 return leftType;
 
-            throw new TypeInferenceException("Can't inference type for: {0} and for: {1}", leftType, rightType);
+            throw new TypeInferenceException("Can't infer a type for: {0} and for: {1}", leftType, rightType);
         }
     }
 }

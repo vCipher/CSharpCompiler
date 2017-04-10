@@ -122,7 +122,6 @@ namespace CSharpCompiler.Syntax
             return stmtSeq;
         }
 
-
         private ParseNode Stmt()
         {
             if (CheckToken(TokenTag.OPEN_CURLY_BRACE)) return Block();
@@ -144,7 +143,7 @@ namespace CSharpCompiler.Syntax
             TryAddChild(forStmt, Expression, () => !CheckToken(TokenTag.SEMICOLON));
             forStmt.AddChild(Terminal(TokenTag.SEMICOLON));
 
-            TryAddChild(forStmt, Expression, () => !CheckToken(TokenTag.SEMICOLON));
+            TryAddChild(forStmt, StmtExpression, () => !CheckToken(TokenTag.SEMICOLON));
             forStmt.AddChild(Terminal(TokenTag.CLOSE_PAREN));
             forStmt.AddChild(Stmt());
 
@@ -208,68 +207,64 @@ namespace CSharpCompiler.Syntax
         private ParseNode ExpressionStmt()
         {
             return new ParseNode(ParseNodeTag.ExpressionStmt)
-                .AddChild(Expression())
+                .AddChild(StmtExpression())
                 .AddChild(Terminal(TokenTag.SEMICOLON));
+        }
+
+        private ParseNode StmtExpression()
+        {
+            if (IsInvokeExpression()) return InvokeExpression();
+            if (IsPostfixIncrement()) return PostfixIncrement();
+            if (IsPostfixDecrement()) return PostfixDecrement();
+            if (IsAssingExpression()) return Assignment();
+            if (CheckToken(TokenTag.INCREMENT)) return PrefixIncrement();
+            if (CheckToken(TokenTag.DECREMENT)) return PrefixDecrement();
+            if (CheckToken(TokenTag.NEW)) return ObjectCreation();
+
+            throw new SyntaxException("Only assignment, call, increment, decrement, and new object expressions can be used as a statement");
         }
         
         private ParseNode Expression()
         {
             var expr = ConditionExpression();
 
-            if (!IsAssingExpression()) return expr;
+            return CheckToken(IsAssingOperator)
+                ? Assignment(expr)
+                : expr;
+        }
+
+        private ParseNode Assignment()
+        {
+            return Assignment(VarAccess());
+        }
+
+        private ParseNode Assignment(ParseNode node)
+        {
             return new ParseNode(ParseNodeTag.Assignment)
-                .AddChild(expr)
+                .AddChild(node)
                 .AddChild(Terminal())
-                .AddChild(Expression());
-        }
-
-        private Func<ParseNode> EliminateLeftRecurtion(
-            Func<ParseNode> leftOpFactory,
-            Func<ParseNode> operatorFactory,
-            Func<ParseNode, ParseNode, ParseNode, ParseNode> rightOpFactory,
-            Func<bool> breakCondition)
-        {
-            Func<ParseNode, ParseNode, ParseNode> recursiveCall = null;
-            recursiveCall = (leftOp, @operator) =>
-            {
-                var rightOp = leftOpFactory();
-                if (breakCondition()) return rightOpFactory(leftOp, @operator, rightOp);
-
-                var op = rightOpFactory(leftOp, @operator, rightOp);
-                return recursiveCall(op, operatorFactory());
-            };
-
-            return () =>
-            {
-                var leftOp = leftOpFactory();
-                if (breakCondition()) return leftOp;
-                return recursiveCall(leftOp, operatorFactory());
-            };
-        }
-
-        private Func<ParseNode, ParseNode, ParseNode, ParseNode> GetBinaryOperationFactory(ParseNodeTag tag)
-        {
-            return (leftOp, @operator, rightOp) =>
-            {
-                return new ParseNode(tag)
-                    .AddChild(leftOp)
-                    .AddChild(@operator)
-                    .AddChild(rightOp)
-                    .Wrap(ParseNodeTag.Expression);
-            };
+                .AddChild(Expression())
+                .Wrap(ParseNodeTag.Expression);
         }
 
         private ParseNode ConditionExpression()
         {
-            var conditionExpr = ConditionalOrExpression();
-            if (!CheckToken(TokenTag.QUESTION)) return conditionExpr;
+            var expr = ConditionalOrExpression();
 
+            return CheckToken(TokenTag.QUESTION) 
+                ? TernaryExpression(expr)
+                : expr;
+        }
+
+        private ParseNode TernaryExpression(ParseNode conditionExpr)
+        {
             return new ParseNode(ParseNodeTag.TernaryExpression)
                 .AddChild(conditionExpr)
                 .AddChild(Terminal(TokenTag.QUESTION))
                 .AddChild(Expression())
                 .AddChild(Terminal(TokenTag.COLON))
-                .AddChild(Expression());
+                .AddChild(Expression())
+                .Wrap(ParseNodeTag.Expression);
         }
 
         private ParseNode UnaryExpression()
@@ -287,11 +282,13 @@ namespace CSharpCompiler.Syntax
         {
             if (IsLiteral()) return Literal();
             if (IsCastExpression()) return CastExpression();
-            if (CheckToken(TokenTag.OPEN_PAREN)) return ParenthesisExpression();
             if (IsInvokeExpression()) return InvokeExpression();
             if (IsElementAccess()) return ElementAccess();
             if (IsPostfixIncrement()) return PostfixIncrement();
             if (IsPostfixDecrement()) return PostfixDecrement();
+            if (CheckToken(TokenTag.OPEN_PAREN)) return ParenthesisExpression();
+            if (CheckToken(TokenTag.INCREMENT)) return PrefixIncrement();
+            if (CheckToken(TokenTag.DECREMENT)) return PrefixDecrement();
             if (CheckToken(TokenTag.ID)) return VarAccess();
             if (CheckToken(TokenTag.NEW)) return ObjectCreation();
 
@@ -405,6 +402,22 @@ namespace CSharpCompiler.Syntax
                 .Wrap(ParseNodeTag.Expression);
         }
 
+        private ParseNode PrefixIncrement()
+        {
+            return new ParseNode(ParseNodeTag.PrefixIncrement)
+                .AddChild(Terminal(TokenTag.INCREMENT))
+                .AddChild(VarAccess())                
+                .Wrap(ParseNodeTag.Expression);
+        }
+
+        private ParseNode PrefixDecrement()
+        {
+            return new ParseNode(ParseNodeTag.PrefixDecrement)
+                .AddChild(Terminal(TokenTag.DECREMENT))
+                .AddChild(VarAccess())                
+                .Wrap(ParseNodeTag.Expression);
+        }
+
         private ParseNode VarAccess()
         {
             return new ParseNode(ParseNodeTag.VarAccess)
@@ -472,6 +485,42 @@ namespace CSharpCompiler.Syntax
 
             return currToken;
         }
+
+        private Func<ParseNode> EliminateLeftRecurtion(
+            Func<ParseNode> leftOpFactory,
+            Func<ParseNode> operatorFactory,
+            Func<ParseNode, ParseNode, ParseNode, ParseNode> rightOpFactory,
+            Func<bool> breakCondition)
+        {
+            Func<ParseNode, ParseNode, ParseNode> recursiveCall = null;
+            recursiveCall = (leftOp, @operator) =>
+            {
+                var rightOp = leftOpFactory();
+                if (breakCondition()) return rightOpFactory(leftOp, @operator, rightOp);
+
+                var op = rightOpFactory(leftOp, @operator, rightOp);
+                return recursiveCall(op, operatorFactory());
+            };
+
+            return () =>
+            {
+                var leftOp = leftOpFactory();
+                if (breakCondition()) return leftOp;
+                return recursiveCall(leftOp, operatorFactory());
+            };
+        }
+
+        private Func<ParseNode, ParseNode, ParseNode, ParseNode> GetBinaryOperationFactory(ParseNodeTag tag)
+        {
+            return (leftOp, @operator, rightOp) =>
+            {
+                return new ParseNode(tag)
+                    .AddChild(leftOp)
+                    .AddChild(@operator)
+                    .AddChild(rightOp)
+                    .Wrap(ParseNodeTag.Expression);
+            };
+        }
         #endregion
 
         #region check methods
@@ -523,26 +572,28 @@ namespace CSharpCompiler.Syntax
 
         private bool IsAssingExpression()
         {
-            return CheckTokenSet(
-                TokenTag.ASSIGN,
-                TokenTag.PLUS_ASSIGN,
-                TokenTag.MINUS_ASSIGN,
-                TokenTag.MULTIPLY_ASSIGN,
-                TokenTag.MOD_ASSIGN,
-                TokenTag.BIT_AND_ASSIGN,
-                TokenTag.BIT_OR_ASSIGN,
-                TokenTag.BIT_XOR_ASSIGN,
-                TokenTag.LEFT_SHIFT_ASSIGN,
-                TokenTag.RIGHT_SHIFT_ASSIGN);
+            if (!CheckToken(1, TokenTag.ID)) return false;
+            if (!CheckToken(2, IsAssingOperator)) return false;
+            return true;
+        }
+
+        private bool IsAssingOperator(TokenTag tag)
+        {
+            return tag == TokenTag.ASSIGN ||
+                tag == TokenTag.PLUS_ASSIGN ||
+                tag == TokenTag.MINUS_ASSIGN ||
+                tag == TokenTag.MULTIPLY_ASSIGN ||
+                tag == TokenTag.MOD_ASSIGN ||
+                tag == TokenTag.BIT_AND_ASSIGN ||
+                tag == TokenTag.BIT_OR_ASSIGN ||
+                tag == TokenTag.BIT_XOR_ASSIGN ||
+                tag == TokenTag.LEFT_SHIFT_ASSIGN ||
+                tag == TokenTag.RIGHT_SHIFT_ASSIGN;
         }
 
         private bool IsUnaryExpression()
         {
-            return CheckTokenSet(
-                TokenTag.MINUS,
-                TokenTag.NOT,
-                TokenTag.INCREMENT,
-                TokenTag.DECREMENT);
+            return CheckTokenSet(TokenTag.MINUS, TokenTag.NOT);
         }
 
         private bool IsLiteral()
@@ -600,7 +651,6 @@ namespace CSharpCompiler.Syntax
             // instead of known types
             if (!CheckToken(1, tag => tag == TokenTag.VAR || tag.IsPrimitiveType())) return false;
             if (!CheckToken(2, TokenTag.ID)) return false;
-            if (!CheckToken(3, TokenTag.ASSIGN)) return false;
             return true;
         }
         #endregion

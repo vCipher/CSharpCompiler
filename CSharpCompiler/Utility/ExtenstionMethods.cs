@@ -8,10 +8,9 @@ namespace CSharpCompiler.Utility
 {
     internal static class ExtenstionMethods
     {
-        internal static void Do<TSrc>(this TSrc src, Action<TSrc> func)
+        internal static TRes Pipe<TSrc, TRes>(this TSrc src, Func<TSrc, TRes> func)
         {
-            if (src == null) return;
-            func(src);
+            return (src == null) ? default(TRes) : func(src);
         }
 
         internal static IEnumerable<TSrc> EmptyIfNull<TSrc>(this IEnumerable<TSrc> src)

@@ -1,5 +1,6 @@
 ﻿using CSharpCompiler.Semantics.Metadata;
 using CSharpCompiler.Semantics.TypeSystem;
+using System;
 
 namespace CSharpCompiler.Syntax.Ast.Expressions
 {
@@ -19,7 +20,7 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
         public override IType InferType()
         {
             if (!KnownType.Boolean.Equals(Condition.InferType()))
-                throw new TypeInferenceException("Condition of ternary operation must have a boolean type");
+                throw new TypeInferenceException("Condition of a ternary operation must have a boolean type");
 
             var trueBranchType = TrueBranch.InferType();
             var falseBranchType = FalseBranch.InferType();
@@ -27,12 +28,12 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             if (trueBranchType.Equals(falseBranchType))
                 return trueBranchType;
 
-            throw new TypeInferenceException("Can't inference type for: {0} and for: {1}", trueBranchType, falseBranchType);
+            throw new TypeInferenceException("Can't infer a type for: {0} and for: {1}", trueBranchType, falseBranchType);
         }
 
         public override void Build(MethodBuilder builder)
         {
-            builder.Build(this);
+            throw new NotImplementedException();
         }
     }
 }

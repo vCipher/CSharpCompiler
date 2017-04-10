@@ -1,16 +1,16 @@
-﻿using CSharpCompiler.Semantics.Cil;
+﻿using System;
 using CSharpCompiler.Semantics.Metadata;
 using CSharpCompiler.Semantics.TypeSystem;
-using System;
+using CSharpCompiler.Semantics.Cil;
 
 namespace CSharpCompiler.Syntax.Ast.Expressions
 {
-    public sealed class PostfixDecrement : Expression
+    public sealed class PrefixIncrement : Expression
     {
         public Expression Operand { get; private set; }
         public bool IsStmtExpression { get; private set; }
         
-        public PostfixDecrement(Expression operand, bool isStmtExpression)
+        public PrefixIncrement(Expression operand, bool isStmtExpression)
         {
             Operand = operand;
             IsStmtExpression = isStmtExpression;
@@ -21,17 +21,18 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             if (Operand is VarAccess)
             {
                 var varAccess = (VarAccess)Operand;
-                var varDef = builder.GetVarDefinition(varAccess);
-
+                var declaration = varAccess.Resolve();
+                var varDef = builder.GetVarDefinition(declaration);
+                
                 builder.Emit(OpCodes.Ldloc, varDef);
-                if (!IsStmtExpression) builder.Emit(OpCodes.Dup);
                 builder.Emit(OpCodes.Ldc_I4_1);
-                builder.Emit(OpCodes.Sub);
+                builder.Emit(OpCodes.Add);
+                if (!IsStmtExpression) builder.Emit(OpCodes.Dup);
                 builder.Emit(OpCodes.Stloc, varDef);
                 return;
             }
 
-            throw new NotSupportedException("Posfix decrement is supported only for variables");
+            throw new NotSupportedException("Prefix increment is supported only for variables");
         }
 
         public override IType InferType()

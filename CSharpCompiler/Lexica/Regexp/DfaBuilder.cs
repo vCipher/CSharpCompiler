@@ -60,9 +60,8 @@ namespace CSharpCompiler.Lexica.Regexp
 
         private void SetAcceptance(DfaState dfaState)
         {
-            dfaState.NfaStates
-                .FirstOrDefault(state => state.IsAccepting)
-                .Do(state => SetAcceptance(dfaState, state));
+            var state = dfaState.NfaStates.FirstOrDefault(st => st.IsAccepting);
+            if (state != null) SetAcceptance(dfaState, state);
         }
 
         private void SetAcceptance(DfaState dfaState, NfaState nfaState)

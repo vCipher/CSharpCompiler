@@ -36,8 +36,10 @@
         VarAccess,
         ElementAccess,
         ExpressionList,
-        PostfixDecrement,
         PostfixIncrement,
+        PostfixDecrement,
+        PrefixIncrement,
+        PrefixDecrement,
         ObjectCreation,
         VarDeclaratorList,
         VarDeclarator

@@ -1,12 +1,9 @@
-﻿using CSharpCompiler.Lexica.Tokens;
-using CSharpCompiler.Semantics.Cil;
+﻿using CSharpCompiler.Semantics.Cil;
 using CSharpCompiler.Semantics.TypeSystem;
 using CSharpCompiler.Syntax.Ast;
 using CSharpCompiler.Syntax.Ast.Expressions;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace CSharpCompiler.Semantics.Metadata
 {
@@ -21,19 +18,6 @@ namespace CSharpCompiler.Semantics.Metadata
             _references = new Queue<InstructionReference>();
         }
 
-        public void Build(VarDeclaration declaration)
-        {
-            var varDef = GetVarDefinition(declaration);
-            Register(varDef);
-
-            var initialier = declaration.Initializer;
-            if (initialier == null)
-                return;
-
-            initialier.Build(this);
-            Emit(OpCodes.Stloc, varDef);
-        }
-
         public VariableDefinition GetVarDefinition(VarAccess varAccess)
         {
             var declaration = varAccess.Resolve();
@@ -44,26 +28,6 @@ namespace CSharpCompiler.Semantics.Metadata
         {
             var type = declaration.InferType();
             return new VariableDefinition(declaration.VarName, type, _methodBody);
-        }
-
-        public void Build(UnaryOperation unaryOperation)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Build(IsOperation isOperation)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Build(CastExpression castExpression)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Build(TernaryOperation ternaryOperation)
-        {
-            throw new NotImplementedException();
         }
 
         public void Resolve(InstructionReference instructionRef)

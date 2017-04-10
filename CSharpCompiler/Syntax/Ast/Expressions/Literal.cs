@@ -27,7 +27,7 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
                 case TokenTag.FALSE: return KnownType.Boolean;
             }
 
-            throw new TypeInferenceException("Can't inference type from literal: {0}", Value);
+            throw new TypeInferenceException("Can't infer a type from the literal: {0}", Value);
         }
 
         public override void Build(MethodBuilder builder)

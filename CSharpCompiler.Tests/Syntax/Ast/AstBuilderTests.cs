@@ -5,6 +5,7 @@ using CSharpCompiler.Syntax.Ast.Statements;
 using CSharpCompiler.Syntax.Ast.Types;
 using CSharpCompiler.Tests;
 using CSharpCompiler.Tests.Assertions;
+using System.Collections.Generic;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -55,13 +56,17 @@ namespace CSharpCompiler.Syntax.Ast.Tests
                 new ExpressionStmt(
                     new InvokeExpression(
                         "writeLine",
-                        new Argument(
-                            new ArithmeticOperation(
-                                Tokens.PLUS,
-                                new VarAccess("a", scope),
-                                new VarAccess("b", scope)
+                        new List<Argument>
+                        {
+                            new Argument(
+                                new ArithmeticOperation(
+                                    Tokens.PLUS,
+                                    new VarAccess("a", scope),
+                                    new VarAccess("b", scope)
+                                )
                             )
-                        )
+                        },
+                        true
                     )
                 )
             );

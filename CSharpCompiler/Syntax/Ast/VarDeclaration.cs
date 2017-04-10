@@ -1,9 +1,9 @@
-﻿using System;
+﻿using CSharpCompiler.Semantics;
+using CSharpCompiler.Semantics.Cil;
 using CSharpCompiler.Semantics.Metadata;
+using CSharpCompiler.Semantics.TypeSystem;
 using CSharpCompiler.Syntax.Ast.Expressions;
 using CSharpCompiler.Syntax.Ast.Types;
-using CSharpCompiler.Semantics.TypeSystem;
-using CSharpCompiler.Semantics;
 
 namespace CSharpCompiler.Syntax.Ast
 {
@@ -36,7 +36,14 @@ namespace CSharpCompiler.Syntax.Ast
 
         public void Build(MethodBuilder builder)
         {
-            builder.Build(this);
+            var varDef = builder.GetVarDefinition(this);
+            builder.Register(varDef);
+
+            var initialier = Initializer;
+            if (initialier == null) return;
+
+            initialier.Build(builder);
+            builder.Emit(OpCodes.Stloc, varDef);
         }
 
         public IType InferType()

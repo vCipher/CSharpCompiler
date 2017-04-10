@@ -1,28 +1,44 @@
-﻿using System;
-using CSharpCompiler.Lexica.Tokens;
+﻿using CSharpCompiler.Lexica.Tokens;
+using CSharpCompiler.Semantics.Cil;
 using CSharpCompiler.Semantics.Metadata;
 using CSharpCompiler.Semantics.TypeSystem;
-using CSharpCompiler.Semantics.Cil;
 
 namespace CSharpCompiler.Syntax.Ast.Expressions
 {
     public sealed class Assignment : BinaryOperation
     {
-        public Assignment(Token @operator, Expression leftOperand, Expression rightOperand) 
+        private bool _isStmtExpression;
+
+        public Assignment(Token @operator, Expression leftOperand, Expression rightOperand, bool isStmtExpression) 
             : base(@operator, leftOperand, rightOperand)
-        { }
+        {
+            _isStmtExpression = isStmtExpression;
+        }
 
         public override void Build(MethodBuilder builder)
         {
             if (LeftOperand is VarAccess)
             {
-                var varDef = builder.GetVarDefinition((VarAccess)LeftOperand);
-                RightOperand.Build(builder);
-                builder.Emit(OpCodes.Stloc, varDef);
+                Build(builder, (VarAccess)LeftOperand);
                 return;
             }
 
-            throw new NotSupportedException("Assignment is supported only for variables");
+            if (LeftOperand is Assignment)
+            {
+                Build(builder, (VarAccess)((Assignment)LeftOperand).LeftOperand);
+                return;
+            }
+
+            throw new SyntaxException("The left-hand side of an assignment must be a variable, property or indexer");
+        }
+
+        private void Build(MethodBuilder builder, VarAccess varAccess)
+        {
+            var varDef = builder.GetVarDefinition(varAccess);
+            RightOperand.Build(builder);
+
+            if (!_isStmtExpression) builder.Emit(OpCodes.Dup);
+            builder.Emit(OpCodes.Stloc, varDef);
         }
 
         public override IType InferType()
@@ -33,7 +49,7 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             if (leftType.Equals(rightType))
                 return leftType;
 
-            throw new TypeInferenceException("Can't inference type for: {0} and for: {1}", leftType, rightType);
+            throw new TypeInferenceException("Can't infer a type for: {0} and for: {1}", leftType, rightType);
         }
     }
 }
