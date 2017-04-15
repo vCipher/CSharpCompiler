@@ -39,7 +39,7 @@ namespace CSharpCompiler.Syntax.Ast.Tests
             SyntaxTree expected = new SyntaxTree(
                 new DeclarationStmt(
                     new VarDeclaration(
-                        new PrimitiveType(Tokens.INT),
+                        new PrimitiveTypeNode(Tokens.INT),
                         "a",
                         new Literal(Tokens.INT_LITERAL("1")),
                         scope
@@ -47,7 +47,7 @@ namespace CSharpCompiler.Syntax.Ast.Tests
                 ),
                 new DeclarationStmt(
                     new VarDeclaration(
-                        new PrimitiveType(Tokens.INT),
+                        new PrimitiveTypeNode(Tokens.INT),
                         "b",
                         new Literal(Tokens.INT_LITERAL("1")),
                         scope

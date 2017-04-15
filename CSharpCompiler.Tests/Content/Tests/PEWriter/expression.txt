@@ -1,0 +1,15 @@
+﻿# test
+## param (content)
+int a = 3;
+int b = 5;
+writeLine((a + a) * b + ((a << b) >> a) ^ (a & b | b) / a);
+
+## param (expectedFile)
+Content/expression.dll
+
+## param (options)
+{
+    "TimeStamp": 0x58F2588B,
+    "AssemblyName": "sample.dll",
+    "Mvid": "5830F64D-A4EA-45E4-BB86-A1DD9D6BB641"
+}

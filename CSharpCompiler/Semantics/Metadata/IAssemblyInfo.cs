@@ -2,7 +2,7 @@
 
 namespace CSharpCompiler.Semantics.Metadata
 {
-    public interface IAssemblyInfo : IMetadataEntity
+    public interface IAssemblyInfo : IMetadataEntity, IEquatable<IAssemblyInfo>
     {
         string Name { get; }
         string Culture { get; }

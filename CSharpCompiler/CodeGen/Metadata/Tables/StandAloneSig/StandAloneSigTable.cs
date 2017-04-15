@@ -1,41 +1,39 @@
 ﻿using CSharpCompiler.Semantics.Metadata;
-using CSharpCompiler.Utility;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
 namespace CSharpCompiler.CodeGen.Metadata.Tables.StandAloneSig
 {
-    public sealed class StandAloneSigTable : MetadataTable<StandAloneSigRow>
+    public sealed class StandAloneSigTable : MetadataTable<StandAloneSignature, StandAloneSigRow>
     {
-        private Dictionary<SingatureBuilder, MetadataToken> _standAloneSigMap;
         private MetadataBuilder _metadata;
 
         public StandAloneSigTable(MetadataBuilder metadata)
         {
-            _standAloneSigMap = new Dictionary<SingatureBuilder, MetadataToken>(new ByteBufferComparer());
             _metadata = metadata;
         }
 
         public MetadataToken GetStandAloneSigToken(Collection<VariableDefinition> variables)
         {
-            SingatureBuilder signature = SingatureBuilder.GetVariablesSignature(variables);
-            return GetStandAloneSigToken(signature);
+            StandAloneSignature signature = StandAloneSignature.GetVariablesSignature(variables);
+            return GetToken(signature);
         }
 
-        public MetadataToken GetStandAloneSigToken(SingatureBuilder signature)
+        public override MetadataToken GetToken(StandAloneSignature signature)
         {
             MetadataToken token;
-            if (_standAloneSigMap.TryGetValue(signature, out token))
+            if (TryGetToken(signature, out token))
                 return token;
 
-            uint rid = Add(CreateStandAloneSigRow(signature));
-            token = new MetadataToken(MetadataTokenType.Signature, rid);
-            _standAloneSigMap.Add(signature, token);
-
-            return token;
+            uint rid = Add(signature, CreateStandAloneSigRow(signature));
+            return new MetadataToken(GetTokenType(), rid);
         }
 
-        private StandAloneSigRow CreateStandAloneSigRow(SingatureBuilder signature)
+        protected override MetadataTokenType GetTokenType()
+        {
+            return MetadataTokenType.Signature;
+        }
+
+        private StandAloneSigRow CreateStandAloneSigRow(StandAloneSignature signature)
         {
             return new StandAloneSigRow()
             {

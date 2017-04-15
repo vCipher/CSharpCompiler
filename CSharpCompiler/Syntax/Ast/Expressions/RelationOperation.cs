@@ -26,7 +26,7 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             throw new NotSupportedException(string.Format("Not supported operator: {0}", Operator));
         }
 
-        public override IType InferType()
+        public override ITypeInfo InferType()
         {
             var leftType = LeftOperand.InferType();
             var rightType = RightOperand.InferType();

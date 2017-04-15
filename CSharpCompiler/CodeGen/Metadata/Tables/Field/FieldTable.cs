@@ -5,7 +5,7 @@ using CSharpCompiler.Utility;
 
 namespace CSharpCompiler.CodeGen.Metadata.Tables.Field
 {
-    public sealed class FieldTable : MetadataTable<FieldRow>
+    public sealed class FieldTable : MetadataTable<FieldDefinition, FieldRow>
     {
         private MetadataBuilder _metadata;
 
@@ -19,10 +19,14 @@ namespace CSharpCompiler.CodeGen.Metadata.Tables.Field
             ushort start = Position;
             foreach (FieldDefinition fieldDef in fields.EmptyIfNull())
             {
-                FieldRow row = CreateFieldRow(fieldDef);
-                fieldDef.ResolveToken(Add(row));
+                Add(fieldDef, CreateFieldRow(fieldDef));
             }
             return start;
+        }
+
+        protected override MetadataTokenType GetTokenType()
+        {
+            return MetadataTokenType.Field;
         }
 
         private FieldRow CreateFieldRow(FieldDefinition fieldDef)

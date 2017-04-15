@@ -1,4 +1,4 @@
-﻿namespace CSharpCompiler.Semantics.Metadata
+﻿namespace CSharpCompiler.CodeGen.Metadata
 {
     public enum MetadataTokenType : uint
     {

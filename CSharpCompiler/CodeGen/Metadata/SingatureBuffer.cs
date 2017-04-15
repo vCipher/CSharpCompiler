@@ -79,12 +79,7 @@ namespace CSharpCompiler.CodeGen.Metadata
 
         public void WriteTypeSignature(ITypeInfo typeInfo)
         {
-            WriteTypeSignature(typeInfo.DeclaringType);
-        }
-
-        private void WriteTypeSignature(IType type)
-        {
-            WriteByte((byte)type.ElementType);
+            WriteByte((byte)typeInfo.ElementType);
         }
     }
 }

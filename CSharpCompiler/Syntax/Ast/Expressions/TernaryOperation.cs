@@ -17,7 +17,7 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             FalseBranch = falseBranch;
         }
 
-        public override IType InferType()
+        public override ITypeInfo InferType()
         {
             if (!KnownType.Boolean.Equals(Condition.InferType()))
                 throw new TypeInferenceException("Condition of a ternary operation must have a boolean type");

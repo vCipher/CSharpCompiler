@@ -1,12 +1,12 @@
-﻿using CSharpCompiler.Semantics.TypeSystem;
-using System;
+﻿using System;
+using System.Collections.Generic;
 
 namespace CSharpCompiler.Semantics.Metadata
 {
     public sealed class VariableDefinition : IEquatable<VariableDefinition>
     {
         public string Name { get; private set; }
-        public IType Type { get; private set; }
+        public ITypeInfo Type { get; private set; }
         public MethodBody MethodBody { get; private set; }
 
         public int Index
@@ -14,7 +14,7 @@ namespace CSharpCompiler.Semantics.Metadata
             get { return MethodBody.Variables.IndexOf(this); }
         }
 
-        public VariableDefinition(string name, IType type, MethodBody methodBody)
+        public VariableDefinition(string name, ITypeInfo type, MethodBody methodBody)
         {
             Name = name;
             Type = type;
@@ -26,24 +26,22 @@ namespace CSharpCompiler.Semantics.Metadata
             unchecked
             {
                 int res = 31;
-                res ^= (Name == null) ? 0 : Name.GetHashCode();
-                res ^= (Type == null) ? 0 : Type.GetHashCode();
+                res ^= EqualityComparer<string>.Default.GetHashCode(Name);
+                res ^= TypeInfoComparer.Default.GetHashCode(Type);
                 return res;
             }
         }
 
         public override bool Equals(object obj)
         {
-            if (obj is VariableDefinition)
-                return Equals((VariableDefinition)obj);
-
-            return false;
+            if (!(obj is VariableDefinition)) return false;
+            return Equals((VariableDefinition)obj);
         }
 
         public bool Equals(VariableDefinition other)
         {
-            return string.Equals(Name, other.Name, StringComparison.Ordinal) &&
-                Type.Equals(other.Type);
+            return string.Equals(Name, other.Name) 
+                && Type.Equals(other.Type);
         }
     }
 }

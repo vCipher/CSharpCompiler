@@ -1,28 +1,45 @@
-﻿using CSharpCompiler.Semantics.TypeSystem;
-using System.Reflection;
-
-namespace CSharpCompiler.Semantics.Metadata
+﻿namespace CSharpCompiler.Semantics.Metadata
 {
-    public sealed class TypeReference : ITypeInfo
+    public class TypeReference : ITypeInfo
     {
         public string Name { get; private set; }
         public string Namespace { get; private set; }
-        public MetadataToken Token { get; private set; }
-        public IType DeclaringType { get; private set; }
+        public ElementType ElementType { get; private set; }
         public IAssemblyInfo Assembly { get; private set; }
         
-        public TypeReference(System.Type type)
+        public TypeReference(string name, string @namespace, ElementType elementType, IAssemblyInfo assembly)
         {
-            Name = type.Name;
-            Namespace = type.Namespace;
-            Token = new MetadataToken(MetadataTokenType.TypeRef, 0);
-            DeclaringType = TypeFactory.Create(type.GetKnownTypeCode());
-            Assembly = new AssemblyReference(type.GetTypeInfo().Assembly.GetName());
+            Name = name;
+            Namespace = @namespace;
+            ElementType = elementType;
+            Assembly = assembly;
         }
 
-        public void ResolveToken(uint rid)
+        public override string ToString()
         {
-            Token = new MetadataToken(Token.Type, rid);
+            return string.Format("{0}.{1}, {2}", Namespace, Name, Assembly);
+        }
+
+        public override int GetHashCode()
+        {
+            return TypeInfoComparer.Default.GetHashCode(this);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is TypeReference)) return false;
+            return TypeInfoComparer.Default.Equals(this, (TypeReference)obj);
+        }
+
+        public bool Equals(ITypeInfo other)
+        {
+            if (!(other is TypeReference)) return false;
+            return Equals((TypeReference)other);
+        }
+
+        public bool Equals(TypeReference other)
+        {
+            return TypeInfoComparer.Default.Equals(this, other);
         }
     }
 }

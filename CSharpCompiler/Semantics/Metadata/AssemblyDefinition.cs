@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Text;
 
 namespace CSharpCompiler.Semantics.Metadata
 {
@@ -8,7 +9,6 @@ namespace CSharpCompiler.Semantics.Metadata
         public string Name { get; private set; }
         public byte[] PublicKey { get; private set; }
         public byte[] PublicKeyToken { get; private set; }
-        public MetadataToken Token { get; private set; }
         public Version Version { get; private set; }
         public string Culture { get; private set; }
         public byte[] Hash { get; private set; }
@@ -21,18 +21,46 @@ namespace CSharpCompiler.Semantics.Metadata
         public AssemblyDefinition(string name, ModuleDefinition moduleDef)
         {
             Name = name;
-            Token = new MetadataToken(MetadataTokenType.Assembly, 0);
-            Version = new System.Version(0, 0, 0, 0);
+            Version = new Version(0, 0, 0, 0);
             Attributes = AssemblyAttributes.None;
             Module = moduleDef;
-            Token = new MetadataToken(MetadataTokenType.Assembly, 0);
             References = new Collection<AssemblyReference>();
             CustomAttributes = new Collection<CustomAttribute>();
         }
 
-        public void ResolveToken(uint rid)
+        public override string ToString()
         {
-            Token = new MetadataToken(Token.Type, rid);
+            var sb = new StringBuilder();
+            sb.Append(Name);
+            sb.AppendFormat(", Version = {0}", Version);
+            sb.AppendFormat(", Culture = {0}", Culture);
+            sb.AppendFormat(", PublicKeyToken = {0}", BitConverter.ToString(PublicKeyToken)
+                .Replace("-", "")
+                .ToLower());
+
+            return sb.ToString();
+        }
+
+        public override int GetHashCode()
+        {
+            return AssemblyInfoComparer.Default.GetHashCode(this);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is AssemblyDefinition)) return false;
+            return Equals((AssemblyDefinition)obj);
+        }
+
+        public bool Equals(IAssemblyInfo other)
+        {
+            if (!(other is AssemblyDefinition)) return false;
+            return Equals((AssemblyDefinition)other);
+        }
+
+        public bool Equals(AssemblyDefinition other)
+        {
+            return AssemblyInfoComparer.Default.Equals(this, other);
         }
     }
 }

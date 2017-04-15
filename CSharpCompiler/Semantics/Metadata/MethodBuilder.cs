@@ -27,17 +27,12 @@ namespace CSharpCompiler.Semantics.Metadata
         public VariableDefinition GetVarDefinition(VarDeclaration declaration)
         {
             var type = declaration.InferType();
-            return new VariableDefinition(declaration.VarName, type, _methodBody);
+            return new VariableDefinition(declaration.GetUniqueVarName(), type, _methodBody);
         }
 
         public void Resolve(InstructionReference instructionRef)
         {
             _references.Enqueue(instructionRef);
-        }
-
-        public void Register(string varName, IType type)
-        {
-            _methodBody.Variables.Add(new VariableDefinition(varName, type, _methodBody));
         }
 
         public void Register(VariableDefinition varDef)
@@ -98,6 +93,11 @@ namespace CSharpCompiler.Semantics.Metadata
         public void Emit(OpCode opCode, IInstructionReference instructionRef)
         {
             Emit(Instruction.Create(opCode, instructionRef));
+        }
+
+        public void Emit(OpCode opCode, ITypeInfo typrInfo)
+        {
+            Emit(Instruction.Create(opCode, typrInfo));
         }
 
         public void Emit(Instruction instruction)

@@ -8,15 +8,15 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
 {
     public sealed class ObjectCreation : Expression
     {
-        private AstType _type;
-        private IList<Argument> _arguments;
-        private bool _isStmtExpression;
+        public TypeNode Type { get; private set; }
+        public IList<Argument> Arguments { get; private set; }
+        public bool IsStmtExpression { get; private set; }
 
-        public ObjectCreation(AstType type, IList<Argument> arguments, bool isStmtExpression)
+        public ObjectCreation(TypeNode type, IList<Argument> arguments, bool isStmtExpression)
         {
-            _type = type;
-            _arguments = arguments;
-            _isStmtExpression = isStmtExpression;
+            Type = type;
+            Arguments = arguments;
+            IsStmtExpression = isStmtExpression;
         }
 
         public override void Build(MethodBuilder builder)
@@ -24,9 +24,9 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             throw new NotImplementedException();
         }
 
-        public override IType InferType()
+        public override ITypeInfo InferType()
         {
-            return _type.ToType();
+            return Type.ToType();
         }
     }
 }

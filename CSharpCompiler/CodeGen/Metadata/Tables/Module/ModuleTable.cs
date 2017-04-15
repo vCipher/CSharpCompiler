@@ -2,7 +2,7 @@
 
 namespace CSharpCompiler.CodeGen.Metadata.Tables.Module
 {
-    public sealed class ModuleTable : MetadataTable<ModuleRow>
+    public sealed class ModuleTable : MetadataTable<ModuleDefinition, ModuleRow>
     {
         private MetadataBuilder _metadata;
 
@@ -13,20 +13,24 @@ namespace CSharpCompiler.CodeGen.Metadata.Tables.Module
 
         public void Add(ModuleDefinition moduleDef)
         {
-            ModuleRow row = CreateModuleRow(moduleDef);
-            moduleDef.ResolveToken(Add(row));
+            Add(moduleDef, CreateModuleRow(moduleDef));
+        }
+
+        protected override MetadataTokenType GetTokenType()
+        {
+            return MetadataTokenType.Module;
         }
 
         private ModuleRow CreateModuleRow(ModuleDefinition moduleDef)
         {
-            ModuleRow row = new ModuleRow();
-            row.Generation = 0;
-            row.Name = _metadata.RegisterString(moduleDef.Name);
-            row.Mvid = _metadata.RegisterGuid(moduleDef.Mvid);
-            row.EncId = 0;
-            row.EncBaseId = 0;
-
-            return row;
+            return new ModuleRow()
+            {
+                Generation = 0,
+                Name = _metadata.RegisterString(moduleDef.Name),
+                Mvid = _metadata.RegisterGuid(moduleDef.Mvid),
+                EncId = 0,
+                EncBaseId = 0
+            };
         }
     }
 }

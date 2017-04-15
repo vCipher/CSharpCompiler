@@ -7,8 +7,7 @@ namespace CSharpCompiler.Semantics.Metadata
     {
         public string Name { get; private set; }
         public string Namespace { get; private set; }
-        public MetadataToken Token { get; private set; }
-        public IType DeclaringType { get; private set; }
+        public ElementType ElementType { get; private set; }
         public IAssemblyInfo Assembly { get; private set; }
         public TypeAttributes Attributes { get; private set; }
         public ITypeInfo BaseType { get; private set; }
@@ -16,23 +15,44 @@ namespace CSharpCompiler.Semantics.Metadata
         public Collection<FieldDefinition> Fields { get; private set; }
         public Collection<CustomAttribute> CustomAttributes { get; private set; }
 
-        public TypeDefinition(string name, string @namespace, TypeAttributes attributes, IAssemblyInfo assembly)
+        public TypeDefinition(string name, string @namespace, TypeAttributes attributes, ITypeInfo baseType, IAssemblyInfo assembly)
         {
             Name = name;
             Namespace = @namespace;
-            DeclaringType = new UserType();
+            ElementType = ElementType.Class;
             Assembly = assembly;
             Attributes = attributes;
-            BaseType = new TypeReference(typeof(object));
-            Token = new MetadataToken(MetadataTokenType.TypeDef, 0);
+            BaseType = baseType;
             Methods = new Collection<MethodDefinition>();
             Fields = new Collection<FieldDefinition>();
             CustomAttributes = new Collection<CustomAttribute>();
         }
 
-        public void ResolveToken(uint rid)
+        public override string ToString()
         {
-            Token = new MetadataToken(Token.Type, rid);
+            return string.Format("{0}.{1}, {2}", Namespace, Name, Assembly);
+        }
+
+        public override int GetHashCode()
+        {
+            return TypeInfoComparer.Default.GetHashCode(this);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is TypeDefinition)) return false;
+            return Equals((TypeDefinition)obj);
+        }
+
+        public bool Equals(ITypeInfo other)
+        {
+            if (!(other is TypeDefinition)) return false;
+            return Equals((TypeDefinition)other);
+        }
+
+        public bool Equals(TypeDefinition other)
+        {
+            return TypeInfoComparer.Default.Equals(this, other);
         }
     }
 }

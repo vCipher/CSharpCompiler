@@ -1,0 +1,13 @@
+﻿# test
+## param (content)
+writeLine("hello, world!");
+
+## param (expectedFile)
+Content/string.dll
+
+## param (options)
+{
+    "TimeStamp": 0x58F2585A,
+    "AssemblyName": "sample.dll",
+    "Mvid": "D4CB2C3C-AABE-43C8-9EEF-2064E065097B"
+}

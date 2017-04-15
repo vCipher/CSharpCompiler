@@ -17,7 +17,7 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             Operand = operand;
         }
 
-        public override IType InferType()
+        public override ITypeInfo InferType()
         {
             return Operand.InferType();
         }

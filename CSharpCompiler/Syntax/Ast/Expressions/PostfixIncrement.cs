@@ -35,7 +35,7 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             throw new NotSupportedException("Posfix increment is supported only for variables");
         }
 
-        public override IType InferType()
+        public override ITypeInfo InferType()
         {
             return Operand.InferType();
         }

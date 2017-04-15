@@ -4,12 +4,12 @@ Simple c# compiler for education purpose. It targets to [.NET Core](https://docs
 
 Supported:
 * expressions
+* for loop
+* arrays
 * `writeLine(...)` console output
 * a script like file structure (without `using`, `namespace`, `class` or method declarations)
-* `for` loop
 
 Work in progress:
-* arrays
 * method invokation with name and signature resolving
 * file structure with `using`, `namespace`, `class`, and method declaration
 

@@ -1,4 +1,3 @@
-﻿for (int i = 0; i < 5; i++)
-{
-    writeLine(i);
-}
+﻿int a = 3;
+int b = 5;
+writeLine((a + a) * b + ((a << b) >> a) ^ (a & b | b) / a);

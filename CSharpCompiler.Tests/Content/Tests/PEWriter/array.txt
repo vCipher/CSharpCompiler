@@ -1,0 +1,24 @@
+﻿# test
+## param (content)
+int length = 5;
+int[] arr = new int[length];
+            
+for (int i = 0; i < length; i++)
+{
+    arr[i] = i * i;
+}
+
+for (int i = 0; i < length; i++)
+{
+    writeLine(arr[i]);
+}
+
+## param (expectedFile)
+Content/array.dll
+
+## param (options)
+{
+    "TimeStamp": 0x58F270F8,
+    "AssemblyName": "sample.dll",
+    "Mvid": "919E00E9-4CCC-4A97-B8C6-1D68BEF4BF59"
+}

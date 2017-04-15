@@ -10,11 +10,8 @@ namespace CSharpCompiler.Syntax
     public class ParseNode
     {
         public ParseNodeTag Tag { get; private set; }
-
         public Token Token { get; private set; }
-
         public ParseNode Parent { get; private set; }
-
         public ParseNodeCollection Children { get; private set; }
 
         public bool IsTerminal

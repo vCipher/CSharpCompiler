@@ -9,15 +9,15 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
     {
         public Expression Operand { get; private set; }
 
-        public AstType Type { get; private set; }
+        public TypeNode Type { get; private set; }
 
-        public IsOperation(Expression operand, AstType type)
+        public IsOperation(Expression operand, TypeNode type)
         {
             Operand = operand;
             Type = type;
         }
 
-        public override IType InferType()
+        public override ITypeInfo InferType()
         {
             return KnownType.Boolean;
         }

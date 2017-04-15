@@ -5,10 +5,15 @@ namespace CSharpCompiler.Utility
 {
     public sealed class ByteArrayComparer : IEqualityComparer<byte[]>
     {
+        public static readonly ByteArrayComparer Default = new ByteArrayComparer();
+
+        private ByteArrayComparer() { }
+
         public bool Equals(byte[] x, byte[] y)
         {
-            if (x == null || y == null) return false;
+            if (ReferenceEquals(x, y)) return true;
             if (x.Length != y.Length) return false;
+
             return x.SequenceEqual(y);
         }
 

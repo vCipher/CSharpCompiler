@@ -1,50 +1,64 @@
 ﻿using CSharpCompiler.CodeGen.Metadata.Heaps;
-using System;
-using System.Collections;
+using CSharpCompiler.Semantics.Metadata;
 using System.Collections.Generic;
+using System.Collections;
 
 namespace CSharpCompiler.CodeGen.Metadata.Tables
 {
-    public abstract class MetadataTable<TRow> : IMetadataTable where TRow : struct
+    public abstract class MetadataTable<TEntity, TRow> : IMetadataTable
+        where TEntity : IMetadataEntity
+        where TRow : struct
     {
-        protected List<Func<TRow>> _bindings;
-
-        public int Length
-        {
-            get { return _bindings.Count; }
-        }
+        private List<TEntity> _entities;
+        private List<TRow> _rows;
 
         public ushort Position
         {
-            get { return (ushort)(_bindings.Count + 1); }
+            get { return (ushort)(_rows.Count + 1); }
+        }
+
+        public int Length
+        {
+            get { return _rows.Count; }
         }
 
         public MetadataTable()
         {
-            _bindings = new List<Func<TRow>>();
+            _entities = new List<TEntity>();
+            _rows = new List<TRow>();
         }
 
-        public uint Add(TRow row)
+        public uint Add(TEntity entity, TRow row)
         {
-            _bindings.Add(() => row);
-            return (uint)_bindings.Count;
+            _entities.Add(entity);
+            _rows.Add(row);
+            return (uint)_rows.Count;
         }
 
-        public uint Add(Func<TRow> binding)
+        public bool TryGetToken(TEntity entity, out MetadataToken token)
         {
-            _bindings.Add(binding);
-            return (uint)_bindings.Count;
+            uint rid = (uint)(_entities.IndexOf(entity) + 1);
+            token = new MetadataToken(GetTokenType(), rid);
+            return rid != 0;
+        }
+
+        public virtual MetadataToken GetToken(TEntity entity)
+        {
+            uint rid = (uint)(_entities.IndexOf(entity) + 1);
+            return new MetadataToken(GetTokenType(), rid);
         }
 
         public virtual void Write(TableHeap heap)
         {
-            foreach (Func<TRow> binding in _bindings)
-                heap.WriteStruct(binding());
+            foreach (TRow row in _rows)
+                heap.WriteStruct(row);
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
+        public IEnumerator GetEnumerator()
         {
-            return _bindings.GetEnumerator();
+            return _rows.GetEnumerator();
         }
+
+        protected abstract MetadataTokenType GetTokenType();
     }
 }

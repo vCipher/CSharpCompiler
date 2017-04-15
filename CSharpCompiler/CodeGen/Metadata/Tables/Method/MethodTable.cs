@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CSharpCompiler.Semantics.Metadata;
 using CSharpCompiler.Utility;
 
 namespace CSharpCompiler.CodeGen.Metadata.Tables.Method
 {
-    public sealed class MethodTable : MetadataTable<MethodRow>
+    public sealed class MethodTable : MetadataTable<MethodDefinition, MethodRow>
     {
         private MetadataBuilder _metadata;
 
@@ -19,23 +18,27 @@ namespace CSharpCompiler.CodeGen.Metadata.Tables.Method
             ushort start = Position;
             foreach (MethodDefinition methodDef in methods.EmptyIfNull())
             {
-                uint rid = Add(CreateMethodRow(methodDef));
-                methodDef.ResolveToken(rid);
+                Add(methodDef, CreateMethodRow(methodDef));
             }
             return start;
         }
 
+        protected override MetadataTokenType GetTokenType()
+        {
+            return MetadataTokenType.Method;
+        }
+
         private MethodRow CreateMethodRow(MethodDefinition methodDef)
         {
-            MethodRow row = new MethodRow();
-            row.RVA = _metadata.WriteMethod(methodDef);
-            row.ImplAttributes = methodDef.ImplAttributes;
-            row.Attributes = methodDef.Attributes;
-            row.Name = _metadata.RegisterString(methodDef.Name);
-            row.Signature = _metadata.WriteSignature(methodDef);
-            row.ParamList = _metadata.ParameterTable.AddRange(methodDef.Parameters);
-
-            return row;
+            return new MethodRow()
+            {
+                RVA = _metadata.WriteMethod(methodDef),
+                ImplAttributes = methodDef.ImplAttributes,
+                Attributes = methodDef.Attributes,
+                Name = _metadata.RegisterString(methodDef.Name),
+                Signature = _metadata.WriteSignature(methodDef),
+                ParamList = _metadata.ParameterTable.AddRange(methodDef.Parameters)
+            };
         }
     }
 }

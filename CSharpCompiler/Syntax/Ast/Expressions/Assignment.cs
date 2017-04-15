@@ -41,7 +41,7 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             builder.Emit(OpCodes.Stloc, varDef);
         }
 
-        public override IType InferType()
+        public override ITypeInfo InferType()
         {
             var leftType = LeftOperand.InferType();
             var rightType = RightOperand.InferType();

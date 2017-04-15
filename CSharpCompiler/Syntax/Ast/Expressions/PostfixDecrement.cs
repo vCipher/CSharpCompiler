@@ -34,7 +34,7 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             throw new NotSupportedException("Posfix decrement is supported only for variables");
         }
 
-        public override IType InferType()
+        public override ITypeInfo InferType()
         {
             return Operand.InferType();
         }

@@ -16,7 +16,7 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             throw new NotImplementedException();
         }
 
-        public override IType InferType()
+        public override ITypeInfo InferType()
         {
             var leftType = LeftOperand.InferType();
             var rightType = RightOperand.InferType();

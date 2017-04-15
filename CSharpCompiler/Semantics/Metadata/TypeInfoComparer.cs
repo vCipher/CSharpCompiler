@@ -2,23 +2,20 @@
 
 namespace CSharpCompiler.Semantics.Metadata
 {
-    public sealed class TypeComparer : IEqualityComparer<ITypeInfo>
+    public sealed class TypeInfoComparer : IEqualityComparer<ITypeInfo>
     {
-        private AssemblyComparer _assemblyComparer;
+        public static readonly TypeInfoComparer Default = new TypeInfoComparer();
 
-        public TypeComparer()
-        {
-            _assemblyComparer = new AssemblyComparer();
-        }
+        private TypeInfoComparer() { }
 
         public bool Equals(ITypeInfo x, ITypeInfo y)
         {
-            if (x == null || y == null) return false;
+            if (ReferenceEquals(x, y)) return true;
             if (x.GetType() != y.GetType()) return false;
 
             return string.Equals(x.Name, y.Name) &&
                 string.Equals(x.Namespace, y.Namespace) &&
-                _assemblyComparer.Equals(x.Assembly, y.Assembly);
+                AssemblyInfoComparer.Default.Equals(x.Assembly, y.Assembly);
         }
 
         public int GetHashCode(ITypeInfo obj)
@@ -30,7 +27,7 @@ namespace CSharpCompiler.Semantics.Metadata
                 int res = 31;
                 res ^= (obj.Name == null ? 0 : obj.Name.GetHashCode());
                 res ^= (obj.Namespace == null ? 0 : obj.Namespace.GetHashCode());
-                res ^= _assemblyComparer.GetHashCode(obj.Assembly);
+                res ^= AssemblyInfoComparer.Default.GetHashCode(obj.Assembly);
                 return res;
             }
         }

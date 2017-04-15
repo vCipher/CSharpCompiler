@@ -14,11 +14,6 @@ namespace CSharpCompiler.Syntax.Ast
         private ParseTree _parseTree;
         private Stack<VarScope> _scopes;
 
-        private VarScope CurrentScope
-        {
-            get { return _scopes.Peek(); }
-        }
-
         public AstBuilder(ParseTree parseTree)
         {
             _parseTree = parseTree;
@@ -35,15 +30,16 @@ namespace CSharpCompiler.Syntax.Ast
             _scopes.Push(new VarScope());
 
             return _parseTree.Children
-                .GetAndMove(ParseNodeTag.StmtSeq, child => StmtSequance(child))
+                .GetAndMove(StmtSequance)
                 .Pipe(stmts => new SyntaxTree(stmts));
         }
 
+        #region statements
         private List<Stmt> StmtSequance(ParseNode node)
         {
             return node.Children
                 .EmptyIfNull()
-                .Select(child => Stmt(child))
+                .Select(Stmt)
                 .ToList();
         }
 
@@ -68,23 +64,24 @@ namespace CSharpCompiler.Syntax.Ast
             children.Skip(TokenTag.FOR);
             children.Skip(TokenTag.OPEN_PAREN);
             var declarations = children.Check(ParseNodeTag.VarDeclaration)
-                ? children.GetAndMove(ParseNodeTag.VarDeclaration, child => VarDeclarations(child))
+                ? children.GetAndMove(VarDeclarations)
                 : new List<VarDeclaration>();
 
             children.Skip(TokenTag.SEMICOLON);
-            var condition = children.Check(ParseNodeTag.Expression)
-                ? children.GetAndMove(ParseNodeTag.Expression, child => Expression(child))
+            var condition = children.Check(child => !child.IsTerminal)
+                ? children.GetAndMove(Expression)
                 : new EmptyExpression();
 
             children.Skip(TokenTag.SEMICOLON);
-            var postIteration = children.Check(ParseNodeTag.Expression)
-                ? children.GetAndMove(ParseNodeTag.Expression, child => StmtExpression(child))
+            var postIteration = children.Check(child => !child.IsTerminal)
+                ? children.GetAndMove(StmtExpression)
                 : new EmptyExpression();
 
             children.Skip(TokenTag.CLOSE_PAREN);
             var body = children.Check(ParseNodeTag.Block)
-                ? children.GetAndMove(ParseNodeTag.Block, child => Block(child))
-                : children.GetAndMove(ParseNodeTag.ExpressionStmt, child => new List<Stmt>() { ExpressionStmt(child) });
+                ? children.GetAndMove(Block)
+                : children.GetAndMove(ExpressionStmt)
+                    .ToSingletonList<Stmt>();
             
             _scopes.Pop();
             
@@ -95,13 +92,13 @@ namespace CSharpCompiler.Syntax.Ast
         {
             return node.Children
                 .Skip(TokenTag.OPEN_CURLY_BRACE)
-                .GetAndMove(ParseNodeTag.StmtSeq, child => StmtSequance(child));
+                .GetAndMove(StmtSequance);
         }
 
         private DeclarationStmt DeclarationStmt(ParseNode node)
         {
             return node.Children
-                .GetAndMove(ParseNodeTag.VarDeclaration, child => VarDeclarations(child))
+                .GetAndMove(VarDeclarations)
                 .Pipe(declarations => new DeclarationStmt(declarations));
         }
 
@@ -114,7 +111,7 @@ namespace CSharpCompiler.Syntax.Ast
 
             return children
                 .Where(child => !child.IsTerminal)
-                .Select(child => factory(child))
+                .Select(factory)
                 .ToList();
         }
 
@@ -124,7 +121,7 @@ namespace CSharpCompiler.Syntax.Ast
                 return child => ImplicitVarDeclaration(child);
 
             return node.Children
-                .GetAndMove(ParseNodeTag.Type, child => Type(child))
+                .GetAndMove(child => Type(child))
                 .Pipe(type => (Func<ParseNode, VarDeclaration>)(child => ExplicitVarDeclaration(type, child)));
         }
 
@@ -140,16 +137,16 @@ namespace CSharpCompiler.Syntax.Ast
                 throw new DublicateVariableDeclarationException(varName);
 
             if (!children.Check(TokenTag.ASSIGN))
-                return new VarDeclaration(varName, null, CurrentScope);
+                return new VarDeclaration(varName, null, GetCurrentScope());
             
             var initializer = children
                 .Skip(TokenTag.ASSIGN)
-                .GetAndMove(ParseNodeTag.Expression, child => Expression(child));
+                .GetAndMove(Expression);
 
-            return new VarDeclaration(varName, initializer, CurrentScope);
+            return new VarDeclaration(varName, initializer, GetCurrentScope());
         }
 
-        private VarDeclaration ExplicitVarDeclaration(AstType type, ParseNode node)
+        private VarDeclaration ExplicitVarDeclaration(TypeNode type, ParseNode node)
         {
             var children = node.Children;
             var varName = children.GetAndMove(ParseNodeTag.Terminal)
@@ -161,24 +158,27 @@ namespace CSharpCompiler.Syntax.Ast
                 throw new DublicateVariableDeclarationException(varName);
 
             if (!children.Check(TokenTag.ASSIGN))
-                return new VarDeclaration(type, varName, null, CurrentScope);
+                return new VarDeclaration(type, varName, null, GetCurrentScope());
 
             var initializer = children
                 .Skip(TokenTag.ASSIGN)
-                .GetAndMove(ParseNodeTag.Expression, child => Expression(child));
+                .GetAndMove(Expression);
 
-            return new VarDeclaration(type, varName, initializer, CurrentScope);
+            return new VarDeclaration(type, varName, initializer, GetCurrentScope());
         }
+        #endregion
 
+        #region expressions
         private VarAccess VarAccess(ParseNode node)
         {
-            var varName = node.Children.GetAndMove(ParseNodeTag.Terminal)
+            var varName = node.Children
+                .GetAndMove(ParseNodeTag.Terminal)
                 .Token
                 .Lexeme;
             
             VarDeclaration declaration;
             if (SeekVariable(varName, out declaration))
-                return new VarAccess(varName, CurrentScope);
+                return new VarAccess(varName, declaration.Scope);
 
             throw new UndefinedVariableException(varName);
         }
@@ -186,22 +186,23 @@ namespace CSharpCompiler.Syntax.Ast
         private ExpressionStmt ExpressionStmt(ParseNode node)
         {
             return node.Children
-                .GetAndMove(ParseNodeTag.Expression, child => StmtExpression(child))
+                .GetAndMove(StmtExpression)
                 .Pipe(expr => new ExpressionStmt(expr));
         }
 
         private Expression StmtExpression(ParseNode node)
         {
-            var child = node.Children.First();
-            switch (child.Tag)
+            switch (node.Tag)
             {
-                case ParseNodeTag.InvokeExpression: return InvocationExpression(child, true);
-                case ParseNodeTag.PostfixIncrement: return PostfixIncrement(child, true);
-                case ParseNodeTag.PostfixDecrement: return PostfixDecrement(child, true);
-                case ParseNodeTag.PrefixIncrement: return PrefixIncrement(child, true);
-                case ParseNodeTag.PrefixDecrement: return PrefixDecrement(child, true);
-                case ParseNodeTag.Assignment: return Assignment(child, true);
-                case ParseNodeTag.ObjectCreation: return ObjectCreation(child, true);
+                case ParseNodeTag.InvokeExpression: return InvocationExpression(node, true);
+                case ParseNodeTag.PostfixIncrement: return PostfixIncrement(node, true);
+                case ParseNodeTag.PostfixDecrement: return PostfixDecrement(node, true);
+                case ParseNodeTag.PrefixIncrement: return PrefixIncrement(node, true);
+                case ParseNodeTag.PrefixDecrement: return PrefixDecrement(node, true);
+                case ParseNodeTag.Assignment: return Assignment(node, true);
+                case ParseNodeTag.ArrayCreation: return ArrayCreation(node, true);
+                case ParseNodeTag.ObjectCreation: return ObjectCreation(node, true);
+                case ParseNodeTag.ElementStore: return ElementStore(node, true);
             }
 
             throw new SyntaxException("Only assignment, call, increment, decrement, and new object expressions can be used as a statement");
@@ -209,60 +210,103 @@ namespace CSharpCompiler.Syntax.Ast
 
         private Expression Expression(ParseNode node)
         {
-            var child = node.Children.First();
-            switch (child.Tag)
+            switch (node.Tag)
             {
-                case ParseNodeTag.Assignment: return Assignment(child);
-                case ParseNodeTag.ConditionalAndExpression: return AndOperation(child);
-                case ParseNodeTag.ConditionalOrExpression: return OrOperation(child);
-                case ParseNodeTag.RelationalExpression: return RelationalOperation(child);
-                case ParseNodeTag.EqualityExpression: return RelationalOperation(child);
-                case ParseNodeTag.TernaryExpression: return TernaryOperation(child);
-                case ParseNodeTag.MultiplicativeExpression: return ArithmeticOperation(child);
-                case ParseNodeTag.AdditiveExpression: return ArithmeticOperation(child);
-                case ParseNodeTag.ShiftExpression: return ArithmeticOperation(child);
-                case ParseNodeTag.BitAndExpression: return ArithmeticOperation(child);
-                case ParseNodeTag.BitXorExpression: return ArithmeticOperation(child);
-                case ParseNodeTag.BitOrExpression: return ArithmeticOperation(child);
-                case ParseNodeTag.UnaryExpression: return UnaryOperation(child);
-                case ParseNodeTag.CastExpression: return CastExpression(child);
-                case ParseNodeTag.Literal: return Literal(child);
-                case ParseNodeTag.VarAccess: return VarAccess(child);
-                case ParseNodeTag.InvokeExpression: return InvocationExpression(child);
-                case ParseNodeTag.ParenthesisExpression: return ParenthesisExpression(child);
-                case ParseNodeTag.PostfixIncrement: return PostfixIncrement(child);
-                case ParseNodeTag.PostfixDecrement: return PostfixDecrement(child);
-                case ParseNodeTag.PrefixIncrement: return PrefixIncrement(child);
-                case ParseNodeTag.PrefixDecrement: return PrefixDecrement(child);
-                case ParseNodeTag.ObjectCreation: return ObjectCreation(child);
+                case ParseNodeTag.Assignment: return Assignment(node);
+                case ParseNodeTag.ConditionalAndExpression: return AndOperation(node);
+                case ParseNodeTag.ConditionalOrExpression: return OrOperation(node);
+                case ParseNodeTag.RelationalExpression: return RelationalOperation(node);
+                case ParseNodeTag.EqualityExpression: return RelationalOperation(node);
+                case ParseNodeTag.TernaryExpression: return TernaryOperation(node);
+                case ParseNodeTag.MultiplicativeExpression: return ArithmeticOperation(node);
+                case ParseNodeTag.AdditiveExpression: return ArithmeticOperation(node);
+                case ParseNodeTag.ShiftExpression: return ArithmeticOperation(node);
+                case ParseNodeTag.BitAndExpression: return ArithmeticOperation(node);
+                case ParseNodeTag.BitXorExpression: return ArithmeticOperation(node);
+                case ParseNodeTag.BitOrExpression: return ArithmeticOperation(node);
+                case ParseNodeTag.UnaryExpression: return UnaryOperation(node);
+                case ParseNodeTag.CastExpression: return CastExpression(node);
+                case ParseNodeTag.Literal: return Literal(node);
+                case ParseNodeTag.VarAccess: return VarAccess(node);
+                case ParseNodeTag.InvokeExpression: return InvocationExpression(node);
+                case ParseNodeTag.ParenthesisExpression: return ParenthesisExpression(node);
+                case ParseNodeTag.PostfixIncrement: return PostfixIncrement(node);
+                case ParseNodeTag.PostfixDecrement: return PostfixDecrement(node);
+                case ParseNodeTag.PrefixIncrement: return PrefixIncrement(node);
+                case ParseNodeTag.PrefixDecrement: return PrefixDecrement(node);
+                case ParseNodeTag.ArrayCreation: return ArrayCreation(node);
+                case ParseNodeTag.ObjectCreation: return ObjectCreation(node);
+                case ParseNodeTag.ElementAccess: return ElementAccess(node);
+                case ParseNodeTag.ElementStore: return ElementStore(node);
             }
 
-            throw new SyntaxException("Unsupported expression: {0}", child);
+            throw new SyntaxException("Unsupported expression: {0}", node);
         }
 
-        private Expression ObjectCreation(ParseNode node, bool isStmtExpression = false)
+        private ElementAccess ElementAccess(ParseNode node)
+        {
+            var array = node.Children
+                .GetAndMove(Expression);
+
+            var index = node.Children
+                .Skip(TokenTag.OPEN_SQUARE_BRACE)
+                .GetAndMove(Expression);
+
+            return new ElementAccess(array, index);
+        }
+
+        private ElementStore ElementStore(ParseNode node, bool isStmtExpression = false)
+        {
+            var array = node.Children
+                .GetAndMove(Expression);
+
+            var index = node.Children
+                .Skip(TokenTag.OPEN_SQUARE_BRACE)
+                .GetAndMove(Expression);
+
+            var value = node.Children
+                .Skip(TokenTag.CLOSE_SQUARE_BRACE)
+                .Skip(TokenTag.ASSIGN)
+                .GetAndMove(Expression);
+
+            return new ElementStore(array, index, value, isStmtExpression);
+        }
+
+        private ArrayCreation ArrayCreation(ParseNode node, bool isStmtExpression = false)
+        {
+            var containedType = node.Children
+                .Skip(TokenTag.NEW)
+                .GetAndMove(NotArrayType);
+
+            return node.Children
+                .Skip(TokenTag.OPEN_SQUARE_BRACE)
+                .GetAndMove(Expression)
+                .Pipe(initializer => new ArrayCreation(containedType, initializer, isStmtExpression));
+        }
+
+        private ObjectCreation ObjectCreation(ParseNode node, bool isStmtExpression = false)
         {
             var type = node.Children
                 .Skip(TokenTag.NEW)
-                .GetAndMove(ParseNodeTag.Type, child => Type(child));
+                .GetAndMove(Type);
 
             return node.Children
                 .Skip(TokenTag.OPEN_PAREN)
-                .GetAndMove(ParseNodeTag.ArgumentList, child => Arguments(child))
+                .GetAndMove(Arguments)
                 .Pipe(args => new ObjectCreation(type, args, isStmtExpression));
         }
 
         private PostfixIncrement PostfixIncrement(ParseNode node, bool isStmtExpression = false)
         {
             return node.Children
-                .GetAndMove(ParseNodeTag.Expression, child => Expression(child))
+                .GetAndMove(Expression)
                 .Pipe(operand => new PostfixIncrement(operand, isStmtExpression));
         }
 
         private PostfixDecrement PostfixDecrement(ParseNode node, bool isStmtExpression = false)
         {
             return node.Children
-                .GetAndMove(ParseNodeTag.Expression, child => Expression(child))
+                .GetAndMove(Expression)
                 .Pipe(operand => new PostfixDecrement(operand, isStmtExpression));
         }
 
@@ -270,14 +314,14 @@ namespace CSharpCompiler.Syntax.Ast
         {
             return node.Children
                 .Skip(TokenTag.INCREMENT)
-                .GetAndMove(ParseNodeTag.Expression, child => Expression(child))
+                .GetAndMove(Expression)
                 .Pipe(operand => new PrefixIncrement(operand, isStmtExpression));
         }
 
         private PrefixDecrement PrefixDecrement(ParseNode node, bool isStmtExpression = false)
         {
             return node.Children
-                .GetAndMove(ParseNodeTag.Expression, child => Expression(child))
+                .GetAndMove(Expression)
                 .Pipe(operand => new PrefixDecrement(operand, isStmtExpression));
         }
 
@@ -285,7 +329,7 @@ namespace CSharpCompiler.Syntax.Ast
         {
             return node.Children
                 .Skip(TokenTag.OPEN_PAREN)
-                .GetAndMove(ParseNodeTag.Expression, child => Expression(child));
+                .GetAndMove(Expression);
         }
 
         private InvokeExpression InvocationExpression(ParseNode node, bool isStmtExpression = false)
@@ -297,7 +341,7 @@ namespace CSharpCompiler.Syntax.Ast
 
             return node.Children
                 .Skip(TokenTag.OPEN_PAREN)
-                .GetAndMove(ParseNodeTag.ArgumentList, child => Arguments(child))
+                .GetAndMove(Arguments)
                 .Pipe(args => new InvokeExpression(methodName, args, isStmtExpression));
         }
 
@@ -305,7 +349,7 @@ namespace CSharpCompiler.Syntax.Ast
         {
             return node.Children
                 .Where(child => !child.IsTerminal)
-                .Select(child => Argument(child))
+                .Select(Argument)
                 .ToList();
         }
 
@@ -316,16 +360,16 @@ namespace CSharpCompiler.Syntax.Ast
                 ? children.GetAndMove(ParseNodeTag.Terminal).Token
                 : default(Token?);
 
-            return children.GetAndMove(ParseNodeTag.Expression, child => Expression(child))
+            return children.GetAndMove(Expression)
                 .Pipe(value => new Argument(modifier, value));
         }
 
         private AndOperation AndOperation(ParseNode node)
         {
             var children = node.Children;
-            var leftOperand = children.GetAndMove(ParseNodeTag.Expression, child => Expression(child));
+            var leftOperand = children.GetAndMove(Expression);
             var @operator = children.GetAndMove(ParseNodeTag.Terminal).Token;
-            var rightOperand = children.GetAndMove(ParseNodeTag.Expression, child => Expression(child));
+            var rightOperand = children.GetAndMove(Expression);
 
             return new AndOperation(@operator, leftOperand, rightOperand);
         }
@@ -333,9 +377,9 @@ namespace CSharpCompiler.Syntax.Ast
         private OrOperation OrOperation(ParseNode node)
         {
             var children = node.Children;
-            var leftOperand = children.GetAndMove(ParseNodeTag.Expression, child => Expression(child));
+            var leftOperand = children.GetAndMove(Expression);
             var @operator = children.GetAndMove(ParseNodeTag.Terminal).Token;
-            var rightOperand = children.GetAndMove(ParseNodeTag.Expression, child => Expression(child));
+            var rightOperand = children.GetAndMove(Expression);
 
             return new OrOperation(@operator, leftOperand, rightOperand);
         }
@@ -343,9 +387,9 @@ namespace CSharpCompiler.Syntax.Ast
         private Assignment Assignment(ParseNode node, bool isStmtExpression = false)
         {
             var children = node.Children;
-            var leftOperand = children.GetAndMove(ParseNodeTag.Expression, child => Expression(child));
+            var leftOperand = children.GetAndMove(Expression);
             var @operator = children.GetAndMove(ParseNodeTag.Terminal).Token;
-            var rightOperand = children.GetAndMove(ParseNodeTag.Expression, child => Expression(child));
+            var rightOperand = children.GetAndMove(Expression);
 
             return new Assignment(@operator, leftOperand, rightOperand, isStmtExpression);
         }
@@ -353,45 +397,45 @@ namespace CSharpCompiler.Syntax.Ast
         private Expression RelationalOperation(ParseNode node)
         {
             var children = node.Children;
-            var leftOperand = children.GetAndMove(ParseNodeTag.Expression, child => Expression(child));
+            var leftOperand = children.GetAndMove(Expression);
 
             if (children.Check(TokenTag.IS)) return IsOperation(leftOperand, children);
             if (children.Check(TokenTag.AS)) return AsOperation(leftOperand, children);
 
             var @operator = children.GetAndMove(ParseNodeTag.Terminal).Token;
-            var rightOperand = children.GetAndMove(ParseNodeTag.Expression, child => Expression(child));
+            var rightOperand = children.GetAndMove(Expression);
 
             return new RelationOperation(@operator, leftOperand, rightOperand);
         }
 
-        private Expression IsOperation(Expression operand, ParseNodeCollection children)
+        private IsOperation IsOperation(Expression operand, ParseNodeCollection children)
         {
             return children
                 .Skip(TokenTag.IS)
-                .GetAndMove(ParseNodeTag.Type, child => Type(child))
+                .GetAndMove(Type)
                 .Pipe(type => new IsOperation(operand, type));
         }
 
-        private Expression AsOperation(Expression operand, ParseNodeCollection children)
+        private AsOperation AsOperation(Expression operand, ParseNodeCollection children)
         {
             return children
                 .Skip(TokenTag.AS)
-                .GetAndMove(ParseNodeTag.Type, child => Type(child))
+                .GetAndMove(Type)
                 .Pipe(type => new AsOperation(operand, type));
         }
 
-        private Expression TernaryOperation(ParseNode node)
+        private TernaryOperation TernaryOperation(ParseNode node)
         {
             var children = node.Children;
-            var condition = children.GetAndMove(ParseNodeTag.Expression, child => Expression(child));
+            var condition = children.GetAndMove(Expression);
 
             var trueBranch = children
                 .Skip(TokenTag.QUESTION)
-                .GetAndMove(ParseNodeTag.Expression, child => Expression(child));
+                .GetAndMove(Expression);
 
             var falseBranch = children
                 .Skip(TokenTag.COLON)
-                .GetAndMove(ParseNodeTag.Expression, child => Expression(child));
+                .GetAndMove(Expression);
 
             return new TernaryOperation(condition, trueBranch, falseBranch);
         }
@@ -399,9 +443,9 @@ namespace CSharpCompiler.Syntax.Ast
         private ArithmeticOperation ArithmeticOperation(ParseNode node)
         {
             var children = node.Children;
-            var leftOperand = children.GetAndMove(ParseNodeTag.Expression, child => Expression(child));
+            var leftOperand = children.GetAndMove(Expression);
             var @operator = children.GetAndMove(ParseNodeTag.Terminal).Token;
-            var rightOperand = children.GetAndMove(ParseNodeTag.Expression, child => Expression(child));
+            var rightOperand = children.GetAndMove(Expression);
 
             return new ArithmeticOperation(@operator, leftOperand, rightOperand);
         }
@@ -410,7 +454,7 @@ namespace CSharpCompiler.Syntax.Ast
         {
             var children = node.Children;
             var @operator = children.GetAndMove(ParseNodeTag.Terminal).Token;
-            var operand = children.GetAndMove(ParseNodeTag.Expression, child => Expression(child));
+            var operand = children.GetAndMove(Expression);
 
             return new UnaryOperation(@operator, operand);
         }
@@ -419,11 +463,11 @@ namespace CSharpCompiler.Syntax.Ast
         {
             var type = node.Children
                 .Skip(TokenTag.OPEN_PAREN)
-                .GetAndMove(ParseNodeTag.Type, child => Type(child));
+                .GetAndMove(Type);
 
             return node.Children
                 .Skip(TokenTag.CLOSE_PAREN)
-                .GetAndMove(ParseNodeTag.Expression, child => Expression(child))
+                .GetAndMove(Expression)
                 .Pipe(operand => new CastExpression(type, operand));
         }
 
@@ -433,29 +477,69 @@ namespace CSharpCompiler.Syntax.Ast
                 .GetAndMove(ParseNodeTag.Terminal)
                 .Pipe(terminal => new Literal(terminal.Token));
         }
+        #endregion
 
-        private AstType Type(ParseNode node)
+        private TypeNode Type(ParseNode node)
         {
-            var child = node.Children.First();
-            switch (child.Tag)
+            switch (node.Tag)
             {
-                case ParseNodeTag.PrimitiveType: return PrimitiveType(child);
+                case ParseNodeTag.PrimitiveType: return PrimitiveType(node);
+                case ParseNodeTag.ArrayType: return ArrayType(node);
             }
 
-            throw new SyntaxException("Unsupported type: {0}", child);
+            throw new SyntaxException("Unsupported type: {0}", node);
         }
 
-        private PrimitiveType PrimitiveType(ParseNode node)
+        private TypeNode NotArrayType(ParseNode node)
+        {
+            switch (node.Tag)
+            {
+                case ParseNodeTag.PrimitiveType: return PrimitiveType(node);
+            }
+
+            throw new SyntaxException("Unsupported type: {0}", node);
+        }
+        
+        private ArrayTypeNode ArrayType(ParseNode node)
+        {
+            var ofType = node.Children.GetAndMove(NotArrayType);
+            var rank = node.Children.GetAndMove(ArrayRank);
+
+            return new ArrayTypeNode(ofType, rank);
+        }
+
+        private int ArrayRank(ParseNode node)
+        {
+            return node.Children.Count();
+        }
+
+        private PrimitiveTypeNode PrimitiveType(ParseNode node)
         {
             return node.Children
                 .GetAndMove(ParseNodeTag.Terminal)
-                .Pipe(terminal => new PrimitiveType(terminal.Token));
+                .Pipe(terminal => new PrimitiveTypeNode(terminal.Token));
         }
 
         private bool SeekVariable(string varName, out VarDeclaration declaration)
         {
-            // todo: implement scope backward seek
-            return _scopes.Peek().TryResolve(varName, out declaration);
+            if (_scopes.Peek().TryResolve(varName, out declaration))
+                return true; // hot path
+
+            var copy = new Queue<VarScope>(_scopes);
+            copy.Dequeue();
+
+            while (copy.Any())
+            {
+                if (copy.Dequeue().TryResolve(varName, out declaration))
+                    return true;
+            }
+
+            return false;
+        }
+        
+        private VarScope GetCurrentScope()
+        {
+            return _scopes.Peek();
         }
     }
 }

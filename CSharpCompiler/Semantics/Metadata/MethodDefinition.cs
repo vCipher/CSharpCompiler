@@ -1,17 +1,15 @@
 ﻿using System.Collections.ObjectModel;
-using CSharpCompiler.Semantics.Metadata;
+using CSharpCompiler.Semantics.TypeSystem;
 
 namespace CSharpCompiler.Semantics.Metadata
 {
     public sealed class MethodDefinition : IMethodInfo
     {
         public string Name { get; private set; }
-        public MetadataToken Token { get; private set; }
         public ITypeInfo ReturnType { get; private set; }
         public ITypeInfo DeclaringType { get; private set; }
         public CallingConventions CallingConventions { get; private set; }
         public Collection<ParameterDefinition> Parameters { get; private set; }
-
         public MethodBody Body { get; private set; }
         public MethodImplAttributes ImplAttributes { get; private set; }
         public MethodAttributes Attributes { get; private set; }
@@ -24,8 +22,7 @@ namespace CSharpCompiler.Semantics.Metadata
         public MethodDefinition(string name, MethodAttributes attributes, TypeDefinition typeDef)
         {
             Name = name;
-            Token = new MetadataToken(MetadataTokenType.Method, 0);            
-            ReturnType = new TypeReference(typeof(void));
+            ReturnType = KnownType.Void;
             DeclaringType = typeDef;
             Body = new MethodBody();
             ImplAttributes = MethodImplAttributes.IL | MethodImplAttributes.Managed;
@@ -34,16 +31,33 @@ namespace CSharpCompiler.Semantics.Metadata
             CallingConventions = GetCallingConvention();
         }
 
+        public override int GetHashCode()
+        {
+            return MethodInfoComparer.Default.GetHashCode(this);
+        }
+
+        public override bool  Equals(object obj)
+        {
+            if (!(obj is MethodDefinition)) return false;
+            return Equals((MethodDefinition)obj);
+        }
+
+        public bool Equals(IMethodInfo other)
+        {
+            if (!(other is MethodDefinition)) return false;
+            return Equals((MethodDefinition)other);
+        }
+
+        public bool Equals(MethodDefinition other)
+        {
+            return MethodInfoComparer.Default.Equals(this, other);
+        }
+
         private CallingConventions GetCallingConvention()
         {
             var convention = CallingConventions.Default;
             if (HasThis) convention |= CallingConventions.HasThis;
             return convention;
-        }
-
-        public void ResolveToken(uint rid)
-        {
-            Token = new MetadataToken(Token.Type, rid);
         }
     }
 }

@@ -14,14 +14,12 @@ namespace CSharpCompiler.Tests.Helpers
         }
         public static ParseNode InvokeMethod(Token method, ParseNode arg)
         {
-            return new ParseNode(ParseNodeTag.Expression,
-                new ParseNode(ParseNodeTag.InvokeExpression,
-                    new ParseNode(method),
-                    new ParseNode(Tokens.OPEN_PAREN),
-                    new ParseNode(ParseNodeTag.ArgumentList,
-                        new ParseNode(ParseNodeTag.Argument, arg)),
-                    new ParseNode(Tokens.CLOSE_PAREN)
-                )
+            return new ParseNode(ParseNodeTag.InvokeExpression,
+                new ParseNode(method),
+                new ParseNode(Tokens.OPEN_PAREN),
+                new ParseNode(ParseNodeTag.ArgumentList,
+                    new ParseNode(ParseNodeTag.Argument, arg)),
+                new ParseNode(Tokens.CLOSE_PAREN)
             );
         }
 
@@ -49,39 +47,31 @@ namespace CSharpCompiler.Tests.Helpers
 
         public static ParseNode PrimitiveType(Token token)
         {
-            return new ParseNode(ParseNodeTag.Type, 
-                new ParseNode(ParseNodeTag.PrimitiveType,
-                    new ParseNode(token)
-                )
+            return new ParseNode(ParseNodeTag.PrimitiveType,
+                new ParseNode(token)
             );
         }
 
         public static ParseNode Literal(Token token)
         {
-            return new ParseNode(ParseNodeTag.Expression,
-                new ParseNode(ParseNodeTag.Literal,
-                    new ParseNode(token)
-                )
+            return new ParseNode(ParseNodeTag.Literal,
+                new ParseNode(token)
             );
         }
 
         public static ParseNode Plus(ParseNode leftOp, ParseNode rightOp)
         {
-            return new ParseNode(ParseNodeTag.Expression,
-                new ParseNode(ParseNodeTag.AdditiveExpression,
-                    leftOp,
-                    new ParseNode(Tokens.PLUS),
-                    rightOp
-                )
+            return new ParseNode(ParseNodeTag.AdditiveExpression,
+                leftOp,
+                new ParseNode(Tokens.PLUS),
+                rightOp
             );
         }
 
         public static ParseNode Var(string name)
         {
-            return new ParseNode(ParseNodeTag.Expression, 
-                new ParseNode(ParseNodeTag.VarAccess,
-                    new ParseNode(Tokens.ID(name))
-                )
+            return new ParseNode(ParseNodeTag.VarAccess,
+                new ParseNode(Tokens.ID(name))
             );
         }
     }

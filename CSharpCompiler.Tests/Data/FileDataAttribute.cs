@@ -8,7 +8,7 @@ using Xunit.Sdk;
 
 namespace CSharpCompiler.Tests.Data
 {
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
     public sealed class FileDataAttribute : DataAttribute
     {
         private static readonly Regex TEST_PATTERN = new Regex(@"# test.*", RegexOptions.IgnoreCase);

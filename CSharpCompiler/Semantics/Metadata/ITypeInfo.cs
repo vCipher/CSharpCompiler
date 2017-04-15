@@ -1,12 +1,12 @@
-﻿using CSharpCompiler.Semantics.TypeSystem;
+﻿using System;
 
 namespace CSharpCompiler.Semantics.Metadata
 {
-    public interface ITypeInfo : IMetadataEntity
+    public interface ITypeInfo : IMetadataEntity, IEquatable<ITypeInfo>
     {
         string Name { get; }
         string Namespace { get; }
-        IType DeclaringType { get; }
-        IAssemblyInfo Assembly { get; }        
+        ElementType ElementType { get; }
+        IAssemblyInfo Assembly { get; }
     }
 }

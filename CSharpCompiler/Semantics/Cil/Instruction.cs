@@ -119,6 +119,17 @@ namespace CSharpCompiler.Semantics.Cil
             return new Instruction(opCode, instructionRef);
         }
 
+        public static Instruction Create(OpCode opCode, ITypeInfo typeInfo)
+        {
+            if (typeInfo == null)
+                throw new ArgumentNullException("typeInfo");
+
+            if (opCode.OperandType != OperandType.InlineType)
+                throw new ArgumentException("opCode");
+
+            return new Instruction(opCode, typeInfo);
+        }
+
         public int GetSize()
         {
             int size = OpCode.Size;

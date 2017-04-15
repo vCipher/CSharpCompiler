@@ -96,13 +96,13 @@ namespace CSharpCompiler.CodeGen.Metadata
 
         public ushort WriteSignature(IMethodInfo methodInfo)
         {
-            SingatureBuilder signature = SingatureBuilder.GetMethodSignature(methodInfo);
+            StandAloneSignature signature = StandAloneSignature.GetMethodSignature(methodInfo);
             return RegisterBlob(signature);
         }
 
         public ushort WriteSignature(CustomAttribute attribute)
         {
-            SingatureBuilder signature = SingatureBuilder.GetAttributeSignature(attribute);
+            StandAloneSignature signature = StandAloneSignature.GetAttributeSignature(attribute);
             return RegisterBlob(signature);
         }
 
@@ -113,39 +113,28 @@ namespace CSharpCompiler.CodeGen.Metadata
 
         public MetadataToken ResolveToken(IMetadataEntity entity)
         {
-            if (entity == null) throw new ArgumentNullException();
-            MetadataToken token = entity.Token;
-
-            switch (token.Type)
-            {
-                case MetadataTokenType.TypeDef:
-                case MetadataTokenType.Method:
-                case MetadataTokenType.Field:
-                case MetadataTokenType.Event:
-                case MetadataTokenType.Property:
-                case MetadataTokenType.Assembly:
-                    return token;
-
-                case MetadataTokenType.MemberRef:
-                    return MemberRefTable.GetMemberRefToken((MethodReference)entity);
-
-                case MetadataTokenType.TypeRef:
-                    return TypeRefTable.GetTypeRefToken((TypeReference)entity);
-
-                case MetadataTokenType.AssemblyRef:
-                    return AssemblyRefTable.GetAssemblyRefToken((AssemblyReference)entity);
-
-                default:
-                    throw new NotSupportedException();
-            }
+            if (entity == null) return MetadataToken.Zero;
+            if (entity is AssemblyDefinition) return AssemblyTable.GetToken((AssemblyDefinition)entity);
+            if (entity is ModuleDefinition) return ModuleTable.GetToken((ModuleDefinition)entity);
+            if (entity is TypeDefinition) return TypeDefTable.GetToken((TypeDefinition)entity);
+            if (entity is MethodDefinition) return MethodTable.GetToken((MethodDefinition)entity);
+            if (entity is FieldDefinition) return FieldTable.GetToken((FieldDefinition)entity);
+            if (entity is ParameterDefinition) return ParameterTable.GetToken((ParameterDefinition)entity);
+            if (entity is CustomAttribute) return CustomAttributeTable.GetToken((CustomAttribute)entity);
+            if (entity is StandAloneSignature) return StandAloneSigTable.GetToken((StandAloneSignature)entity);
+            if (entity is AssemblyReference) return AssemblyRefTable.GetToken((AssemblyReference)entity);
+            if (entity is TypeReference) return TypeRefTable.GetToken((TypeReference)entity);
+            if (entity is MethodReference) return MemberRefTable.GetToken((MethodReference)entity);
+            
+            throw new NotSupportedException();
         }
 
-        public ushort GetCodedRID(IMetadataEntity entity, CodedTokenType type)
+        public ushort GetCodedRid(IMetadataEntity entity, CodedTokenType type)
         {
-            return GetCodedRID(ResolveToken(entity), type);
+            return GetCodedRid(ResolveToken(entity), type);
         }
 
-        public ushort GetCodedRID(MetadataToken token, CodedTokenType type)
+        public ushort GetCodedRid(MetadataToken token, CodedTokenType type)
         {
             return (ushort)CodedTokenBuilder.Build(token, type).Value;
         }
@@ -155,8 +144,10 @@ namespace CSharpCompiler.CodeGen.Metadata
             BuildModule(_assemblyDef.Module);
             BuildAssembly(_assemblyDef);
             BuildTypes(_assemblyDef.Module.Types);
-            
+
+            _metadata.EntryPointToken = ResolveToken(_assemblyDef.EntryPoint);
             _metadata.Tables.Write();
+
             return _metadata;
         }
 

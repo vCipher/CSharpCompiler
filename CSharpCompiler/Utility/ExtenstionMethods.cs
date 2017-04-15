@@ -67,5 +67,10 @@ namespace CSharpCompiler.Utility
         {
             return new Collection<TSrc>(src.ToList());
         }
+
+        internal static List<TSrc> ToSingletonList<TSrc>(this TSrc src)
+        {
+            return new List<TSrc> { src };
+        }
     }
 }

@@ -8,7 +8,7 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
         public override void Build(MethodBuilder builder)
         { }
 
-        public override IType InferType()
+        public override ITypeInfo InferType()
         {
             return KnownType.Void;
         }

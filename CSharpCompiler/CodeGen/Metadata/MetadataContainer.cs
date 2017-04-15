@@ -1,5 +1,6 @@
 ﻿using CSharpCompiler.CodeGen.Sections.Text;
 using CSharpCompiler.CodeGen.Metadata.Heaps;
+using CSharpCompiler.Semantics.Metadata;
 
 namespace CSharpCompiler.CodeGen.Metadata
 {
@@ -11,6 +12,7 @@ namespace CSharpCompiler.CodeGen.Metadata
         public GuidHeap Guids { get; private set; }
         public UserStringHeap UserStrings { get; private set; }
         public ILCodeBuffer ILCode { get; private set; }
+        public MetadataToken EntryPointToken { get; set; }
 
         public MetadataContainer(ILCodeBuffer ilCode)
         {

@@ -22,7 +22,7 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             return Scope.Resolve(VarName);
         }
 
-        public override IType InferType()
+        public override ITypeInfo InferType()
         {
             return Resolve().Type.ToType();
         }

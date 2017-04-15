@@ -26,6 +26,12 @@ namespace CSharpCompiler.Syntax
                 && Items[_index].Token.Tag == tag;
         }
 
+        public bool Check(Func<ParseNode, bool> condition)
+        {
+            return (_index >= 0 && _index < Items.Count)
+                && condition(Items[_index]);
+        }
+
         public ParseNodeCollection Skip(TokenTag tag)
         {
             ParseNode node = Items[_index++];
@@ -33,6 +39,11 @@ namespace CSharpCompiler.Syntax
                 throw new SyntaxException("Unexpected parse node: {0} (expected: {1})", node.Tag, tag);
 
             return this;
+        }
+
+        public ParseNode GetAndMove()
+        {
+            return Items[_index++];
         }
 
         public ParseNode GetAndMove(ParseNodeTag tag)
@@ -44,12 +55,9 @@ namespace CSharpCompiler.Syntax
             return node;
         }
 
-        public T GetAndMove<T>(ParseNodeTag tag, Func<ParseNode, T> factory)
+        public T GetAndMove<T>(Func<ParseNode, T> factory)
         {
             ParseNode node = Items[_index++];
-            if (node.Tag != tag)
-                throw new SyntaxException("Unexpected parse node: {0} (expected: {1})", node.Tag, tag);
-
             return factory(node);
         }
     }

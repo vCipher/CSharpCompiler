@@ -1,4 +1,5 @@
 ﻿using CSharpCompiler.Semantics.Cil;
+using CSharpCompiler.Semantics.TypeSystem;
 using CSharpCompiler.Syntax.Ast;
 using CSharpCompiler.Syntax.Ast.Statements;
 using System;
@@ -32,14 +33,18 @@ namespace CSharpCompiler.Semantics.Metadata
 
         public TypeDefinition TypeDefinition()
         {
-            TypeAttributes attributes = TypeAttributes.Public |
+            var attributes = TypeAttributes.Public |
                 TypeAttributes.AutoLayout |
                 TypeAttributes.Class |
                 TypeAttributes.AnsiClass |
                 TypeAttributes.BeforeFieldInit;
 
-            TypeDefinition typeDef = new TypeDefinition(
-                _options.TypeName, _options.Namespace, attributes, _assemblyDef);
+            var typeDef = new TypeDefinition(
+                _options.TypeName, 
+                _options.Namespace, 
+                attributes, 
+                KnownType.Object, 
+                _assemblyDef);
 
             _assemblyDef.EntryPoint = MethodDefinition(_syntaxTree.Statements, typeDef);
             typeDef.Methods.Add(_assemblyDef.EntryPoint);

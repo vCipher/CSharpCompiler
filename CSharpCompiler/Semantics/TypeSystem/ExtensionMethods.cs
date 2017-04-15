@@ -1,5 +1,4 @@
 ﻿using CSharpCompiler.Lexica.Tokens;
-using CSharpCompiler.Semantics.Metadata;
 using System;
 
 namespace CSharpCompiler.Semantics.TypeSystem
@@ -49,37 +48,6 @@ namespace CSharpCompiler.Semantics.TypeSystem
             if (type == typeof(string)) return KnownTypeCode.String;
             if (type == typeof(void)) return KnownTypeCode.Void;
             return KnownTypeCode.None;
-        }
-
-        public static ElementType GetElementType(this KnownTypeCode typeCode)
-        {
-            switch (typeCode)
-            {
-                case KnownTypeCode.Object: return ElementType.Object;
-                case KnownTypeCode.Boolean: return ElementType.Boolean;
-                case KnownTypeCode.Char: return ElementType.Char;
-                case KnownTypeCode.SByte: return ElementType.UInt8;
-                case KnownTypeCode.Byte: return ElementType.Int8;
-                case KnownTypeCode.UInt16: return ElementType.UInt16;
-                case KnownTypeCode.Int16: return ElementType.Int16;
-                case KnownTypeCode.UInt32: return ElementType.UInt32;
-                case KnownTypeCode.Int32: return ElementType.Int32;
-                case KnownTypeCode.UInt64: return ElementType.UInt64;
-                case KnownTypeCode.Int64: return ElementType.Int64;
-                case KnownTypeCode.Single: return ElementType.Single;
-                case KnownTypeCode.Double: return ElementType.Double;
-                case KnownTypeCode.Decimal: return ElementType.ValueType;
-                case KnownTypeCode.String: return ElementType.String;
-                case KnownTypeCode.Void: return ElementType.Void;
-                case KnownTypeCode.Type: return ElementType.Type;
-                // todo: check a difference ElementType.Array <-> ElementType.SizeArray
-                case KnownTypeCode.Array: return ElementType.SizeArray;
-                case KnownTypeCode.Attribute: return ElementType.Class;
-                case KnownTypeCode.ValueType: return ElementType.ValueType;
-                case KnownTypeCode.Enum: return ElementType.Enum;
-                case KnownTypeCode.Delegate: return ElementType.FunctionPointer;
-                default: return ElementType.None;
-            }
         }
 
         public static bool IsPrimitiveType(this TokenTag tokenTag)

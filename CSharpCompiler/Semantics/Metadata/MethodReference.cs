@@ -1,4 +1,5 @@
-﻿using CSharpCompiler.Utility;
+﻿using CSharpCompiler.Semantics.TypeSystem;
+using CSharpCompiler.Utility;
 using System.Collections.ObjectModel;
 using System.Linq;
 
@@ -7,7 +8,6 @@ namespace CSharpCompiler.Semantics.Metadata
     public sealed class MethodReference : IMethodInfo
     {
         public string Name { get; private set; }
-        public MetadataToken Token { get; private set; }
         public ITypeInfo ReturnType { get; private set; }
         public ITypeInfo DeclaringType { get; private set; }
         public CallingConventions CallingConventions { get; private set; }
@@ -16,30 +16,45 @@ namespace CSharpCompiler.Semantics.Metadata
         public MethodReference(System.Reflection.ConstructorInfo ctorInfo)
         {
             Name = ctorInfo.Name;
-            Token = new MetadataToken(MetadataTokenType.MemberRef, 0);
-            ReturnType = new TypeReference(typeof(void));
-            DeclaringType = new TypeReference(ctorInfo.DeclaringType);
+            ReturnType = KnownType.Void;
+            DeclaringType = TypeFactory.Create(ctorInfo.DeclaringType);
             CallingConventions = GetCallingConventions(ctorInfo);
             Parameters = ctorInfo.GetParameters()
-                .Select(param => new ParameterDefinition(param.Name, new TypeReference(param.ParameterType), this))
+                .Select(param => new ParameterDefinition(param.Name, TypeFactory.Create(param.ParameterType), this))
                 .ToCollection();
         }
 
         public MethodReference(System.Reflection.MethodInfo methodInfo)
         {
             Name = methodInfo.Name;
-            Token = new MetadataToken(MetadataTokenType.MemberRef, 0);
-            ReturnType = new TypeReference(methodInfo.ReturnType);
-            DeclaringType = new TypeReference(methodInfo.DeclaringType);
+            ReturnType = TypeFactory.Create(methodInfo.ReturnType);
+            DeclaringType = TypeFactory.Create(methodInfo.DeclaringType);
             CallingConventions = GetCallingConventions(methodInfo);
             Parameters = methodInfo.GetParameters()
-                .Select(param => new ParameterDefinition(param.Name, new TypeReference(param.ParameterType), this))
+                .Select(param => new ParameterDefinition(param.Name, TypeFactory.Create(param.ParameterType), this))
                 .ToCollection();
         }
 
-        public void ResolveToken(uint rid)
+        public override int GetHashCode()
         {
-            Token = new MetadataToken(Token.Type, rid);
+            return MethodInfoComparer.Default.GetHashCode(this);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is MethodReference)) return false;
+            return Equals((MethodReference)obj);
+        }
+
+        public bool Equals(IMethodInfo other)
+        {
+            if (!(other is MethodReference)) return false;
+            return Equals((MethodReference)other);
+        }
+
+        public bool Equals(MethodReference other)
+        {
+            return MethodInfoComparer.Default.Equals(this, other);
         }
 
         private CallingConventions GetCallingConventions(System.Reflection.MethodBase methodBase)

@@ -15,7 +15,7 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             Value = value;
         }
 
-        public override IType InferType()
+        public override ITypeInfo InferType()
         {
             switch (Value.Tag)
             {

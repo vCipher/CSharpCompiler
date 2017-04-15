@@ -1,13 +1,21 @@
-﻿namespace CSharpCompiler.Semantics.TypeSystem
+﻿using CSharpCompiler.Semantics.Metadata;
+using System.Reflection;
+
+namespace CSharpCompiler.Semantics.TypeSystem
 {
     public static class TypeFactory
     {
-        public static IType Create(KnownTypeCode typeCode)
+        public static ITypeInfo Create(System.Type type)
         {
-            if (typeCode == KnownTypeCode.None)
-                return new UserType();
+            KnownTypeCode knownTypeCode = type.GetKnownTypeCode();
+            if (knownTypeCode != KnownTypeCode.None) return KnownType.Get(knownTypeCode);
+            if (type.IsArray) return new ArrayType(Create(type.GetElementType()), type.GetArrayRank());
 
-            return new KnownType(typeCode);
+            return new TypeReference(
+                type.Name,
+                type.Namespace,
+                ElementType.Class,
+                AssemblyFactory.Create(type.GetTypeInfo().Assembly.GetName()));
         }
     }
 }

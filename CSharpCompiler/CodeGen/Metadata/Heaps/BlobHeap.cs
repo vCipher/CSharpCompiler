@@ -5,7 +5,7 @@ namespace CSharpCompiler.CodeGen.Metadata.Heaps
 {
     public sealed class BlobHeap : HeapBuffer
     {
-        private Dictionary<ByteBuffer, uint> _blobs = new Dictionary<ByteBuffer, uint>(new ByteBufferComparer());
+        private Dictionary<ByteBuffer, uint> _blobs = new Dictionary<ByteBuffer, uint>();
 
         public BlobHeap() : base(new byte[] { 0x00 }) { }
         

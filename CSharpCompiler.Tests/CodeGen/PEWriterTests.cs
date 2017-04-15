@@ -19,7 +19,10 @@ namespace CSharpCompiler.CodeGen.Tests
         { }
 
         [Theory]
-        [FileData("Content/Tests/PEWriterTest.txt")]
+        [FileData("Content/Tests/PEWriter/string.txt")]
+        [FileData("Content/Tests/PEWriter/expression.txt")]
+        [FileData("Content/Tests/PEWriter/for_loop.txt")]
+        [FileData("Content/Tests/PEWriter/array.txt")]
         public void WriteTest(string content, string expectedFile, CompilationOptions options)
         {
             TokenEnumerable tokens = Scanner.Scan(content);

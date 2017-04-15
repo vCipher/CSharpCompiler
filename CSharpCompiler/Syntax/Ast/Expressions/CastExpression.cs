@@ -9,15 +9,15 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
     {
         public Expression Operand { get; private set; }
 
-        public AstType Type { get; private set; }
+        public TypeNode Type { get; private set; }
 
-        public CastExpression(AstType type, Expression operand)
+        public CastExpression(TypeNode type, Expression operand)
         {
             Operand = operand;
             Type = type;
         }
 
-        public override IType InferType()
+        public override ITypeInfo InferType()
         {
             return Type.ToType();
         }

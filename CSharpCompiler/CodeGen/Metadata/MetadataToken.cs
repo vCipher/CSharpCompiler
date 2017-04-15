@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace CSharpCompiler.Semantics.Metadata
+namespace CSharpCompiler.CodeGen.Metadata
 {
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct MetadataToken : IEquatable<MetadataToken>
     {
-        public static readonly MetadataToken Zero = new MetadataToken(0);
+        public static readonly MetadataToken Zero = new MetadataToken();
 
         private readonly uint _value;
 
@@ -19,14 +19,14 @@ namespace CSharpCompiler.Semantics.Metadata
             get { return (MetadataTokenType)(_value & 0xff000000); }
         }
 
+        public MetadataToken(MetadataTokenType type)
+        {
+            _value = (uint)type;
+        }
+
         public MetadataToken(MetadataTokenType type, uint rid)
         {
             _value = (uint)type | rid;
-        }
-
-        public MetadataToken(uint value)
-        {
-            _value = value;
         }
 
         public override int GetHashCode()

@@ -1,0 +1,16 @@
+﻿# test
+## param (content)
+for (int i = 0; i < 5; i++)
+{
+    writeLine(i);
+}
+
+## param (expectedFile)
+Content/for_loop.dll
+
+## param (options)
+{
+    "TimeStamp": 0x58F255F3,
+    "AssemblyName": "sample.dll",
+    "Mvid": "0087B706-62D4-4BF8-A08A-8DA00D3372FA"
+}

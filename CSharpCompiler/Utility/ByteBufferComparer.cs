@@ -4,9 +4,11 @@ namespace CSharpCompiler.Utility
 {
     public sealed class ByteBufferComparer : IEqualityComparer<ByteBuffer>
     {
+        public static readonly ByteBufferComparer Default = new ByteBufferComparer();
+
         public bool Equals(ByteBuffer x, ByteBuffer y)
         {
-            if (x == null || y == null) return false;
+            if (ReferenceEquals(x, y)) return true;
             if (x.Length != y.Length) return false;
 
             byte[] xBuffer = x.Buffer;

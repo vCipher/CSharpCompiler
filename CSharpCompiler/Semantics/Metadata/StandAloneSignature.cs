@@ -1,35 +1,34 @@
-﻿using CSharpCompiler.Semantics.TypeSystem;
-using CSharpCompiler.Utility;
+﻿using CSharpCompiler.Utility;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace CSharpCompiler.Semantics.Metadata
 {
-    public sealed class SingatureBuilder : ByteBuffer
+    public sealed class StandAloneSignature : ByteBuffer, IMetadataEntity
     {
-        public static SingatureBuilder GetMethodSignature(IMethodInfo methodInfo)
+        public static StandAloneSignature GetMethodSignature(IMethodInfo methodInfo)
         {
-            SingatureBuilder signature = new SingatureBuilder();
+            StandAloneSignature signature = new StandAloneSignature();
             signature.WriteMethod(methodInfo);
             return signature;
         }
 
-        public static SingatureBuilder GetAttributeSignature(CustomAttribute attribute)
+        public static StandAloneSignature GetAttributeSignature(CustomAttribute attribute)
         {
-            SingatureBuilder signature = new SingatureBuilder();
+            StandAloneSignature signature = new StandAloneSignature();
             signature.WriteCustomAttribute(attribute);
             return signature;
         }
 
-        public static SingatureBuilder GetVariablesSignature(Collection<VariableDefinition> variables)
+        public static StandAloneSignature GetVariablesSignature(Collection<VariableDefinition> variables)
         {
-            SingatureBuilder signature = new SingatureBuilder();
+            StandAloneSignature signature = new StandAloneSignature();
             signature.WriteVariablesSignature(variables);
             return signature;
         }
 
-        public SingatureBuilder WriteMethod(IMethodInfo methodInfo)
+        public StandAloneSignature WriteMethod(IMethodInfo methodInfo)
         {
             CallingConventions conventions = methodInfo.CallingConventions;
             int paramCount = methodInfo.Parameters.EmptyIfNull().Count();
@@ -46,7 +45,7 @@ namespace CSharpCompiler.Semantics.Metadata
             return this;
         }
 
-        public SingatureBuilder WriteCustomAttribute(CustomAttribute attribute)
+        public StandAloneSignature WriteCustomAttribute(CustomAttribute attribute)
         {
             // todo: implement custom argument signature
             switch (attribute.Name)
@@ -71,7 +70,7 @@ namespace CSharpCompiler.Semantics.Metadata
             return this;
         }
 
-        public SingatureBuilder WriteVariablesSignature(Collection<VariableDefinition> variables)
+        public StandAloneSignature WriteVariablesSignature(Collection<VariableDefinition> variables)
         {
             WriteByte(0x7);
             WriteCompressedUInt32((uint)variables.Count);
@@ -82,14 +81,9 @@ namespace CSharpCompiler.Semantics.Metadata
             return this;
         }
 
-        public SingatureBuilder WriteTypeSignature(ITypeInfo typeInfo)
+        public StandAloneSignature WriteTypeSignature(ITypeInfo typeInfo)
         {
-            return WriteTypeSignature(typeInfo.DeclaringType);
-        }
-
-        public SingatureBuilder WriteTypeSignature(IType type)
-        {
-            WriteByte((byte)type.ElementType);
+            WriteByte((byte)typeInfo.ElementType);
             return this;
         }
     }

@@ -51,6 +51,14 @@
         /// </summary>
         UInt64,
         /// <summary>
+        /// native unsigned int
+        /// </summary>
+        UIntPtr,
+        /// <summary>
+        /// native int
+        /// </summary>
+        IntPtr,
+        /// <summary>
         /// float (System.Single)
         /// </summary>
         Single,

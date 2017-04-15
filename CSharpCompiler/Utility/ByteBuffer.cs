@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace CSharpCompiler.Utility
 {
-    public class ByteBuffer
+    public class ByteBuffer : IEquatable<ByteBuffer>
     {
         protected int _align;
 
@@ -234,6 +234,22 @@ namespace CSharpCompiler.Utility
 
             System.Buffer.BlockCopy(oldBuffer, 0, buffer, 0, oldLength);
             Buffer = buffer;
+        }
+
+        public override int GetHashCode()
+        {
+            return ByteBufferComparer.Default.GetHashCode(this);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is ByteBuffer)) return false;
+            return Equals((ByteBuffer)obj);
+        }
+
+        public bool Equals(ByteBuffer other)
+        {
+            return ByteBufferComparer.Default.Equals(this, (ByteBuffer)other);
         }
     }
 }

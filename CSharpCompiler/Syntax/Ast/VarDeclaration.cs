@@ -1,7 +1,6 @@
 ﻿using CSharpCompiler.Semantics;
 using CSharpCompiler.Semantics.Cil;
 using CSharpCompiler.Semantics.Metadata;
-using CSharpCompiler.Semantics.TypeSystem;
 using CSharpCompiler.Syntax.Ast.Expressions;
 using CSharpCompiler.Syntax.Ast.Types;
 
@@ -9,7 +8,7 @@ namespace CSharpCompiler.Syntax.Ast
 {
     public sealed class VarDeclaration : AstNode
     {
-        public AstType Type { get; private set; }
+        public TypeNode Type { get; private set; }
         public string VarName { get; private set; }
         public Expression Initializer { get; private set; }
         public VarScope Scope { get; private set; }
@@ -25,7 +24,7 @@ namespace CSharpCompiler.Syntax.Ast
         /// <summary>
         /// Create a local variable declaration with the explicit typification.
         /// </summary>
-        public VarDeclaration(AstType type, string varName, Expression initializer, VarScope scope)
+        public VarDeclaration(TypeNode type, string varName, Expression initializer, VarScope scope)
         {
             Type = type;
             VarName = varName;
@@ -46,7 +45,7 @@ namespace CSharpCompiler.Syntax.Ast
             builder.Emit(OpCodes.Stloc, varDef);
         }
 
-        public IType InferType()
+        public ITypeInfo InferType()
         {
             if (IsImplicit)
             {
@@ -57,6 +56,11 @@ namespace CSharpCompiler.Syntax.Ast
             }
 
             return Type.ToType();
+        }
+
+        public string GetUniqueVarName()
+        {
+            return string.Format("{0}#{1}", VarName, Scope.GetHashCode());
         }
     }
 }

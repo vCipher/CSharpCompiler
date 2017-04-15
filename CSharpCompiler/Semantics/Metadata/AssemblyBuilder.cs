@@ -1,4 +1,5 @@
-﻿using CSharpCompiler.Syntax.Ast;
+﻿using CSharpCompiler.Semantics.TypeSystem;
+using CSharpCompiler.Syntax.Ast;
 using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -31,7 +32,7 @@ namespace CSharpCompiler.Semantics.Metadata
             ModuleDefinition moduleDef = new ModuleDefinition(_options.Mvid, _options.AssemblyName);
             AssemblyDefinition assemblyDef = new AssemblyDefinition(_options.AssemblyName, moduleDef);
 
-            assemblyDef.References.Add(new AssemblyReference(typeof(object).GetTypeInfo().Assembly.GetName()));
+            assemblyDef.References.Add(KnownAssembly.System);
             assemblyDef.CustomAttributes.Add(CustomAttribute.Get<CompilationRelaxationsAttribute>(assemblyDef, typeof(int)));
             assemblyDef.CustomAttributes.Add(CustomAttribute.Get<RuntimeCompatibilityAttribute>(assemblyDef));
             moduleDef.Types.Add(TypeBuilder.Build(_syntaxTree, assemblyDef, _options));

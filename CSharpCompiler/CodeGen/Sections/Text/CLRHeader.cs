@@ -1,4 +1,4 @@
-﻿using CSharpCompiler.Semantics.Metadata;
+﻿using CSharpCompiler.CodeGen.Metadata;
 using System.Runtime.InteropServices;
 
 namespace CSharpCompiler.CodeGen.Sections.Text

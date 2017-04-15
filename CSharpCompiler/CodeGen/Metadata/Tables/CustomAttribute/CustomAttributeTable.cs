@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 
 namespace CSharpCompiler.CodeGen.Metadata.Tables.CustomAttribute
 {
-    public sealed class CustomAttributeTable : MetadataTable<CustomAttributeRow>
+    public sealed class CustomAttributeTable : MetadataTable<Semantics.Metadata.CustomAttribute, CustomAttributeRow>
     {
         private MetadataBuilder _metadata;
 
@@ -19,18 +19,22 @@ namespace CSharpCompiler.CodeGen.Metadata.Tables.CustomAttribute
 
         public void Add(Semantics.Metadata.CustomAttribute attribute)
         {
-            uint rid = Add(CreateCustomAttributeRow(attribute));
-            attribute.ResolveToken(rid);
+            Add(attribute, CreateCustomAttributeRow(attribute));
+        }
+
+        protected override MetadataTokenType GetTokenType()
+        {
+            return MetadataTokenType.CustomAttribute;
         }
 
         private CustomAttributeRow CreateCustomAttributeRow(Semantics.Metadata.CustomAttribute attribute)
         {
-            CustomAttributeRow row = new CustomAttributeRow();
-            row.Parent = _metadata.GetCodedRID(attribute.Owner, CodedTokenType.HasCustomAttribute);
-            row.Type = _metadata.GetCodedRID(attribute.Constructor, CodedTokenType.CustomAttributeType);
-            row.Value = _metadata.WriteSignature(attribute);
-
-            return row;
+            return new CustomAttributeRow()
+            {
+                Parent = _metadata.GetCodedRid(attribute.Owner, CodedTokenType.HasCustomAttribute),
+                Type = _metadata.GetCodedRid(attribute.Constructor, CodedTokenType.CustomAttributeType),
+                Value = _metadata.WriteSignature(attribute)
+            };
         }
     }
 }

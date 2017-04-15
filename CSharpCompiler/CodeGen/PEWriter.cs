@@ -120,7 +120,7 @@ namespace CSharpCompiler.CodeGen
             return new TextSection()
             {
                 Header = GetTextHeader(map),
-                CLRHeader = GetCLRHeader(assemblyDef, map),
+                CLRHeader = GetCLRHeader(assemblyDef, map, metadata),
                 Map = map,
                 Metadata = metadata,
                 Resources = resources,
@@ -191,7 +191,7 @@ namespace CSharpCompiler.CodeGen
             };
         }
 
-        private static CLRHeader GetCLRHeader(AssemblyDefinition assemblyDef, TextMap map)
+        private CLRHeader GetCLRHeader(AssemblyDefinition assemblyDef, TextMap map, MetadataContainer metadata)
         {
             return new CLRHeader()
             {
@@ -203,7 +203,7 @@ namespace CSharpCompiler.CodeGen
                     map.GetOffset(TextSegment.MetadataHeader, TextSegment.DebugDirectory)
                 ),
                 PEKind = PEFileKinds.ILOnly,
-                EntryPointToken = assemblyDef.EntryPoint.Token
+                EntryPointToken = metadata.EntryPointToken
             };
         }
 
@@ -327,9 +327,9 @@ namespace CSharpCompiler.CodeGen
                 SizeOfHeaders = GetPEHeaderSize(),
                 Subsystem = SUBSYSTEM_WINDOWS_CUI,
                 DllCharacteristics = DllCharacteristics.DYNAMIC_BASE |
-                DllCharacteristics.NX_COMPAT |
-                DllCharacteristics.NO_SEH |
-                DllCharacteristics.TERMINAL_SERVER_AWARE,
+                    DllCharacteristics.NX_COMPAT |
+                    DllCharacteristics.NO_SEH |
+                    DllCharacteristics.TERMINAL_SERVER_AWARE,
                 SizeOfStackReserve = 0x00100000,
                 SizeOfStackCommit = 0x00001000,
                 SizeOfHeapReserve = 0x00100000,

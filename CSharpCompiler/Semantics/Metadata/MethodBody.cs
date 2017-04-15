@@ -54,29 +54,30 @@ namespace CSharpCompiler.Semantics.Metadata
             return maxStack;
         }
 
-        private void ComputeStackDelta(Instruction instruction, ref int stack_size)
+        private void ComputeStackDelta(Instruction instruction, ref int stackSize)
         {
-            if (instruction.OpCode.FlowControl == FlowControl.Call)
+            var opCode = instruction.OpCode;
+            if (opCode.FlowControl == FlowControl.Call)
             {
                 var method = (MethodReference)instruction.Operand;
                 // push return value
-                if (method.ReturnType.DeclaringType != KnownType.Void || instruction.OpCode.Code == Code.Newobj)
-                    stack_size++;
+                if (!method.ReturnType.Equals(KnownType.Void) || opCode.Code == Code.Newobj)
+                    stackSize++;
                 return;
             }
 
-            ComputePopDelta(instruction.OpCode.PopBehaviour, ref stack_size);
-            ComputePushDelta(instruction.OpCode.PushBehaviour, ref stack_size);
+            ComputePopDelta(opCode.PopBehaviour, ref stackSize);
+            ComputePushDelta(opCode.PushBehaviour, ref stackSize);
         }
 
-        private void ComputePopDelta(StackBehaviour pop_behavior, ref int stack_size)
+        private void ComputePopDelta(StackBehaviour popBehavior, ref int stackSize)
         {
-            switch (pop_behavior)
+            switch (popBehavior)
             {
                 case StackBehaviour.Popi:
                 case StackBehaviour.Popref:
                 case StackBehaviour.Pop1:
-                    stack_size--;
+                    stackSize--;
                     break;
                 case StackBehaviour.Pop1_pop1:
                 case StackBehaviour.Popi_pop1:
@@ -86,7 +87,7 @@ namespace CSharpCompiler.Semantics.Metadata
                 case StackBehaviour.Popi_popr8:
                 case StackBehaviour.Popref_pop1:
                 case StackBehaviour.Popref_popi:
-                    stack_size -= 2;
+                    stackSize -= 2;
                     break;
                 case StackBehaviour.Popi_popi_popi:
                 case StackBehaviour.Popref_popi_popi:
@@ -94,17 +95,17 @@ namespace CSharpCompiler.Semantics.Metadata
                 case StackBehaviour.Popref_popi_popr4:
                 case StackBehaviour.Popref_popi_popr8:
                 case StackBehaviour.Popref_popi_popref:
-                    stack_size -= 3;
+                    stackSize -= 3;
                     break;
                 case StackBehaviour.PopAll:
-                    stack_size = 0;
+                    stackSize = 0;
                     break;
             }
         }
 
-        private void ComputePushDelta(StackBehaviour push_behaviour, ref int stack_size)
+        private void ComputePushDelta(StackBehaviour pushBehaviour, ref int stackSize)
         {
-            switch (push_behaviour)
+            switch (pushBehaviour)
             {
                 case StackBehaviour.Push1:
                 case StackBehaviour.Pushi:
@@ -112,10 +113,10 @@ namespace CSharpCompiler.Semantics.Metadata
                 case StackBehaviour.Pushr4:
                 case StackBehaviour.Pushr8:
                 case StackBehaviour.Pushref:
-                    stack_size++;
+                    stackSize++;
                     break;
                 case StackBehaviour.Push1_push1:
-                    stack_size += 2;
+                    stackSize += 2;
                     break;
             }
         }

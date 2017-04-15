@@ -3,7 +3,7 @@ using CSharpCompiler.Semantics.Metadata;
 
 namespace CSharpCompiler.CodeGen.Metadata.Tables.Parameter
 {
-    public sealed class ParameterTable : MetadataTable<ParameterRow>
+    public sealed class ParameterTable : MetadataTable<ParameterDefinition, ParameterRow>
     {
         private MetadataBuilder _metadata;
 
@@ -17,20 +17,24 @@ namespace CSharpCompiler.CodeGen.Metadata.Tables.Parameter
             ushort start = Position;
             foreach (ParameterDefinition parameterDef in parameters)
             {
-                uint rid = Add(CreateParamRow(parameterDef));
-                parameterDef.ResolveToken(rid);
+                Add(parameterDef, CreateParamRow(parameterDef));
             }
             return start;
         }
 
+        protected override MetadataTokenType GetTokenType()
+        {
+            return MetadataTokenType.Param;
+        }
+
         private ParameterRow CreateParamRow(ParameterDefinition parameterDef)
         {
-            ParameterRow row = new ParameterRow();
-            row.Attributes = parameterDef.Attributes;
-            row.Sequence = (ushort)(parameterDef.Index + 1);
-            row.Name = _metadata.RegisterString(parameterDef.Name);
-
-            return row;
+            return new ParameterRow()
+            {
+                Attributes = parameterDef.Attributes,
+                Sequence = (ushort)(parameterDef.Index + 1),
+                Name = _metadata.RegisterString(parameterDef.Name)
+            };
         }
     }
 }
