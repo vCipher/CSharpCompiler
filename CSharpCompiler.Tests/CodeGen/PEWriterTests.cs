@@ -1,9 +1,4 @@
-﻿using CSharpCompiler.Lexica;
-using CSharpCompiler.Lexica.Tokens;
-using CSharpCompiler.Semantics.Metadata;
-using CSharpCompiler.Syntax;
-using CSharpCompiler.Syntax.Ast;
-using CSharpCompiler.Tests;
+﻿using CSharpCompiler.Tests;
 using CSharpCompiler.Tests.Assertions;
 using CSharpCompiler.Tests.Data;
 using System;
@@ -19,16 +14,24 @@ namespace CSharpCompiler.CodeGen.Tests
         { }
 
         [Theory]
-        [FileData("Content/Tests/PEWriter/string.txt")]
+        [FileData("Content/Tests/PEWriter/hello_world.txt")]
+        public void WriteHelloWorld(string content, string expectedFile, CompilationOptions options) => Write(content, expectedFile, options);
+
+        [Theory]
         [FileData("Content/Tests/PEWriter/expression.txt")]
+        public void WriteExpression(string content, string expectedFile, CompilationOptions options) => Write(content, expectedFile, options);
+
+        [Theory]
         [FileData("Content/Tests/PEWriter/for_loop.txt")]
+        public void WriteForLoop(string content, string expectedFile, CompilationOptions options) => Write(content, expectedFile, options);
+
+        [Theory]
         [FileData("Content/Tests/PEWriter/array.txt")]
-        public void WriteTest(string content, string expectedFile, CompilationOptions options)
+        public void WriteArray(string content, string expectedFile, CompilationOptions options) => Write(content, expectedFile, options);
+
+        private void Write(string content, string expectedFile, CompilationOptions options)
         {
-            TokenEnumerable tokens = Scanner.Scan(content);
-            ParseTree parseTree = Parser.Parse(tokens);
-            SyntaxTree syntaxTree = AstBuilder.Build(parseTree);
-            AssemblyDefinition assemblyDef = AssemblyBuilder.Build(syntaxTree, options);
+            var assemblyDef = Compiler.CompileAssembly(content, options);
 
             using (Stream expected = File.Open(Path.Combine(AppContext.BaseDirectory, expectedFile), FileMode.Open))
             using (Stream actual = new MemoryStream())

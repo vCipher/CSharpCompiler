@@ -61,9 +61,7 @@ namespace CSharpCompiler.Lexica.Tests
             string vocabulary = "\\w ID";
 
             TransitionTable table = TransitionTable.FromString(vocabulary);
-            TokenEnumerable tokens = Scanner.Scan(content, table);
-
-            tokens.Should().Throw<NotAcceptLexemeException>();
+            Assert.Throws<NotAcceptLexemeException>(() => Scanner.Scan(content, table));
         }
 
         [Fact]

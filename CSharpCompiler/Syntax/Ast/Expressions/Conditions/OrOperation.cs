@@ -3,7 +3,7 @@ using CSharpCompiler.Semantics.Metadata;
 using System;
 using CSharpCompiler.Semantics.TypeSystem;
 
-namespace CSharpCompiler.Syntax.Ast.Expressions
+namespace CSharpCompiler.Syntax.Ast.Expressions.Relations
 {
     public sealed class OrOperation : BinaryOperation
     {

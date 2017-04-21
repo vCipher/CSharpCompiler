@@ -30,7 +30,7 @@ namespace CSharpCompiler.Semantics.Metadata
             return new VariableDefinition(declaration.GetUniqueVarName(), type, _methodBody);
         }
 
-        public void Resolve(InstructionReference instructionRef)
+        public void ResolveOnNextStep(InstructionReference instructionRef)
         {
             _references.Enqueue(instructionRef);
         }
@@ -102,15 +102,13 @@ namespace CSharpCompiler.Semantics.Metadata
 
         public void Emit(Instruction instruction)
         {
-            var result = instruction.Optimize();
-
             if (_references.Any())
             {
                 var instructionRef = _references.Dequeue();
-                instructionRef.Resolve(result);
+                instructionRef.Resolve(instruction);
             }
 
-            _methodBody.Instructions.Add(result);
+            _methodBody.Instructions.Add(instruction);
         }
     }
 }

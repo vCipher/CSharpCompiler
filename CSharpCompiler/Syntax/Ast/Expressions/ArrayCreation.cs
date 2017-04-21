@@ -9,13 +9,13 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
     {
         public TypeNode ContainedType { get; private set; }
         public Expression Initializer { get; private set; }
-        public bool IsStmtExpression { get; private set; }
+        public bool IsStatementExpression { get; private set; }
 
-        public ArrayCreation(TypeNode containedType, Expression initializer, bool isStmtExpression)
+        public ArrayCreation(TypeNode containedType, Expression initializer, bool isStatementExpression)
         {
             ContainedType = containedType;
             Initializer = initializer;
-            IsStmtExpression = isStmtExpression;
+            IsStatementExpression = isStatementExpression;
         }
 
         public override void Build(MethodBuilder builder)
@@ -23,7 +23,7 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             Initializer.Build(builder);
             builder.Emit(OpCodes.Newarr, ContainedType.ToType());
 
-            if (IsStmtExpression)
+            if (IsStatementExpression)
                 builder.Emit(OpCodes.Pop);
         }
 

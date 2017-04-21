@@ -7,12 +7,12 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
 {
     public sealed class Assignment : BinaryOperation
     {
-        private bool _isStmtExpression;
+        private bool _isStatementExpression;
 
-        public Assignment(Token @operator, Expression leftOperand, Expression rightOperand, bool isStmtExpression) 
+        public Assignment(Token @operator, Expression leftOperand, Expression rightOperand, bool isStatementExpression) 
             : base(@operator, leftOperand, rightOperand)
         {
-            _isStmtExpression = isStmtExpression;
+            _isStatementExpression = isStatementExpression;
         }
 
         public override void Build(MethodBuilder builder)
@@ -37,7 +37,7 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             var varDef = builder.GetVarDefinition(varAccess);
             RightOperand.Build(builder);
 
-            if (!_isStmtExpression) builder.Emit(OpCodes.Dup);
+            if (!_isStatementExpression) builder.Emit(OpCodes.Dup);
             builder.Emit(OpCodes.Stloc, varDef);
         }
 

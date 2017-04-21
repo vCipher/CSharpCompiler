@@ -6,21 +6,21 @@ namespace CSharpCompiler.Lexica.Tokens
 {
     public sealed class TokenEnumerable : IEnumerable<Token>
     {
-        private Lazy<List<Token>> _tokens;
+        private List<Token> _tokens;
 
         internal TokenEnumerable(Scanner scanner)
         {
-            _tokens = new Lazy<List<Token>>(() => scanner.Scan());
+            _tokens = scanner.Scan();
         }
 
         public IEnumerator<Token> GetEnumerator()
         {
-            return new TokenEnumerator(_tokens.Value);
+            return new TokenEnumerator(_tokens);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return new TokenEnumerator(_tokens.Value);
+            return new TokenEnumerator(_tokens);
         }
     }
 }

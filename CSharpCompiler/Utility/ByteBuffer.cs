@@ -1,5 +1,4 @@
-﻿using CSharpCompiler.Utility;
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
 
 namespace CSharpCompiler.Utility
@@ -86,7 +85,9 @@ namespace CSharpCompiler.Utility
 
         public void WriteByte(byte value)
         {
-            Write(1, () => Buffer[Position++] = value);
+            EnsureCapacity(1);
+            Buffer[Position++] = value;
+            Length = BitArithmetic.Align(Math.Max(Position, Length), _align);
         }
 
         public void WriteSByte(sbyte value)
@@ -96,11 +97,12 @@ namespace CSharpCompiler.Utility
 
         public void WriteUInt16(ushort value)
         {
-            Write(2, () =>
-            {
-                Buffer[Position++] = (byte)value;
-                Buffer[Position++] = (byte)(value >> 8);
-            });
+            EnsureCapacity(2);
+
+            Buffer[Position++] = (byte)value;
+            Buffer[Position++] = (byte)(value >> 8);
+
+            Length = BitArithmetic.Align(Math.Max(Position, Length), _align);
         }
 
         public void WriteInt16(short value)
@@ -110,13 +112,14 @@ namespace CSharpCompiler.Utility
 
         public void WriteUInt32(uint value)
         {
-            Write(4, () =>
-            {
-                Buffer[Position++] = (byte)value;
-                Buffer[Position++] = (byte)(value >> 8);
-                Buffer[Position++] = (byte)(value >> 16);
-                Buffer[Position++] = (byte)(value >> 24);
-            });
+            EnsureCapacity(4);
+
+            Buffer[Position++] = (byte)value;
+            Buffer[Position++] = (byte)(value >> 8);
+            Buffer[Position++] = (byte)(value >> 16);
+            Buffer[Position++] = (byte)(value >> 24);
+
+            Length = BitArithmetic.Align(Math.Max(Position, Length), _align);
         }
 
         public void WriteInt32(int value)
@@ -126,49 +129,43 @@ namespace CSharpCompiler.Utility
 
         public void WriteUInt64(ulong value)
         {
-            Write(8, () =>
-            {
-                Buffer[Position++] = (byte)value;
-                Buffer[Position++] = (byte)(value >> 8);
-                Buffer[Position++] = (byte)(value >> 16);
-                Buffer[Position++] = (byte)(value >> 24);
-                Buffer[Position++] = (byte)(value >> 32);
-                Buffer[Position++] = (byte)(value >> 40);
-                Buffer[Position++] = (byte)(value >> 48);
-                Buffer[Position++] = (byte)(value >> 56);
-            });
+            EnsureCapacity(8);
+
+            Buffer[Position++] = (byte)value;
+            Buffer[Position++] = (byte)(value >> 8);
+            Buffer[Position++] = (byte)(value >> 16);
+            Buffer[Position++] = (byte)(value >> 24);
+            Buffer[Position++] = (byte)(value >> 32);
+            Buffer[Position++] = (byte)(value >> 40);
+            Buffer[Position++] = (byte)(value >> 48);
+            Buffer[Position++] = (byte)(value >> 56);
+
+            Length = BitArithmetic.Align(Math.Max(Position, Length), _align);
         }
 
         public void WriteInt64(long value)
         {
             WriteUInt64((ulong)value);
-        }        
+        }
 
         public void WriteBytes(byte[] bytes)
         {
-            Write(bytes.Length, () =>
-            {
-                System.Buffer.BlockCopy(bytes, 0, Buffer, Position, bytes.Length);
-                Position += bytes.Length;
-            });
+            EnsureCapacity(bytes.Length);
+
+            System.Buffer.BlockCopy(bytes, 0, Buffer, Position, bytes.Length);
+            Position += bytes.Length;
+
+            Length = BitArithmetic.Align(Math.Max(Position, Length), _align);
         }
 
         public void WriteBuffer(ByteBuffer buffer)
         {
-            Write(buffer.Length, () =>
-            {
-                System.Buffer.BlockCopy(buffer.Buffer, 0, Buffer, Position, buffer.Length);
-                Position += buffer.Length;
-            });
-        }
+            EnsureCapacity(buffer.Length);
 
-        public void WriteBytes(ByteBuffer buffer)
-        {
-            Write(buffer.Length, () =>
-            {
-                System.Buffer.BlockCopy(buffer.Buffer, 0, Buffer, Position, buffer.Length);
-                Position += buffer.Length;
-            });
+            System.Buffer.BlockCopy(buffer.Buffer, 0, Buffer, Position, buffer.Length);
+            Position += buffer.Length;
+
+            Length = BitArithmetic.Align(Math.Max(Position, Length), _align);
         }
 
         public void WriteStruct<T>(T value) where T : struct
@@ -199,7 +196,9 @@ namespace CSharpCompiler.Utility
         public void WriteCompressedUInt32(uint value)
         {
             if (value < 0x80)
+            {
                 WriteByte((byte)value);
+            }
             else if (value < 0x4000)
             {
                 WriteByte((byte)(0x80 | (value >> 8)));
@@ -212,28 +211,6 @@ namespace CSharpCompiler.Utility
                 WriteByte((byte)((value >> 8) & 0xff));
                 WriteByte((byte)(value & 0xff));
             }
-        }
-
-        private void Write(int length, Action writer)
-        {
-            EnsureCapacity(length);
-            writer();
-            Length = BitArithmetic.Align(Math.Max(Position, Length), _align);
-        }
-
-        private void EnsureCapacity(int value)
-        {
-            if (Position + value <= Buffer.Length)
-                return;
-
-            int oldLength = Buffer.Length;
-            int length = BitArithmetic.Align(Math.Max(oldLength + value, oldLength * 2), _align);
-
-            byte[] oldBuffer = Buffer;
-            byte[] buffer = new byte[length];
-
-            System.Buffer.BlockCopy(oldBuffer, 0, buffer, 0, oldLength);
-            Buffer = buffer;
         }
 
         public override int GetHashCode()
@@ -250,6 +227,21 @@ namespace CSharpCompiler.Utility
         public bool Equals(ByteBuffer other)
         {
             return ByteBufferComparer.Default.Equals(this, (ByteBuffer)other);
+        }
+
+        private void EnsureCapacity(int value)
+        {
+            if (Position + value <= Buffer.Length)
+                return;
+
+            int oldLength = Buffer.Length;
+            int length = BitArithmetic.Align(Math.Max(oldLength + value, oldLength * 2), _align);
+
+            byte[] oldBuffer = Buffer;
+            byte[] buffer = new byte[length];
+
+            System.Buffer.BlockCopy(oldBuffer, 0, buffer, 0, oldLength);
+            Buffer = buffer;
         }
     }
 }

@@ -1,29 +1,19 @@
 ﻿using CSharpCompiler.Lexica.Tokens;
-using CSharpCompiler.Semantics.Cil;
 using CSharpCompiler.Semantics.Metadata;
 using System;
 using CSharpCompiler.Semantics.TypeSystem;
 
-namespace CSharpCompiler.Syntax.Ast.Expressions
+namespace CSharpCompiler.Syntax.Ast.Expressions.Relations
 {
-    public sealed class RelationOperation : BinaryOperation
+    public sealed class AndOperation : BinaryOperation
     {
-        public RelationOperation(Token @operator, Expression leftOperand, Expression rightOperand) 
+        public AndOperation(Token @operator, Expression leftOperand, Expression rightOperand) 
             : base(@operator, leftOperand, rightOperand)
         { }
 
         public override void Build(MethodBuilder builder)
         {
-            LeftOperand.Build(builder);
-            RightOperand.Build(builder);
-
-            switch (Operator.Tag)
-            {
-                case TokenTag.LESS: builder.Emit(OpCodes.Clt); return;
-                case TokenTag.GREATER: builder.Emit(OpCodes.Cgt); return;
-            }
-
-            throw new NotSupportedException(string.Format("Not supported operator: {0}", Operator));
+            throw new NotImplementedException();
         }
 
         public override ITypeInfo InferType()

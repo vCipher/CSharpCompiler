@@ -1,4 +1,5 @@
 ﻿using CSharpCompiler.Semantics.Metadata;
+using CSharpCompiler.Semantics.Optimization;
 using System;
 
 namespace CSharpCompiler.Semantics.Cil
@@ -164,9 +165,9 @@ namespace CSharpCompiler.Semantics.Cil
             }
         }
 
-        public Instruction Optimize()
+        public void Optimize()
         {
-            return InstructionOptimizer.Optimize(this);
+            OpCode = OpCodeOptimizer.Optimize(this);
         }
     }
 }

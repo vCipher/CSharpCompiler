@@ -14,14 +14,14 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
 
         public string MethodName { get; private set; }
         public IList<Argument> Arguments { get; private set; }
-        public bool IsStmtExpression { get; private set; }
+        public bool IsStatementExpression { get; private set; }
 
-        public InvokeExpression(string methodName, IList<Argument> arguments, bool isStmtExpression)
+        public InvokeExpression(string methodName, IList<Argument> arguments, bool isStatementExpression)
         {
             _methodRef = new Lazy<MethodReference>(GetMethodReference);
             MethodName = methodName;
             Arguments = arguments;
-            IsStmtExpression = isStmtExpression;
+            IsStatementExpression = isStatementExpression;
         }
 
         public override ITypeInfo InferType()
@@ -44,7 +44,7 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
 
         private bool NeedStackBalancing()
         {
-            return IsStmtExpression && !InferType().Equals(KnownType.Void);
+            return IsStatementExpression && !InferType().Equals(KnownType.Void);
         }
 
         private MethodReference GetMethodReference()

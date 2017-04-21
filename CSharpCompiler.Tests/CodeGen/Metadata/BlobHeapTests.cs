@@ -21,11 +21,8 @@ namespace CSharpCompiler.CodeGen.Metadata.Tests
         [FileData("Content/Tests/BlobHeapTest.txt")]
         public void BlobHeapTest(string content, ByteBuffer expected)
         {
-            TokenEnumerable tokens = Scanner.Scan(content);
-            ParseTree parseTree = Parser.Parse(tokens);
-            SyntaxTree syntaxTree = AstBuilder.Build(parseTree);
-            AssemblyDefinition assemblyDef = AssemblyBuilder.Build(syntaxTree);
-            MetadataContainer metadata = MetadataBuilder.Build(assemblyDef);
+            var assemblyDef = Compiler.CompileAssembly(content);
+            var metadata = MetadataBuilder.Build(assemblyDef);
 
             metadata.Blobs.Should().Be(expected, Output);
         }

@@ -53,7 +53,7 @@ namespace CSharpCompiler.Semantics.Metadata
             return typeDef;
         }
 
-        private MethodDefinition MethodDefinition(List<Stmt> statements, TypeDefinition typeDef)
+        private MethodDefinition MethodDefinition(List<Statement> statements, TypeDefinition typeDef)
         {
             MethodAttributes attributes = MethodAttributes.Public |
                 MethodAttributes.Static |
@@ -63,9 +63,9 @@ namespace CSharpCompiler.Semantics.Metadata
             MethodDefinition methodDef = new MethodDefinition("Main", attributes, typeDef);
             MethodBuilder builder = methodDef.Body.GetBuilder();
             
-            foreach (var stmt in statements)
+            foreach (var Statement in statements)
             {
-                stmt.Build(builder);
+                Statement.Build(builder);
             }
             builder.Emit(OpCodes.Ret);
 

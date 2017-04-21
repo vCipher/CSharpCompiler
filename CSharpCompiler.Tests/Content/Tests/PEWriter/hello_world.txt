@@ -3,7 +3,7 @@
 writeLine("hello, world!");
 
 ## param (expectedFile)
-Content/string.dll
+Content/hello_world.dll
 
 ## param (options)
 {

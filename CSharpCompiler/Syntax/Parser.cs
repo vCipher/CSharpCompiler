@@ -14,9 +14,9 @@ namespace CSharpCompiler.Syntax
         {
             _enumerator = enumerator;
 
-            StmtSeq = GetFlattenLeftRecurtion(
-                ParseNodeTag.StmtSeq,
-                Stmt,
+            StatementSeq = GetFlattenLeftRecurtion(
+                ParseNodeTag.StatementSeq,
+                Statement,
                 () => !ExpectOneOf(TokenTag.CLOSE_CURLY_BRACE, TokenTag.UNKNOWN));
 
             MultiplicativeExpression = GetBinaryOperation(
@@ -92,51 +92,70 @@ namespace CSharpCompiler.Syntax
         
         private ParseTree Parse()
         {
-            return new ParseTree(StmtSeq());
+            return new ParseTree(StatementSeq());
         }
 
         #region statements
-        private Func<ParseNode> StmtSeq;
+        private Func<ParseNode> StatementSeq;
 
         private ParseNode Block()
         {
             return new ParseNode(ParseNodeTag.Block)
                 .AddChild(Terminal(TokenTag.OPEN_CURLY_BRACE))
-                .AddChild(StmtSeq())
+                .AddChild(StatementSeq())
                 .AddChild(Terminal(TokenTag.CLOSE_CURLY_BRACE));
         }
 
-        private ParseNode Stmt()
+        private ParseNode Statement()
         {
             if (Expect(TokenTag.OPEN_CURLY_BRACE)) return Block();
-            if (Expect(TokenTag.FOR)) return ForStmt();
-            if (IsVarDeclaration()) return DeclarationStmt();            
+            if (Expect(TokenTag.FOR)) return ForStatement();
+            if (Expect(TokenTag.IF)) return IfStatement();
+            if (Expect(TokenTag.BREAK)) return BreakStatement();
+            if (IsVarDeclaration()) return DeclarationStatement();            
 
-            return ExpressionStmt();
+            return ExpressionStatement();
         }
 
-        private ParseNode ForStmt()
+        private ParseNode BreakStatement()
         {
-            var forStmt = new ParseNode(ParseNodeTag.ForStmt);
-            forStmt.AddChild(Terminal(TokenTag.FOR));
-            forStmt.AddChild(Terminal(TokenTag.OPEN_PAREN));
-
-            TryAddChild(forStmt, VarDeclaration, IsVarDeclaration);
-            forStmt.AddChild(Terminal(TokenTag.SEMICOLON));
-
-            TryAddChild(forStmt, Expression, () => !Expect(TokenTag.SEMICOLON));
-            forStmt.AddChild(Terminal(TokenTag.SEMICOLON));
-
-            TryAddChild(forStmt, Expression, () => !Expect(TokenTag.SEMICOLON));
-            forStmt.AddChild(Terminal(TokenTag.CLOSE_PAREN));
-            forStmt.AddChild(Stmt());
-
-            return forStmt;
+            return new ParseNode(ParseNodeTag.BreakStatement)
+                .AddChild(Terminal(TokenTag.BREAK))
+                .AddChild(Terminal(TokenTag.SEMICOLON));
         }
 
-        private ParseNode DeclarationStmt()
+        private ParseNode IfStatement()
         {
-            return new ParseNode(ParseNodeTag.DeclarationStmt)
+            return new ParseNode(ParseNodeTag.IfStatement)
+                .AddChild(Terminal(TokenTag.IF))
+                .AddChild(Terminal(TokenTag.OPEN_PAREN))
+                .AddChild(Expression())
+                .AddChild(Terminal(TokenTag.CLOSE_PAREN))
+                .AddChild(Statement());
+        }
+
+        private ParseNode ForStatement()
+        {
+            var forStatement = new ParseNode(ParseNodeTag.ForStatement);
+            forStatement.AddChild(Terminal(TokenTag.FOR));
+            forStatement.AddChild(Terminal(TokenTag.OPEN_PAREN));
+
+            TryAddChild(forStatement, VarDeclaration, IsVarDeclaration);
+            forStatement.AddChild(Terminal(TokenTag.SEMICOLON));
+
+            TryAddChild(forStatement, Expression, () => !Expect(TokenTag.SEMICOLON));
+            forStatement.AddChild(Terminal(TokenTag.SEMICOLON));
+
+            TryAddChild(forStatement, Expression, () => !Expect(TokenTag.SEMICOLON));
+            forStatement.AddChild(Terminal(TokenTag.CLOSE_PAREN));
+            forStatement.AddChild(Statement());
+
+            return forStatement;
+        }
+
+        private ParseNode DeclarationStatement()
+        {
+            return new ParseNode(ParseNodeTag.DeclarationStatement)
                 .AddChild(VarDeclaration())
                 .AddChild(Terminal(TokenTag.SEMICOLON));
         }
@@ -174,9 +193,9 @@ namespace CSharpCompiler.Syntax
             return varDeclr;
         }
 
-        private ParseNode ExpressionStmt()
+        private ParseNode ExpressionStatement()
         {
-            return new ParseNode(ParseNodeTag.ExpressionStmt)
+            return new ParseNode(ParseNodeTag.ExpressionStatement)
                 .AddChild(Expression())
                 .AddChild(Terminal(TokenTag.SEMICOLON));
         }

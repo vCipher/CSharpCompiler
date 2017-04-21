@@ -8,12 +8,12 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
     public sealed class PostfixDecrement : Expression
     {
         public Expression Operand { get; private set; }
-        public bool IsStmtExpression { get; private set; }
+        public bool IsStatementExpression { get; private set; }
         
-        public PostfixDecrement(Expression operand, bool isStmtExpression)
+        public PostfixDecrement(Expression operand, bool isStatementExpression)
         {
             Operand = operand;
-            IsStmtExpression = isStmtExpression;
+            IsStatementExpression = isStatementExpression;
         }
 
         public override void Build(MethodBuilder builder)
@@ -24,7 +24,7 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
                 var varDef = builder.GetVarDefinition(varAccess);
 
                 builder.Emit(OpCodes.Ldloc, varDef);
-                if (!IsStmtExpression) builder.Emit(OpCodes.Dup);
+                if (!IsStatementExpression) builder.Emit(OpCodes.Dup);
                 builder.Emit(OpCodes.Ldc_I4_1);
                 builder.Emit(OpCodes.Sub);
                 builder.Emit(OpCodes.Stloc, varDef);

@@ -1,20 +1,14 @@
 ﻿using CSharpCompiler.Lexica.Tokens;
 using CSharpCompiler.Semantics.Metadata;
-using System;
 using CSharpCompiler.Semantics.TypeSystem;
 
-namespace CSharpCompiler.Syntax.Ast.Expressions
+namespace CSharpCompiler.Syntax.Ast.Expressions.Relations
 {
-    public sealed class AndOperation : BinaryOperation
+    public abstract class RelationOperation : BinaryOperation
     {
-        public AndOperation(Token @operator, Expression leftOperand, Expression rightOperand) 
+        public RelationOperation(Token @operator, Expression leftOperand, Expression rightOperand) 
             : base(@operator, leftOperand, rightOperand)
         { }
-
-        public override void Build(MethodBuilder builder)
-        {
-            throw new NotImplementedException();
-        }
 
         public override ITypeInfo InferType()
         {
@@ -24,7 +18,7 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             if (KnownType.Boolean.Equals(leftType) && KnownType.Boolean.Equals(rightType))
                 return KnownType.Boolean;
 
-            throw new TypeInferenceException("Can't infer a type for: {0} and for: {1}", leftType, rightType);
+            throw new TypeInferenceException("Can't infer type for: {0} and for: {1}", leftType, rightType);
         }
     }
 }

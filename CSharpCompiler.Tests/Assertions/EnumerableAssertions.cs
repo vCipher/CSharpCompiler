@@ -25,10 +25,5 @@ namespace CSharpCompiler.Tests.Assertions
         {
             Assert.Single(actual, expected);
         }
-
-        public void Throw<TException>() where TException : Exception
-        {
-            Assert.Throws<TException>(() => actual.ToList());
-        }
     }
 }

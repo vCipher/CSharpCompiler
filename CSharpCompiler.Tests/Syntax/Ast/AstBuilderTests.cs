@@ -37,7 +37,7 @@ namespace CSharpCompiler.Syntax.Ast.Tests
         {
             VarScope scope = new VarScope();
             SyntaxTree expected = new SyntaxTree(
-                new DeclarationStmt(
+                new DeclarationStatement(
                     new VarDeclaration(
                         new PrimitiveTypeNode(Tokens.INT),
                         "a",
@@ -45,7 +45,7 @@ namespace CSharpCompiler.Syntax.Ast.Tests
                         scope
                     )
                 ),
-                new DeclarationStmt(
+                new DeclarationStatement(
                     new VarDeclaration(
                         new PrimitiveTypeNode(Tokens.INT),
                         "b",
@@ -53,7 +53,7 @@ namespace CSharpCompiler.Syntax.Ast.Tests
                         scope
                     )
                 ),
-                new ExpressionStmt(
+                new ExpressionStatement(
                     new InvokeExpression(
                         "writeLine",
                         new List<Argument>

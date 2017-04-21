@@ -5,9 +5,9 @@ namespace CSharpCompiler.Tests.Helpers
 {
     public static class ParserHelper
     {
-        public static ParseNode ExpressionStmt(ParseNode expr)
+        public static ParseNode ExpressionStatement(ParseNode expr)
         {
-            return new ParseNode(ParseNodeTag.ExpressionStmt,
+            return new ParseNode(ParseNodeTag.ExpressionStatement,
                 expr,
                 new ParseNode(Tokens.SEMICOLON)
             );
@@ -23,9 +23,9 @@ namespace CSharpCompiler.Tests.Helpers
             );
         }
 
-        public static ParseNode DeclarationStmt(Token typeName, Token id, Token constant)
+        public static ParseNode DeclarationStatement(Token typeName, Token id, Token constant)
         {
-            return new ParseNode(ParseNodeTag.DeclarationStmt,
+            return new ParseNode(ParseNodeTag.DeclarationStatement,
                 VarDeclaration(typeName, id, constant),
                 new ParseNode(Tokens.SEMICOLON)
             );

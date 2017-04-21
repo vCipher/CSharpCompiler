@@ -8,12 +8,12 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
     public sealed class PrefixDecrement : Expression
     {
         public Expression Operand { get; private set; }
-        public bool IsStmtExpression { get; private set; }
+        public bool IsStatementExpression { get; private set; }
         
-        public PrefixDecrement(Expression operand, bool isStmtExpression)
+        public PrefixDecrement(Expression operand, bool isStatementExpression)
         {
             Operand = operand;
-            IsStmtExpression = isStmtExpression;
+            IsStatementExpression = isStatementExpression;
         }
 
         public override void Build(MethodBuilder builder)
@@ -27,7 +27,7 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
                 builder.Emit(OpCodes.Ldloc, varDef);
                 builder.Emit(OpCodes.Ldc_I4_1);
                 builder.Emit(OpCodes.Sub);
-                if (!IsStmtExpression) builder.Emit(OpCodes.Dup);
+                if (!IsStatementExpression) builder.Emit(OpCodes.Dup);
                 builder.Emit(OpCodes.Stloc, varDef);
                 return;
             }

@@ -3,39 +3,17 @@ using CSharpCompiler.Semantics.Cil;
 using CSharpCompiler.Semantics.Metadata;
 using CSharpCompiler.Utility;
 using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace CSharpCompiler.CodeGen.Sections.Text
 {
     public sealed class ILCodeBuffer : ByteBuffer
     {
-        private Dictionary<OperandType, Action<Instruction>> _writers;
         private MetadataBuilder _metadata;
 
         public ILCodeBuffer(MetadataBuilder metadata) : base(Empty<byte>.Array, 4)
         {
             _metadata = metadata;
-            _writers = new Dictionary<OperandType, Action<Instruction>>
-            {
-                { OperandType.InlineBrTarget, WriteInlineBrTarget },
-                { OperandType.InlineI, WriteInlineI },
-                { OperandType.InlineI8, WriteInlineI8 },
-                { OperandType.InlineR, WriteInlineR },
-                { OperandType.InlineSig, WriteInlineSig },
-                { OperandType.InlineString, WriteInlineString },
-                { OperandType.InlineSwitch, WriteInlineSwitch },
-                { OperandType.InlineVar, WriteInlineVar },
-                { OperandType.InlineArg, WriteInlineArg },
-                { OperandType.ShortInlineBrTarget, WriteShortInlineBrTarget },
-                { OperandType.ShortInlineI, WriteShortInlineI },
-                { OperandType.ShortInlineR, WriteShortInlineR },
-                { OperandType.ShortInlineVar, WriteShortInlineVar },
-                { OperandType.ShortInlineArg, WriteShortInlineArg },
-                { OperandType.InlineMethod, WriteMetadataToken },
-                { OperandType.InlineField, WriteMetadataToken },
-                { OperandType.InlineTok, WriteMetadataToken },
-                { OperandType.InlineType, WriteMetadataToken }
-            };
         }
 
         public ILCodeBuffer(byte[] buffer) : base(buffer) { }
@@ -91,7 +69,7 @@ namespace CSharpCompiler.CodeGen.Sections.Text
             WriteByte((byte)((int)MethodBodyAttributes.TinyFormat | (methodDef.Body.CodeSize << 2)));
         }
 
-        private void WriteInstructions(IEnumerable<Instruction> instructions)
+        private void WriteInstructions(Collection<Instruction> instructions)
         {
             foreach (var instruction in instructions)
             {
@@ -117,18 +95,33 @@ namespace CSharpCompiler.CodeGen.Sections.Text
         {
             var opcode = instruction.OpCode;
             var operandType = opcode.OperandType;
-            if (operandType == OperandType.InlineNone)
-                return;
 
-            var operand = instruction.Operand;
-            if (operand == null)
-                throw new ArgumentException("instruction");
+            if (operandType == OperandType.InlineNone) return;
+            if (instruction.Operand == null) throw new ArgumentException("instruction");
 
-            Action<Instruction> writer;
-            if (!_writers.TryGetValue(operandType, out writer))
-                throw new ArgumentException("instruction");
+            switch (operandType)
+            {
+                case OperandType.InlineBrTarget: WriteInlineBrTarget(instruction); return;
+                case OperandType.InlineI: WriteInlineI(instruction); return;
+                case OperandType.InlineI8: WriteInlineI8(instruction); return;
+                case OperandType.InlineR: WriteInlineR(instruction); return;
+                case OperandType.InlineSig: WriteInlineSig(instruction); return;
+                case OperandType.InlineString: WriteInlineString(instruction); return;
+                case OperandType.InlineSwitch: WriteInlineSwitch(instruction); return;
+                case OperandType.InlineVar: WriteInlineVar(instruction); return;
+                case OperandType.InlineArg: WriteInlineArg(instruction); return;
+                case OperandType.ShortInlineBrTarget: WriteShortInlineBrTarget(instruction); return;
+                case OperandType.ShortInlineI: WriteShortInlineI(instruction); return;
+                case OperandType.ShortInlineR: WriteShortInlineR(instruction); return;
+                case OperandType.ShortInlineVar: WriteShortInlineVar(instruction); return;
+                case OperandType.ShortInlineArg: WriteShortInlineArg(instruction); return;
+                case OperandType.InlineMethod: WriteMetadataToken(instruction); return;
+                case OperandType.InlineField: WriteMetadataToken(instruction); return;
+                case OperandType.InlineTok: WriteMetadataToken(instruction); return;
+                case OperandType.InlineType: WriteMetadataToken(instruction); return;
+            }
 
-            writer(instruction);
+            throw new ArgumentException("instruction");
         }
 
         private void WriteShortInlineArg(Instruction instruction)
@@ -138,12 +131,12 @@ namespace CSharpCompiler.CodeGen.Sections.Text
 
         private void WriteShortInlineR(Instruction instruction)
         {
-            WriteSingle((float)instruction.Operand);
+            WriteSingle(Convert.ToSingle(instruction.Operand));
         }
 
         private void WriteShortInlineI(Instruction instruction)
         {
-            WriteByte((byte)instruction.Operand);
+            WriteByte(Convert.ToByte(instruction.Operand));
         }
 
         private void WriteShortInlineBrTarget(Instruction instruction)
@@ -179,12 +172,12 @@ namespace CSharpCompiler.CodeGen.Sections.Text
 
         private void WriteInlineR(Instruction instruction)
         {
-            WriteDouble((double)instruction.Operand);
+            WriteDouble(Convert.ToDouble(instruction.Operand));
         }
 
         private void WriteInlineI8(Instruction instruction)
         {
-            WriteDouble((long)instruction.Operand);
+            WriteDouble(Convert.ToInt64(instruction.Operand));
         }
 
         private void WriteInlineBrTarget(Instruction instruction)
@@ -198,7 +191,7 @@ namespace CSharpCompiler.CodeGen.Sections.Text
 
         private void WriteInlineI(Instruction instruction)
         {
-            WriteInt32((int)instruction.Operand);
+            WriteInt32(Convert.ToInt32(instruction.Operand));
         }
 
         private void WriteShortInlineVar(Instruction instruction)

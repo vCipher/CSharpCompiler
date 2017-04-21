@@ -4,23 +4,23 @@ using CSharpCompiler.Syntax.Ast.Expressions;
 
 namespace CSharpCompiler.Syntax.Ast.Statements
 {
-    public sealed class ExpressionStmt : Stmt
+    public sealed class ExpressionStatement : Statement
     {
         public Expression Expression { get; set; }
 
-        public ExpressionStmt(Expression expr)
+        public ExpressionStatement(Expression expr)
         {
             Expression = expr;
         }
 
-        public static implicit operator Expression(ExpressionStmt stmt)
+        public static implicit operator Expression(ExpressionStatement Statement)
         {
-            return stmt.Expression;
+            return Statement.Expression;
         }
 
-        public static implicit operator ExpressionStmt(Expression expr)
+        public static implicit operator ExpressionStatement(Expression expr)
         {
-            return new ExpressionStmt(expr);
+            return new ExpressionStatement(expr);
         }
 
         public override void Build(MethodBuilder builder)

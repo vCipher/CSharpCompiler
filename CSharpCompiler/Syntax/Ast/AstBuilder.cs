@@ -6,6 +6,7 @@ using System.Linq;
 using System.Collections.Generic;
 using CSharpCompiler.Utility;
 using System;
+using CSharpCompiler.Syntax.Ast.Expressions.Relations;
 
 namespace CSharpCompiler.Syntax.Ast
 {
@@ -13,6 +14,7 @@ namespace CSharpCompiler.Syntax.Ast
     {
         private ParseTree _parseTree;
         private Stack<VarScope> _scopes;
+        private LoopStatement _enclosure;
 
         public AstBuilder(ParseTree parseTree)
         {
@@ -30,33 +32,61 @@ namespace CSharpCompiler.Syntax.Ast
             _scopes.Push(new VarScope());
 
             return _parseTree.Children
-                .GetAndMove(StmtSequance)
-                .Pipe(stmts => new SyntaxTree(stmts));
+                .GetAndMove(StatementSequance)
+                .Pipe(Statements => new SyntaxTree(Statements));
         }
 
         #region statements
-        private List<Stmt> StmtSequance(ParseNode node)
+        private List<Statement> StatementSequance(ParseNode node)
         {
             return node.Children
                 .EmptyIfNull()
-                .Select(Stmt)
+                .Select(Statement)
                 .ToList();
         }
 
-        private Stmt Stmt(ParseNode node)
+        private Statement Statement(ParseNode node)
         {
             switch (node.Tag)
             {
-                case ParseNodeTag.DeclarationStmt: return DeclarationStmt(node);
-                case ParseNodeTag.ExpressionStmt: return ExpressionStmt(node);
-                case ParseNodeTag.ForStmt: return ForStmt(node);
+                case ParseNodeTag.DeclarationStatement: return DeclarationStatement(node);
+                case ParseNodeTag.ExpressionStatement: return ExpressionStatement(node);
+                case ParseNodeTag.Block: return Block(node);
+                case ParseNodeTag.ForStatement: return ForStatement(node);
+                case ParseNodeTag.IfStatement: return IfStatement(node);
+                case ParseNodeTag.BreakStatement: return BreakStatement(node);
             }
 
             throw new SyntaxException("Unsupported statement: {0}", node);
         }
 
-        private ForStmt ForStmt(ParseNode node)
+        private BreakStatement BreakStatement(ParseNode node)
         {
+            if (_enclosure == null) throw new SyntaxException("No enclosing loop out of which to break or continue");
+            return new BreakStatement(_enclosure);
+        }
+
+        private IfStatement IfStatement(ParseNode node)
+        {
+            var children = node.Children;
+
+            var expression = children
+                .Skip(TokenTag.IF)
+                .Skip(TokenTag.OPEN_PAREN)
+                .GetAndMove(Expression);
+
+            var statement = children
+                .Skip(TokenTag.CLOSE_PAREN)
+                .GetAndMove(Statement);
+
+            return new IfStatement(expression, statement);
+        }
+
+        private ForStatement ForStatement(ParseNode node)
+        {
+            var forStatement = new ForStatement();
+            _enclosure = forStatement;
+
             _scopes.Push(new VarScope());
 
             var children = node.Children;
@@ -74,32 +104,36 @@ namespace CSharpCompiler.Syntax.Ast
 
             children.Skip(TokenTag.SEMICOLON);
             var postIteration = children.Check(child => !child.IsTerminal)
-                ? children.GetAndMove(StmtExpression)
+                ? children.GetAndMove(StatementExpression)
                 : new EmptyExpression();
 
             children.Skip(TokenTag.CLOSE_PAREN);
-            var body = children.Check(ParseNodeTag.Block)
-                ? children.GetAndMove(Block)
-                : children.GetAndMove(ExpressionStmt)
-                    .ToSingletonList<Stmt>();
+            var body = children.GetAndMove(Statement);
             
             _scopes.Pop();
-            
-            return new ForStmt(declarations, condition, postIteration, body);
+
+            forStatement.Init(declarations, condition, postIteration, body);
+            return forStatement;
         }
 
-        private List<Stmt> Block(ParseNode node)
+        private BlockStatement Block(ParseNode node)
         {
-            return node.Children
+            _scopes.Push(new VarScope());
+
+            var statements = node.Children
                 .Skip(TokenTag.OPEN_CURLY_BRACE)
-                .GetAndMove(StmtSequance);
+                .GetAndMove(StatementSequance);
+
+            _scopes.Pop();
+
+            return new BlockStatement(statements);
         }
 
-        private DeclarationStmt DeclarationStmt(ParseNode node)
+        private DeclarationStatement DeclarationStatement(ParseNode node)
         {
             return node.Children
                 .GetAndMove(VarDeclarations)
-                .Pipe(declarations => new DeclarationStmt(declarations));
+                .Pipe(declarations => new DeclarationStatement(declarations));
         }
 
         private List<VarDeclaration> VarDeclarations(ParseNode node)
@@ -183,14 +217,14 @@ namespace CSharpCompiler.Syntax.Ast
             throw new UndefinedVariableException(varName);
         }
 
-        private ExpressionStmt ExpressionStmt(ParseNode node)
+        private ExpressionStatement ExpressionStatement(ParseNode node)
         {
             return node.Children
-                .GetAndMove(StmtExpression)
-                .Pipe(expr => new ExpressionStmt(expr));
+                .GetAndMove(StatementExpression)
+                .Pipe(expr => new ExpressionStatement(expr));
         }
 
-        private Expression StmtExpression(ParseNode node)
+        private Expression StatementExpression(ParseNode node)
         {
             switch (node.Tag)
             {
@@ -255,7 +289,7 @@ namespace CSharpCompiler.Syntax.Ast
             return new ElementAccess(array, index);
         }
 
-        private ElementStore ElementStore(ParseNode node, bool isStmtExpression = false)
+        private ElementStore ElementStore(ParseNode node, bool isStatementExpression = false)
         {
             var array = node.Children
                 .GetAndMove(Expression);
@@ -269,10 +303,10 @@ namespace CSharpCompiler.Syntax.Ast
                 .Skip(TokenTag.ASSIGN)
                 .GetAndMove(Expression);
 
-            return new ElementStore(array, index, value, isStmtExpression);
+            return new ElementStore(array, index, value, isStatementExpression);
         }
 
-        private ArrayCreation ArrayCreation(ParseNode node, bool isStmtExpression = false)
+        private ArrayCreation ArrayCreation(ParseNode node, bool isStatementExpression = false)
         {
             var containedType = node.Children
                 .Skip(TokenTag.NEW)
@@ -281,10 +315,10 @@ namespace CSharpCompiler.Syntax.Ast
             return node.Children
                 .Skip(TokenTag.OPEN_SQUARE_BRACE)
                 .GetAndMove(Expression)
-                .Pipe(initializer => new ArrayCreation(containedType, initializer, isStmtExpression));
+                .Pipe(initializer => new ArrayCreation(containedType, initializer, isStatementExpression));
         }
 
-        private ObjectCreation ObjectCreation(ParseNode node, bool isStmtExpression = false)
+        private ObjectCreation ObjectCreation(ParseNode node, bool isStatementExpression = false)
         {
             var type = node.Children
                 .Skip(TokenTag.NEW)
@@ -293,36 +327,36 @@ namespace CSharpCompiler.Syntax.Ast
             return node.Children
                 .Skip(TokenTag.OPEN_PAREN)
                 .GetAndMove(Arguments)
-                .Pipe(args => new ObjectCreation(type, args, isStmtExpression));
+                .Pipe(args => new ObjectCreation(type, args, isStatementExpression));
         }
 
-        private PostfixIncrement PostfixIncrement(ParseNode node, bool isStmtExpression = false)
+        private PostfixIncrement PostfixIncrement(ParseNode node, bool isStatementExpression = false)
         {
             return node.Children
                 .GetAndMove(Expression)
-                .Pipe(operand => new PostfixIncrement(operand, isStmtExpression));
+                .Pipe(operand => new PostfixIncrement(operand, isStatementExpression));
         }
 
-        private PostfixDecrement PostfixDecrement(ParseNode node, bool isStmtExpression = false)
+        private PostfixDecrement PostfixDecrement(ParseNode node, bool isStatementExpression = false)
         {
             return node.Children
                 .GetAndMove(Expression)
-                .Pipe(operand => new PostfixDecrement(operand, isStmtExpression));
+                .Pipe(operand => new PostfixDecrement(operand, isStatementExpression));
         }
 
-        private PrefixIncrement PrefixIncrement(ParseNode node, bool isStmtExpression = false)
+        private PrefixIncrement PrefixIncrement(ParseNode node, bool isStatementExpression = false)
         {
             return node.Children
                 .Skip(TokenTag.INCREMENT)
                 .GetAndMove(Expression)
-                .Pipe(operand => new PrefixIncrement(operand, isStmtExpression));
+                .Pipe(operand => new PrefixIncrement(operand, isStatementExpression));
         }
 
-        private PrefixDecrement PrefixDecrement(ParseNode node, bool isStmtExpression = false)
+        private PrefixDecrement PrefixDecrement(ParseNode node, bool isStatementExpression = false)
         {
             return node.Children
                 .GetAndMove(Expression)
-                .Pipe(operand => new PrefixDecrement(operand, isStmtExpression));
+                .Pipe(operand => new PrefixDecrement(operand, isStatementExpression));
         }
 
         private Expression ParenthesisExpression(ParseNode node)
@@ -332,7 +366,7 @@ namespace CSharpCompiler.Syntax.Ast
                 .GetAndMove(Expression);
         }
 
-        private InvokeExpression InvocationExpression(ParseNode node, bool isStmtExpression = false)
+        private InvokeExpression InvocationExpression(ParseNode node, bool isStatementExpression = false)
         {
             var methodName = node.Children
                 .GetAndMove(ParseNodeTag.Terminal)
@@ -342,7 +376,7 @@ namespace CSharpCompiler.Syntax.Ast
             return node.Children
                 .Skip(TokenTag.OPEN_PAREN)
                 .GetAndMove(Arguments)
-                .Pipe(args => new InvokeExpression(methodName, args, isStmtExpression));
+                .Pipe(args => new InvokeExpression(methodName, args, isStatementExpression));
         }
 
         private List<Argument> Arguments(ParseNode node)
@@ -384,14 +418,14 @@ namespace CSharpCompiler.Syntax.Ast
             return new OrOperation(@operator, leftOperand, rightOperand);
         }
 
-        private Assignment Assignment(ParseNode node, bool isStmtExpression = false)
+        private Assignment Assignment(ParseNode node, bool isStatementExpression = false)
         {
             var children = node.Children;
             var leftOperand = children.GetAndMove(Expression);
             var @operator = children.GetAndMove(ParseNodeTag.Terminal).Token;
             var rightOperand = children.GetAndMove(Expression);
 
-            return new Assignment(@operator, leftOperand, rightOperand, isStmtExpression);
+            return new Assignment(@operator, leftOperand, rightOperand, isStatementExpression);
         }
 
         private Expression RelationalOperation(ParseNode node)
@@ -405,7 +439,22 @@ namespace CSharpCompiler.Syntax.Ast
             var @operator = children.GetAndMove(ParseNodeTag.Terminal).Token;
             var rightOperand = children.GetAndMove(Expression);
 
-            return new RelationOperation(@operator, leftOperand, rightOperand);
+            return RelationOperation(@operator, leftOperand, rightOperand);
+        }
+
+        private RelationOperation RelationOperation(Token @operator, Expression leftOperand, Expression rightOperand)
+        {
+            switch (@operator.Tag)
+            {
+                case TokenTag.LESS: return new LessOperation(@operator, leftOperand, rightOperand);
+                case TokenTag.LESS_OR_EQUAL: return new LessOrEqualOperation(@operator, leftOperand, rightOperand);
+                case TokenTag.GREATER: return new GreaterOperation(@operator, leftOperand, rightOperand);
+                case TokenTag.GREATER_OR_EQUAL: return new GreaterOrEqualOperation(@operator, leftOperand, rightOperand);
+                case TokenTag.EQUAL: return new EqualOperation(@operator, leftOperand, rightOperand);
+                case TokenTag.NOT_EQUAL: return new NotEqualOperation(@operator, leftOperand, rightOperand);
+            }
+
+            throw new SyntaxException("Not supported operator: {0}", @operator);
         }
 
         private IsOperation IsOperation(Expression operand, ParseNodeCollection children)

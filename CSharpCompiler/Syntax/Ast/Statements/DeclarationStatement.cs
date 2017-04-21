@@ -3,16 +3,16 @@ using System.Collections.Generic;
 
 namespace CSharpCompiler.Syntax.Ast.Statements
 {
-    public sealed class DeclarationStmt : Stmt
+    public sealed class DeclarationStatement : Statement
     {
         public List<VarDeclaration> Declarations { get; private set; }
 
-        public DeclarationStmt(List<VarDeclaration> declarations)
+        public DeclarationStatement(List<VarDeclaration> declarations)
         {
             Declarations = declarations;
         }
 
-        public DeclarationStmt(params VarDeclaration[] declarations)
+        public DeclarationStatement(params VarDeclaration[] declarations)
         {
             Declarations = new List<VarDeclaration>(declarations);
         }

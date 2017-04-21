@@ -24,10 +24,10 @@ namespace CSharpCompiler.Syntax.Tests
                   writeLine(a + b);";
 
             ParseTree expected = new ParseTree(
-                new ParseNode(ParseNodeTag.StmtSeq,
-                    DeclarationStmt(INT, ID("a"), INT_LITERAL("1")),
-                    DeclarationStmt(INT, ID("b"), INT_LITERAL("1")),
-                    ExpressionStmt(InvokeMethod(
+                new ParseNode(ParseNodeTag.StatementSeq,
+                    DeclarationStatement(INT, ID("a"), INT_LITERAL("1")),
+                    DeclarationStatement(INT, ID("b"), INT_LITERAL("1")),
+                    ExpressionStatement(InvokeMethod(
                         ID("writeLine"), 
                         Plus(Var("a"), Var("b"))
                     ))

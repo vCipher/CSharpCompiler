@@ -9,14 +9,14 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
         public Expression Array { get; private set; }
         public Expression Index { get; private set; }
         public Expression Value { get; private set; }
-        public bool IsStmtExpression { get; private set; }
+        public bool IsStatementExpression { get; private set; }
 
-        public ElementStore(Expression array, Expression index, Expression value, bool isStmtExpression)
+        public ElementStore(Expression array, Expression index, Expression value, bool isStatementExpression)
         {
             Array = array;
             Index = index;
             Value = value;
-            IsStmtExpression = isStmtExpression;
+            IsStatementExpression = isStatementExpression;
         }
 
         public override ITypeInfo InferType()
@@ -37,7 +37,7 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             Index.Build(builder);
             Value.Build(builder);
 
-            if (!IsStmtExpression)
+            if (!IsStatementExpression)
                 builder.Emit(OpCodes.Dup);
 
             builder.Emit(OpCodes.Stelem_I4);

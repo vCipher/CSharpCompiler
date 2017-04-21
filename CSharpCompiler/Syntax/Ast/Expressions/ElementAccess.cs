@@ -20,8 +20,8 @@ namespace CSharpCompiler.Syntax.Ast.Expressions
             var arrayType = Array.InferType() as ArrayType;
             var indexType = Index.InferType();
 
-            if (arrayType == null) throw new TypeInferenceException("Array access expression must have an array type");
-            if (indexType != KnownType.Int32) throw new TypeInferenceException("Array element access index must have only a int32 type");
+            if (arrayType == null) throw new TypeInferenceException("Array access expression must be type array");
+            if (indexType != KnownType.Int32) throw new TypeInferenceException("Array element index must be only type int32");
 
             return indexType;
         }
