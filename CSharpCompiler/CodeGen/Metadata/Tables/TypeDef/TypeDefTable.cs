@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using CSharpCompiler.Semantics.Metadata;
+﻿using CSharpCompiler.Semantics.Metadata;
 using CSharpCompiler.Utility;
+using System.Collections.ObjectModel;
 
 namespace CSharpCompiler.CodeGen.Metadata.Tables.TypeRef
 {

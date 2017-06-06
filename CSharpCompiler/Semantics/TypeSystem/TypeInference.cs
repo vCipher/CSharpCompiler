@@ -35,11 +35,13 @@ namespace CSharpCompiler.Semantics.TypeSystem
             return inference._type;
         }
 
+        #region common
         public void VisitVarDeclaration(VarDeclaration node)
         {
             if (node.IsImplicit && node.Initializer == null) throw new SemanticException("Can't declare unintialized local variable with implicit typification.");
             _type = node.IsImplicit ? InferType(node.Initializer) : InferType(node.Type);
         }
+        #endregion
 
         #region conditions
         public void VisitAndOperation(AndOperation node) => InferConditionalOperationType(node);

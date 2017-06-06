@@ -6,11 +6,9 @@ namespace CSharpCompiler.Lexica.Regexp
     public class NfaState : ITransitionState<NfaState>, IEquatable<NfaState>
     {
         public bool IsAccepting { get; set; }
-
         public string Alias { get; set; }
-
         public int Id { get; private set; }
-
+        
         public ISet<Transition<NfaState>> Transitions { get; private set; }
 
         public NfaState(int id)

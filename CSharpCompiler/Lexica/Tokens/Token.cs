@@ -1,15 +1,16 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace CSharpCompiler.Lexica.Tokens
 {
     /// <summary>
     /// Basic symbols, used to forming strings.
     /// </summary>
+    [DebuggerDisplay("[{Tag}, {Lexeme}]")]
     public struct Token : IEquatable<Token>
     {
-        public TokenTag Tag { get; set; }
-
-        public string Lexeme { get; set; }
+        public TokenTag Tag { get; private set; }
+        public string Lexeme { get; private set; }
         
         public Token(TokenTag tag)
         {
@@ -21,11 +22,6 @@ namespace CSharpCompiler.Lexica.Tokens
         {
             Lexeme = lexeme;
             Tag = tag;
-        }
-
-        public override string ToString()
-        {
-            return string.Format("<{0}, {1}>", Tag, Lexeme);
         }
 
         public override int GetHashCode()

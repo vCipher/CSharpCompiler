@@ -23,9 +23,7 @@ namespace CSharpCompiler.Lexica.Regexp
     public sealed class Transition<TState> : IEquatable<Transition<TState>> where TState : IState
     {
         public TState From { get; set; }
-
         public TState To { get; set; }
-
         public char Character { get; set; }
 
         public bool IsEpsilon

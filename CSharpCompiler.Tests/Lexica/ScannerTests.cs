@@ -2,7 +2,6 @@
 using CSharpCompiler.Lexica.Tokens;
 using CSharpCompiler.Tests;
 using CSharpCompiler.Tests.Assertions;
-using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
 

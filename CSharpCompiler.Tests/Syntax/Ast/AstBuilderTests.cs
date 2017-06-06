@@ -57,8 +57,7 @@ namespace CSharpCompiler.Syntax.Ast.Tests
                 new ExpressionStatement(
                     new InvokeExpression(
                         "writeLine",
-                        new List<Argument>
-                        {
+                        new [] {
                             new Argument(
                                 new ArithmeticOperation(
                                     Tokens.PLUS,

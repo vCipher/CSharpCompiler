@@ -30,7 +30,7 @@ namespace CSharpCompiler.Utility
 
         internal static int Align(int size, int alignment)
         {
-            if (size < 0) throw new ArgumentOutOfRangeException("position");
+            if (size < 0) throw new ArgumentOutOfRangeException("size");
             if (alignment <= 0) throw new ArgumentOutOfRangeException("alignment");
             if (CountBits(alignment) != 1) throw new ArgumentException("alignment");
 
