@@ -24,6 +24,11 @@ namespace CSharpCompiler.Semantics.Metadata
             Attributes = attributes;
         }
 
+        public void Accept(IMetadataEntityVisitor visitor)
+        {
+            visitor.VisitAssemblyReference(this);
+        }
+
         public override string ToString()
         {
             var sb = new StringBuilder();

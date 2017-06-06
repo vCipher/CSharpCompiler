@@ -28,6 +28,11 @@ namespace CSharpCompiler.Semantics.Metadata
             CustomAttributes = new Collection<CustomAttribute>();
         }
 
+        public void Accept(IMetadataEntityVisitor visitor)
+        {
+            visitor.VisitAssemblyDefinition(this);
+        }
+
         public override string ToString()
         {
             var sb = new StringBuilder();

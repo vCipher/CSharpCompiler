@@ -113,20 +113,7 @@ namespace CSharpCompiler.CodeGen.Metadata
 
         public MetadataToken ResolveToken(IMetadataEntity entity)
         {
-            if (entity == null) return MetadataToken.Zero;
-            if (entity is AssemblyDefinition) return AssemblyTable.GetToken((AssemblyDefinition)entity);
-            if (entity is ModuleDefinition) return ModuleTable.GetToken((ModuleDefinition)entity);
-            if (entity is TypeDefinition) return TypeDefTable.GetToken((TypeDefinition)entity);
-            if (entity is MethodDefinition) return MethodTable.GetToken((MethodDefinition)entity);
-            if (entity is FieldDefinition) return FieldTable.GetToken((FieldDefinition)entity);
-            if (entity is ParameterDefinition) return ParameterTable.GetToken((ParameterDefinition)entity);
-            if (entity is CustomAttribute) return CustomAttributeTable.GetToken((CustomAttribute)entity);
-            if (entity is StandAloneSignature) return StandAloneSigTable.GetToken((StandAloneSignature)entity);
-            if (entity is AssemblyReference) return AssemblyRefTable.GetToken((AssemblyReference)entity);
-            if (entity is TypeReference) return TypeRefTable.GetToken((TypeReference)entity);
-            if (entity is MethodReference) return MemberRefTable.GetToken((MethodReference)entity);
-            
-            throw new NotSupportedException();
+            return MetadataTokenResolver.ResolveToken(entity, this);
         }
 
         public ushort GetCodedRid(IMetadataEntity entity, CodedTokenType type)

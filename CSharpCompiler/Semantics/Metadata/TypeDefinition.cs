@@ -1,5 +1,4 @@
-﻿using CSharpCompiler.Semantics.TypeSystem;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 
 namespace CSharpCompiler.Semantics.Metadata
 {
@@ -26,6 +25,11 @@ namespace CSharpCompiler.Semantics.Metadata
             Methods = new Collection<MethodDefinition>();
             Fields = new Collection<FieldDefinition>();
             CustomAttributes = new Collection<CustomAttribute>();
+        }
+
+        public void Accept(IMetadataEntityVisitor visitor)
+        {
+            visitor.VisitTypeDefinition(this);
         }
 
         public override string ToString()

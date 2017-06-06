@@ -1,5 +1,4 @@
-﻿using CSharpCompiler.Semantics.Metadata;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace CSharpCompiler.CodeGen.Metadata

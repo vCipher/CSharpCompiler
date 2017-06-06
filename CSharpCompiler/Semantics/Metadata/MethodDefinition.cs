@@ -1,5 +1,5 @@
-﻿using System.Collections.ObjectModel;
-using CSharpCompiler.Semantics.TypeSystem;
+﻿using CSharpCompiler.Semantics.TypeSystem;
+using System.Collections.ObjectModel;
 
 namespace CSharpCompiler.Semantics.Metadata
 {
@@ -29,6 +29,11 @@ namespace CSharpCompiler.Semantics.Metadata
             Attributes = attributes;
             Parameters = new Collection<ParameterDefinition>();
             CallingConventions = GetCallingConvention();
+        }
+
+        public void Accept(IMetadataEntityVisitor visitor)
+        {
+            visitor.VisitMethodDefinition(this);
         }
 
         public override int GetHashCode()

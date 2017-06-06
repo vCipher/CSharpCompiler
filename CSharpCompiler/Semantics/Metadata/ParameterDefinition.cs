@@ -18,6 +18,11 @@ namespace CSharpCompiler.Semantics.Metadata
             Attributes = ParameterAttributes.None;
         }
 
+        public void Accept(IMetadataEntityVisitor visitor)
+        {
+            visitor.VisitParameterDefinition(this);
+        }
+
         public override int GetHashCode()
         {
             unchecked

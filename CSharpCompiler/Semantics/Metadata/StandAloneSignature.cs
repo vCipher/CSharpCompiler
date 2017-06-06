@@ -28,6 +28,11 @@ namespace CSharpCompiler.Semantics.Metadata
             return signature;
         }
 
+        public void Accept(IMetadataEntityVisitor visitor)
+        {
+            visitor.VisitStandAloneSignature(this);
+        }
+
         public StandAloneSignature WriteMethod(IMethodInfo methodInfo)
         {
             CallingConventions conventions = methodInfo.CallingConventions;

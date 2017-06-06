@@ -4,5 +4,10 @@
     {
         public FieldDefinition()
         { }
+
+        public void Accept(IMetadataEntityVisitor visitor)
+        {
+            visitor.VisitFieldDefinition(this);
+        }
     }
 }

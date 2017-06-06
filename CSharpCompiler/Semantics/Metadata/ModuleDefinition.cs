@@ -20,6 +20,11 @@ namespace CSharpCompiler.Semantics.Metadata
             Types = new Collection<TypeDefinition>();
         }
 
+        public void Accept(IMetadataEntityVisitor visitor)
+        {
+            visitor.VisitModuleDefinition(this);
+        }
+
         public override int GetHashCode()
         {
             return EqualityComparer<Guid>.Default.GetHashCode(Mvid);

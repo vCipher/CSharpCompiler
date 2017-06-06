@@ -16,6 +16,11 @@
             ContainedType = containedType;
         }
 
+        public void Accept(IMetadataEntityVisitor visitor)
+        {
+            visitor.VisitTypeSpecification(this);
+        }
+
         public override int GetHashCode()
         {
             return TypeInfoComparer.Default.GetHashCode(this);

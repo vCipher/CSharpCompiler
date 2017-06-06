@@ -6,14 +6,13 @@ namespace CSharpCompiler.CodeGen.Metadata
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct MetadataToken : IEquatable<MetadataToken>
     {
-        public static readonly MetadataToken Zero = new MetadataToken();
-
         private readonly uint _value;
 
         public uint RID
         {
             get { return _value & 0x00ffffff; }
         }
+
         public MetadataTokenType Type
         {
             get { return (MetadataTokenType)(_value & 0xff000000); }

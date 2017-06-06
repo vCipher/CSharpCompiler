@@ -17,8 +17,8 @@ namespace CSharpCompiler.Semantics.Cil
 
         public override void WriteToBuffer(Utility.ByteBuffer buffer)
         {
-            buffer.WriteByte((byte)(((ushort)Code >> 0) & 0xff));
             buffer.WriteByte((byte)(((ushort)Code >> 8) & 0xff));
+            buffer.WriteByte((byte)(((ushort)Code >> 0) & 0xff));            
         }
 
         public override int GetHashCode()

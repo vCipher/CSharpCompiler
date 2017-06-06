@@ -33,6 +33,11 @@ namespace CSharpCompiler.Semantics.Metadata
             return new CustomAttribute(type, type.GetConstructor(types), owner);
         }
 
+        public void Accept(IMetadataEntityVisitor visitor)
+        {
+            visitor.VisitCustomAttribute(this);
+        }
+
         public override int GetHashCode()
         {
             return StandAloneSignature.GetAttributeSignature(this).GetHashCode();

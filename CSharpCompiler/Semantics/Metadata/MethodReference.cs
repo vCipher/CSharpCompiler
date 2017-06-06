@@ -35,6 +35,11 @@ namespace CSharpCompiler.Semantics.Metadata
                 .ToCollection();
         }
 
+        public void Accept(IMetadataEntityVisitor visitor)
+        {
+            visitor.VisitMethodReference(this);
+        }
+
         public override int GetHashCode()
         {
             return MethodInfoComparer.Default.GetHashCode(this);
@@ -71,6 +76,6 @@ namespace CSharpCompiler.Semantics.Metadata
                 conventions |= CallingConventions.VarArg;
 
             return conventions;
-        }
+        }        
     }
 }
