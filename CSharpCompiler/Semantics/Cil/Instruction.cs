@@ -133,7 +133,7 @@ namespace CSharpCompiler.Semantics.Cil
 
         public int GetSize()
         {
-            int size = OpCode.Size;
+            int size = OpCode.GetSize();
 
             switch (OpCode.OperandType)
             {

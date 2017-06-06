@@ -78,23 +78,15 @@ namespace CSharpCompiler.CodeGen.Sections.Text
             }
         }
 
-        private void WriteOpCode(OpCode opcode)
+        private void WriteOpCode(OpCode opCode)
         {
-            if (opcode.Size == 1)
-            {
-                WriteByte(opcode.Op2);
-            }
-            else
-            {
-                WriteByte(opcode.Op1);
-                WriteByte(opcode.Op2);
-            }
+            opCode.WriteToBuffer(this);
         }
 
         private void WriteOperand(Instruction instruction)
         {
-            var opcode = instruction.OpCode;
-            var operandType = opcode.OperandType;
+            var opCode = instruction.OpCode;
+            var operandType = opCode.OperandType;
 
             if (operandType == OperandType.InlineNone) return;
             if (instruction.Operand == null) throw new ArgumentException("instruction");
@@ -143,7 +135,7 @@ namespace CSharpCompiler.CodeGen.Sections.Text
         {
             var opCode = instruction.OpCode;
             var target = (IInstructionReference)instruction.Operand;
-            var currentOffset = (instruction.Offset + opCode.Size + 1);
+            var currentOffset = (instruction.Offset + opCode.GetSize() + 1);
             
             WriteSByte((sbyte)(target.Offset - currentOffset));
         }
@@ -184,7 +176,7 @@ namespace CSharpCompiler.CodeGen.Sections.Text
         {
             var opCode = instruction.OpCode;
             var target = (IInstructionReference)instruction.Operand;
-            var currentOffset = (instruction.Offset + opCode.Size + 4);
+            var currentOffset = (instruction.Offset + opCode.GetSize() + 4);
             
             WriteInt32(target.Offset - currentOffset);
         }
