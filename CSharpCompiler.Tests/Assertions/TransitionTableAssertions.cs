@@ -11,7 +11,7 @@ namespace CSharpCompiler.Tests.Assertions
 
         public override void Be(TransitionTable expected, ITestOutputHelper output)
         {
-            Assert.Equal(expected, actual, new TransitionTableComparer());
+            Assert.Equal(expected, actual, TransitionTableComparer.Default);
         }
     }
 }

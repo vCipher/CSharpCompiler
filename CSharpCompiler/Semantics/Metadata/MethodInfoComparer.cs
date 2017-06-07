@@ -24,14 +24,15 @@ namespace CSharpCompiler.Semantics.Metadata
 
         public int GetHashCode(IMethodInfo obj)
         {
-            if (obj == null) return 0;
+            if (obj == null)
+                return 0;
 
             unchecked
             {
-                int res = 31;
-                res ^= EqualityComparer<string>.Default.GetHashCode(obj.Name);
-                res ^= StandAloneSignature.GetMethodSignature(obj).GetHashCode();                
-                return res;
+                int hash = 17;
+                hash = hash * 23 + EqualityComparer<string>.Default.GetHashCode(obj.Name);
+                hash = hash * 23 + StandAloneSignature.GetMethodSignature(obj).GetHashCode();
+                return hash;
             }
         }
     }

@@ -44,14 +44,12 @@ namespace CSharpCompiler.Semantics.Metadata
 
         public override bool Equals(object obj)
         {
-            if (!(obj is TypeDefinition)) return false;
-            return Equals((TypeDefinition)obj);
+            return (obj is TypeDefinition) && Equals((TypeDefinition)obj);
         }
 
         public bool Equals(ITypeInfo other)
         {
-            if (!(other is TypeDefinition)) return false;
-            return Equals((TypeDefinition)other);
+            return (other is TypeDefinition) && Equals((TypeDefinition)other);
         }
 
         public bool Equals(TypeDefinition other)

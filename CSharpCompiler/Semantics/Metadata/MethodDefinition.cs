@@ -43,14 +43,12 @@ namespace CSharpCompiler.Semantics.Metadata
 
         public override bool  Equals(object obj)
         {
-            if (!(obj is MethodDefinition)) return false;
-            return Equals((MethodDefinition)obj);
+            return (obj is MethodDefinition) && Equals((MethodDefinition)obj);
         }
 
         public bool Equals(IMethodInfo other)
         {
-            if (!(other is MethodDefinition)) return false;
-            return Equals((MethodDefinition)other);
+            return (other is MethodDefinition) && Equals((MethodDefinition)other);
         }
 
         public bool Equals(MethodDefinition other)

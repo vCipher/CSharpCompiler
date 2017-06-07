@@ -19,7 +19,8 @@ namespace CSharpCompiler.Utility
 
         public int GetHashCode(byte[] bytes)
         {
-            if (bytes == null) return 0;
+            if (bytes == null)
+                return 0;
 
             unchecked
             {

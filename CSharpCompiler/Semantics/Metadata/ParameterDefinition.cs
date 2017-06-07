@@ -27,18 +27,17 @@ namespace CSharpCompiler.Semantics.Metadata
         {
             unchecked
             {
-                int res = 31;
-                res ^= TypeInfoComparer.Default.GetHashCode(Type);
-                res ^= MethodInfoComparer.Default.GetHashCode(Method);
-                res ^= Attributes.GetHashCode();
-                return res;
+                int hash = 17;
+                hash = hash * 23 + TypeInfoComparer.Default.GetHashCode(Type);
+                hash = hash * 23 + MethodInfoComparer.Default.GetHashCode(Method);
+                hash = hash * 23 + Attributes.GetHashCode();
+                return hash;
             }
         }
 
         public override bool Equals(object obj)
         {
-            if (!(obj is MethodReference)) return false;
-            return Equals((MethodReference)obj);
+            return (obj is MethodReference) && Equals((MethodReference)obj);
         }
 
         public bool Equals(ParameterDefinition other)

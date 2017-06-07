@@ -13,22 +13,23 @@ namespace CSharpCompiler.Semantics.Metadata
             if (ReferenceEquals(x, y)) return true;
             if (x.GetType() != y.GetType()) return false;
 
-            return string.Equals(x.Name, y.Name) &&
-                string.Equals(x.Namespace, y.Namespace) &&
-                AssemblyInfoComparer.Default.Equals(x.Assembly, y.Assembly);
+            return string.Equals(x.Name, y.Name) 
+                && string.Equals(x.Namespace, y.Namespace) 
+                && AssemblyInfoComparer.Default.Equals(x.Assembly, y.Assembly);
         }
 
         public int GetHashCode(ITypeInfo obj)
         {
-            if (obj == null) return 0;
+            if (obj == null)
+                return 0;
 
             unchecked
             {
-                int res = 31;
-                res ^= (obj.Name == null ? 0 : obj.Name.GetHashCode());
-                res ^= (obj.Namespace == null ? 0 : obj.Namespace.GetHashCode());
-                res ^= AssemblyInfoComparer.Default.GetHashCode(obj.Assembly);
-                return res;
+                int hash = 17;
+                hash = hash * 23 + EqualityComparer<string>.Default.GetHashCode(obj.Name);
+                hash = hash * 23 + EqualityComparer<string>.Default.GetHashCode(obj.Namespace);
+                hash = hash * 23 + AssemblyInfoComparer.Default.GetHashCode(obj.Assembly);
+                return hash;
             }
         }
     }

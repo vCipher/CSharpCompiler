@@ -23,18 +23,15 @@ namespace CSharpCompiler.Lexica.Regexp
         {
             unchecked
             {
-                int res = 31;
-                res ^= Id.GetHashCode();
-                return res;
+                int hash = 17;
+                hash = hash * 23 + Id.GetHashCode();
+                return hash;
             }
         }
 
         public override bool Equals(object obj)
         {
-            if (obj is NfaState)
-                return Equals((NfaState)obj);
-
-            return false;
+            return (obj is NfaState) && Equals((NfaState)obj);
         }
 
         public bool Equals(NfaState other)

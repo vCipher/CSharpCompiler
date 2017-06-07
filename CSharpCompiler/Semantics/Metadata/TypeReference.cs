@@ -32,14 +32,12 @@
 
         public override bool Equals(object obj)
         {
-            if (!(obj is TypeReference)) return false;
-            return TypeInfoComparer.Default.Equals(this, (TypeReference)obj);
+            return (obj is TypeReference) && TypeInfoComparer.Default.Equals(this, (TypeReference)obj);
         }
 
         public bool Equals(ITypeInfo other)
         {
-            if (!(other is TypeReference)) return false;
-            return Equals((TypeReference)other);
+            return (other is TypeReference) && Equals((TypeReference)other);
         }
 
         public bool Equals(TypeReference other)

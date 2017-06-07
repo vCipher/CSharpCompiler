@@ -45,8 +45,7 @@ namespace CSharpCompiler.Semantics.Metadata
 
         public override bool Equals(object obj)
         {
-            if (!(obj is CustomAttribute)) return false;
-            return Equals((AssemblyReference)obj);
+            return (obj is CustomAttribute) && Equals((CustomAttribute)obj);
         }
 
         public bool Equals(CustomAttribute other)

@@ -32,8 +32,7 @@ namespace CSharpCompiler.Semantics.Metadata
 
         public override bool Equals(object obj)
         {
-            if (!(obj is ModuleDefinition)) return false;
-            return Equals((ModuleDefinition)obj);
+            return (obj is ModuleDefinition) && Equals((ModuleDefinition)obj);
         }
 
         public bool Equals(ModuleDefinition other)

@@ -32,7 +32,7 @@ namespace CSharpCompiler.Tests.Assertions
 
         public int GetHashCode(Stream obj)
         {
-            return (obj == null) ? 0 : obj.GetHashCode();
+            return obj?.GetHashCode() ?? 0;
         }
     }
 }

@@ -49,14 +49,12 @@ namespace CSharpCompiler.Semantics.Metadata
 
         public override bool Equals(object obj)
         {
-            if (!(obj is AssemblyReference)) return false;
-            return Equals((AssemblyReference)obj);
+            return (obj is AssemblyReference) && Equals((AssemblyReference)obj);
         }
 
         public bool Equals(IAssemblyInfo other)
         {
-            if (!(other is AssemblyReference)) return false;
-            return Equals((AssemblyReference)other);
+            return (other is AssemblyReference) && Equals((AssemblyReference)other);
         }
 
         public bool Equals(AssemblyReference other)

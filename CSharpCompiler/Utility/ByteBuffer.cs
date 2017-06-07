@@ -220,8 +220,7 @@ namespace CSharpCompiler.Utility
 
         public override bool Equals(object obj)
         {
-            if (!(obj is ByteBuffer)) return false;
-            return Equals((ByteBuffer)obj);
+            return (obj is ByteBuffer) && Equals((ByteBuffer)obj);
         }
 
         public bool Equals(ByteBuffer other)

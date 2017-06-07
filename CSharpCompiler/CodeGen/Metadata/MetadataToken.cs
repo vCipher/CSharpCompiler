@@ -32,18 +32,15 @@ namespace CSharpCompiler.CodeGen.Metadata
         {
             unchecked
             {
-                int res = 31;
-                res ^= (int)_value;
-                return res;
+                int hash = 17;
+                hash = hash * 23 + (int)_value;
+                return hash;
             }
         }
 
         public override bool Equals(object obj)
         {
-            if (obj is MetadataToken)
-                return Equals((MetadataToken)obj);
-
-            return false;
+            return (obj is MetadataToken) && Equals((MetadataToken)obj);
         }
 
         public bool Equals(MetadataToken other)

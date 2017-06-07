@@ -14,26 +14,27 @@ namespace CSharpCompiler.Semantics.Metadata
             if (ReferenceEquals(x, y)) return true;
             if (x.GetType() != y.GetType()) return false;
 
-            return string.Equals(x.Name, y.Name) &&
-                string.Equals(x.Culture, y.Culture) &&
-                x.Version.Equals(y.Version) &&
-                ByteArrayComparer.Default.Equals(x.PublicKey, y.PublicKey) &&
-                ByteArrayComparer.Default.Equals(x.PublicKeyToken, y.PublicKeyToken);
+            return string.Equals(x.Name, y.Name) 
+                && string.Equals(x.Culture, y.Culture) 
+                && x.Version.Equals(y.Version) 
+                && ByteArrayComparer.Default.Equals(x.PublicKey, y.PublicKey) 
+                && ByteArrayComparer.Default.Equals(x.PublicKeyToken, y.PublicKeyToken);
         }
 
         public int GetHashCode(IAssemblyInfo obj)
         {
-            if (obj == null) return 0;
+            if (obj == null)
+                return 0;
 
             unchecked
             {
-                int res = 31;
-                res ^= (obj.Name == null ? 0 : obj.Name.GetHashCode());
-                res ^= (obj.Culture == null ? 0 : obj.Culture.GetHashCode());
-                res ^= (obj.Version == null ? 0 : obj.Version.GetHashCode());
-                res ^= ByteArrayComparer.Default.GetHashCode(obj.PublicKey);
-                res ^= ByteArrayComparer.Default.GetHashCode(obj.PublicKeyToken);
-                return res;
+                int hash = 17;
+                hash = hash * 23 + obj.Version?.GetHashCode() ?? 0;
+                hash = hash * 23 + EqualityComparer<string>.Default.GetHashCode(obj.Name);
+                hash = hash * 23 + EqualityComparer<string>.Default.GetHashCode(obj.Culture);
+                hash = hash * 23 + ByteArrayComparer.Default.GetHashCode(obj.PublicKey);
+                hash = hash * 23 + ByteArrayComparer.Default.GetHashCode(obj.PublicKeyToken);
+                return hash;
             }
         }
     }

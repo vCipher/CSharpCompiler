@@ -28,19 +28,16 @@ namespace CSharpCompiler.Lexica.Tokens
         {
             unchecked
             {
-                int res = 31;
-                res ^= Tag.GetHashCode();
-                res ^= (Lexeme == null ? 0 : Lexeme.GetHashCode());
-                return res;
+                var hash = 17;
+                hash = hash * 23 + Tag.GetHashCode();
+                hash = hash * 23 + Lexeme?.GetHashCode() ?? 0;
+                return hash;
             }
         }
 
         public override bool Equals(object obj)
         {
-            if (obj is Token)
-                return Equals((Token)obj);
-
-            return false;
+            return (obj is Token) && Equals((Token)obj);
         }
 
         public bool Equals(Token other)

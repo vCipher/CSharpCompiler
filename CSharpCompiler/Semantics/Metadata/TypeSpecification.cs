@@ -28,14 +28,12 @@
 
         public override bool Equals(object obj)
         {
-            if (!(obj is TypeSpecification)) return false;
-            return Equals((TypeSpecification)obj);
+            return (obj is TypeSpecification) && Equals((TypeSpecification)obj);
         }
 
         public bool Equals(ITypeInfo other)
         {
-            if (!(other is TypeSpecification)) return false;
-            return Equals((TypeSpecification)other);
+            return (other is TypeSpecification) && Equals((TypeSpecification)other);
         }
 
         public bool Equals(TypeSpecification other)

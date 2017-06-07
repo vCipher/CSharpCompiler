@@ -1,5 +1,4 @@
-﻿using CSharpCompiler.Lexica.Regexp;
-using System;
+﻿using System;
 
 namespace CSharpCompiler.Lexica.Regexp
 {
@@ -42,27 +41,24 @@ namespace CSharpCompiler.Lexica.Regexp
         {
             unchecked
             {
-                int res = 31;
-                res ^= (From == null) ? 0 : From.GetHashCode();
-                res ^= (To == null) ? 0 : To.GetHashCode();
-                res ^= Character.GetHashCode();
-                return res;
+                int hash = 17;
+                hash = hash * 23 + From?.GetHashCode() ?? 0;
+                hash = hash * 23 + To?.GetHashCode() ?? 0;
+                hash = hash * 23 + Character.GetHashCode();
+                return hash;
             }
         }
 
         public override bool Equals(object obj)
         {
-            if (obj is Transition<TState>)
-                return Equals((Transition<TState>)obj);
-
-            return false;
+            return (obj is Transition<TState>) && Equals((Transition<TState>)obj);
         }
 
         public bool Equals(Transition<TState> other)
         {
-            return From.Equals(other.From) &&
-                To.Equals(other.To) &&
-                Character == other.Character;
+            return (From != null && From.Equals(other.From))
+                && (To != null && To.Equals(other.To))
+                && (Character == other.Character);
         }
     }
 }

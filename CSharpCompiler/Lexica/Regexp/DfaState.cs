@@ -29,26 +29,20 @@ namespace CSharpCompiler.Lexica.Regexp
         {
             unchecked
             {
-                int res = 31;
-                res ^= Id.GetHashCode();
-                return res;
+                int hash = 17;
+                hash = hash * 23 + Id.GetHashCode();
+                return hash;
             }
         }
 
         public override bool Equals(object obj)
         {
-            if (obj is DfaState)
-                return Equals((DfaState)obj);
-
-            return false;
+            return (obj is DfaState) && Equals((DfaState)obj);
         }
 
         public bool Equals(DfaState other)
         {
-            if (other == null)
-                return false;
-
-            return Id == other.Id;
+            return (other != null) && Id == other.Id;
         }
     }
 }

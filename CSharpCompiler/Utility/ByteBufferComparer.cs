@@ -25,7 +25,8 @@ namespace CSharpCompiler.Utility
 
         public int GetHashCode(ByteBuffer buffer)
         {
-            if (buffer == null) return 0;
+            if (buffer == null)
+                return 0;
 
             unchecked
             {

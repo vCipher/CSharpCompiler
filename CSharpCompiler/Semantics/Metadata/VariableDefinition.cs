@@ -25,17 +25,16 @@ namespace CSharpCompiler.Semantics.Metadata
         {
             unchecked
             {
-                int res = 31;
-                res ^= EqualityComparer<string>.Default.GetHashCode(Name);
-                res ^= TypeInfoComparer.Default.GetHashCode(Type);
-                return res;
+                int hash = 17;
+                hash = hash * 23 + EqualityComparer<string>.Default.GetHashCode(Name);
+                hash = hash * 23 + TypeInfoComparer.Default.GetHashCode(Type);
+                return hash;
             }
         }
 
         public override bool Equals(object obj)
         {
-            if (!(obj is VariableDefinition)) return false;
-            return Equals((VariableDefinition)obj);
+            return (obj is VariableDefinition) && Equals((VariableDefinition)obj);
         }
 
         public bool Equals(VariableDefinition other)
