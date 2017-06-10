@@ -84,7 +84,7 @@ namespace CSharpCompiler.Semantics.Cil
             return new Instruction(opCode, value);
         }
 
-        public static Instruction Create(OpCode opCode, MethodReference method)
+        public static Instruction Create(OpCode opCode, IMethodInfo method)
         {
             if (method == null)
                 throw new ArgumentNullException("method");

@@ -1,21 +1,27 @@
-﻿using System;
+﻿using CSharpCompiler.Semantics.Resolvers;
+using System;
 
 namespace CSharpCompiler.Semantics.Metadata
 {
     public sealed class ParameterDefinition : IMetadataEntity, IEquatable<ParameterDefinition>
     {
-        public int Index { get { return Method.Parameters.IndexOf(this); } }
+        private Lazy<ITypeInfo> _type;
+        private Lazy<IMethodInfo> _method;
+
+        public int Index { get; private set; }
         public string Name { get; private set; }
-        public ITypeInfo Type { get; private set; }
-        public IMethodInfo Method { get; private set; }
         public ParameterAttributes Attributes { get; private set; }
 
-        public ParameterDefinition(string name, ITypeInfo type, IMethodInfo method)
+        public ITypeInfo Type => _type.Value;
+        public IMethodInfo Method => _method.Value;
+
+        public ParameterDefinition(IParameterDefinitionResolver resolver)
         {
-            Name = name;
-            Type = type;
-            Method = method;
-            Attributes = ParameterAttributes.None;
+            Index = resolver.GetIndex();
+            Name = resolver.GetName();
+            Attributes = resolver.GetAttributes();
+            _type = new Lazy<ITypeInfo>(resolver.GetParameterType);
+            _method = new Lazy<IMethodInfo>(resolver.GetMethod);
         }
 
         public void Accept(IMetadataEntityVisitor visitor)
@@ -38,6 +44,11 @@ namespace CSharpCompiler.Semantics.Metadata
         public override bool Equals(object obj)
         {
             return (obj is MethodReference) && Equals((MethodReference)obj);
+        }
+
+        public bool Equals(IMetadataEntity other)
+        {
+            return (other is MethodReference) && Equals((MethodReference)other);
         }
 
         public bool Equals(ParameterDefinition other)

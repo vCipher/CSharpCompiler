@@ -6,9 +6,11 @@ namespace CSharpCompiler.Semantics.Metadata
     {
         public int Rank { get; private set; }
 
-        public ArrayType(ITypeInfo containedType, int rank) : base(GetArrayName(containedType), "System", GetElementType(rank), containedType)
+        public ArrayType(ITypeInfo containedType, int rank = 1) : base(containedType)
         {
             Rank = rank;
+            Name = GetArrayName(containedType);
+            ElementType = GetElementType(rank);
         }
 
         private static ElementType GetElementType(int rank)

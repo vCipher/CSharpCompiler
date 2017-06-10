@@ -2,14 +2,14 @@ using System;
 
 namespace CSharpCompiler.Utility
 {
-    internal static class BitArithmetic
+    public static class BitArithmetic
     {
-        internal static int CountBits(int value)
+        public static int CountBits(int value)
         {
             return CountBits(unchecked((uint)value));
         }
 
-        internal static int CountBits(uint value)
+        public static int CountBits(uint value)
         {
             unchecked
             {
@@ -19,7 +19,7 @@ namespace CSharpCompiler.Utility
             }
         }
 
-        internal static uint Align(uint size, uint alignment)
+        public static uint Align(uint size, uint alignment)
         {
             if (alignment == 0) throw new ArgumentOutOfRangeException("alignment");
             if (CountBits(alignment) != 1) throw new ArgumentException("alignment");
@@ -28,7 +28,7 @@ namespace CSharpCompiler.Utility
             return (result == size) ? size : result + alignment;
         }
 
-        internal static int Align(int size, int alignment)
+        public static int Align(int size, int alignment)
         {
             if (size < 0) throw new ArgumentOutOfRangeException("size");
             if (alignment <= 0) throw new ArgumentOutOfRangeException("alignment");

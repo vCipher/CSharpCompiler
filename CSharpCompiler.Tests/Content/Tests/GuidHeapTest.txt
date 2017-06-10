@@ -2,7 +2,7 @@
 ## param (content)
 int a = 1;
 int b = 1;
-writeLine(a + b);
+System.Console.WriteLine(a + b);
 
 ## param (guid)
 21fa4b84-b29c-47d2-a696-6fe9a0d8677f

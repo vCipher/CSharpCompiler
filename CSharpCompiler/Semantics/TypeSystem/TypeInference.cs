@@ -12,25 +12,30 @@ namespace CSharpCompiler.Semantics.TypeSystem
     public sealed class TypeInference : IExpressionVisitor, ITypeVisitor, IVarDeclarationVisitor
     {
         private ITypeInfo _type;
-        private TypeInference() { }
+        private SemanticContext _context;
 
-        public static ITypeInfo InferType(Expression node)
+        private TypeInference(SemanticContext context)
         {
-            var inference = new TypeInference();
+            _context = context;
+        }
+
+        public static ITypeInfo InferType(Expression node, SemanticContext context)
+        {
+            var inference = new TypeInference(context);
             node.Accept(inference);
             return inference._type;
         }
 
-        public static ITypeInfo InferType(TypeNode node)
+        public static ITypeInfo InferType(TypeNode node, SemanticContext context)
         {
-            var inference = new TypeInference();
+            var inference = new TypeInference(context);
             node.Accept(inference);
             return inference._type;
         }
 
-        public static ITypeInfo InferType(VarDeclaration node)
+        public static ITypeInfo InferType(VarDeclaration node, SemanticContext context)
         {
-            var inference = new TypeInference();
+            var inference = new TypeInference(context);
             node.Accept(inference);
             return inference._type;
         }
@@ -39,7 +44,7 @@ namespace CSharpCompiler.Semantics.TypeSystem
         public void VisitVarDeclaration(VarDeclaration node)
         {
             if (node.IsImplicit && node.Initializer == null) throw new SemanticException("Can't declare unintialized local variable with implicit typification.");
-            _type = node.IsImplicit ? InferType(node.Initializer) : InferType(node.Type);
+            _type = node.IsImplicit ? InferType(node.Initializer, _context) : InferType(node.Type, _context);
         }
         #endregion
 
@@ -49,8 +54,8 @@ namespace CSharpCompiler.Semantics.TypeSystem
 
         private void InferConditionalOperationType(BinaryOperation node)
         {
-            var leftType = InferType(node.LeftOperand);
-            var rightType = InferType(node.RightOperand);
+            var leftType = InferType(node.LeftOperand, _context);
+            var rightType = InferType(node.RightOperand, _context);
 
             if (KnownType.Boolean.Equals(leftType) && KnownType.Boolean.Equals(rightType))
                 throw new TypeInferenceException(leftType, rightType);
@@ -75,8 +80,8 @@ namespace CSharpCompiler.Semantics.TypeSystem
         public void VisitAsOperation(AsOperation node) => InferSimpleType(node.Type);
         public void VisitCastExpression(CastExpression node) => InferSimpleType(node.Type);
         public void VisitEmptyExpression(EmptyExpression node) => InferSimpleType(KnownType.Void);
-        public void VisitInvokeExpression(InvokeExpression node) => InferSimpleType(node.MethodReference.ReturnType);
-        public void VisitIsOperation(IsOperation node) => InferSimpleType(KnownType.Boolean);        
+        public void VisitInvokeExpression(InvokeExpression node) => InferSimpleType(node.GetMethod(_context).ReturnType);
+        public void VisitIsOperation(IsOperation node) => InferSimpleType(KnownType.Boolean);
         public void VisitObjectCreation(ObjectCreation node) => InferSimpleType(node.Type);
         public void VisitPostfixDecrement(PostfixDecrement node) => InferSimpleType(node.Operand);
         public void VisitPostfixIncrement(PostfixIncrement node) => InferSimpleType(node.Operand);
@@ -87,8 +92,8 @@ namespace CSharpCompiler.Semantics.TypeSystem
 
         public void VisitElementAccess(ElementAccess node)
         {
-            var arrayType = InferType(node.Array) as ArrayType;
-            var indexType = InferType(node.Index);
+            var arrayType = InferType(node.Array, _context) as ArrayType;
+            var indexType = InferType(node.Index, _context);
 
             if (arrayType == null) throw new TypeInferenceException("Array access expression must be type array");
             if (indexType != KnownType.Int32) throw new TypeInferenceException("Array element index must be only type int32");
@@ -98,9 +103,9 @@ namespace CSharpCompiler.Semantics.TypeSystem
 
         public void VisitElementStore(ElementStore node)
         {
-            var arrayType = InferType(node.Array) as ArrayType;
-            var indexType = InferType(node.Index);
-            var valueType = InferType(node.Value);
+            var arrayType = InferType(node.Array, _context) as ArrayType;
+            var indexType = InferType(node.Index, _context);
+            var valueType = InferType(node.Value, _context);
 
             if (arrayType == null) throw new TypeInferenceException("Array access expression must have an array type");
             if (indexType != KnownType.Int32) throw new TypeInferenceException("Array element store index must have only a int32 type");
@@ -126,12 +131,12 @@ namespace CSharpCompiler.Semantics.TypeSystem
 
         public void VisitTernaryOperation(TernaryOperation node)
         {
-            var conditionType = InferType(node.Condition);
+            var conditionType = InferType(node.Condition, _context);
             if (!KnownType.Boolean.Equals(conditionType))
                 throw new TypeInferenceException("Condition of a ternary operation must have a boolean type");
 
-            var trueBranchType = InferType(node.TrueBranch);
-            var falseBranchType = InferType(node.FalseBranch);
+            var trueBranchType = InferType(node.TrueBranch, _context);
+            var falseBranchType = InferType(node.FalseBranch, _context);
 
             if (!trueBranchType.Equals(falseBranchType))
                 throw new TypeInferenceException(trueBranchType, falseBranchType);
@@ -143,23 +148,23 @@ namespace CSharpCompiler.Semantics.TypeSystem
         #region types
         public void VisitArrayType(ArrayTypeNode node)
         {
-            var containedType = InferType(node.ContainedType);
+            var containedType = InferType(node.ContainedType, _context);
             _type = new ArrayType(containedType, node.Rank);
         }
 
         public void VisitPrimitiveType(PrimitiveTypeNode node)
         {
             var typeToken = node.TypeToken;
-            var knownTypeCode = typeToken.Tag.GetKnownTypeCode();
-            _type = KnownType.Get(knownTypeCode);
+            var knownTypeCode = KnownType.GetTypeCode(typeToken.Tag);
+            _type = KnownType.GetType(knownTypeCode);
         }
         #endregion
 
         #region utils
         private void InferBinaryOperationType(BinaryOperation node)
         {
-            var leftType = InferType(node.LeftOperand);
-            var rightType = InferType(node.RightOperand);
+            var leftType = InferType(node.LeftOperand, _context);
+            var rightType = InferType(node.RightOperand, _context);
 
             if (!leftType.Equals(rightType))
                 throw new TypeInferenceException(leftType, rightType);
@@ -174,12 +179,12 @@ namespace CSharpCompiler.Semantics.TypeSystem
 
         private void InferSimpleType(TypeNode type)
         {
-            _type = InferType(type);
+            _type = InferType(type, _context);
         }
 
         private void InferSimpleType(Expression expression)
         {
-            _type = InferType(expression);
+            _type = InferType(expression, _context);
         }
         #endregion
     }

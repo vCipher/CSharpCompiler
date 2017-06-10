@@ -1,6 +1,6 @@
 ﻿# test (hello, world!)
 ## param (content)
-writeLine("hello, world!");
+System.Console.WriteLine("hello, world!");
 
 ## param (expected)
 0x00, 0x1B, 0x68, 0x00, 0x65, 0x00, 0x6C, 0x00, 

@@ -1,36 +1,28 @@
-﻿using CSharpCompiler.Semantics.TypeSystem;
+﻿using CSharpCompiler.Semantics.Resolvers;
 using System;
-using System.Reflection;
 
 namespace CSharpCompiler.Semantics.Metadata
 {
-    public sealed class CustomAttribute : IMetadataEntity, IEquatable<CustomAttribute>
+    public sealed class CustomAttribute : IMetadataEntity
     {
+        private Lazy<IAssemblyInfo> _assembly;
+        private Lazy<IMethodInfo> _constructor;
+        private Lazy<ICustomAttributeProvider> _owner;
+
         public string Name { get; private set; }
         public string Namespace { get; private set; }
-        public IAssemblyInfo Assembly { get; private set; }
-        public IMethodInfo Constructor { get; private set; }
-        public ICustomAttributeProvider Owner { get; private set; }
+
+        public IAssemblyInfo Assembly => _assembly.Value;
+        public IMethodInfo Constructor => _constructor.Value;
+        public ICustomAttributeProvider Owner => _owner.Value;
         
-        public CustomAttribute(Type type, ConstructorInfo ctorInfo, ICustomAttributeProvider owner)
+        public CustomAttribute(ICustomAttributeResolver resolver)
         {
-            Name = type.Name;
-            Namespace = type.Namespace;
-            Assembly = AssemblyFactory.Create(type.GetTypeInfo().Assembly.GetName());
-            Constructor = new MethodReference(ctorInfo);
-            Owner = owner;
-        }
-
-        public static CustomAttribute Get<TAttribute>(ICustomAttributeProvider owner) where TAttribute : Attribute
-        {
-            Type type = typeof(TAttribute);
-            return new CustomAttribute(type, type.GetConstructor(new Type[0]), owner);
-        }
-
-        public static CustomAttribute Get<TAttribute>(ICustomAttributeProvider owner, params Type[] types) where TAttribute : Attribute
-        {
-            Type type = typeof(TAttribute);
-            return new CustomAttribute(type, type.GetConstructor(types), owner);
+            Name = resolver.GetName();
+            Namespace = resolver.GetNamespace();
+            _assembly = new Lazy<IAssemblyInfo>(resolver.GetAssembly);
+            _constructor = new Lazy<IMethodInfo>(resolver.GetConstructor);
+            _owner = new Lazy<ICustomAttributeProvider>(resolver.GetOwner);
         }
 
         public void Accept(IMetadataEntityVisitor visitor)
@@ -40,12 +32,19 @@ namespace CSharpCompiler.Semantics.Metadata
 
         public override int GetHashCode()
         {
-            return StandAloneSignature.GetAttributeSignature(this).GetHashCode();
+            return RuntimeBindingSignature
+                .GetAttributeSignature(this)
+                .GetHashCode();
         }
 
         public override bool Equals(object obj)
         {
             return (obj is CustomAttribute) && Equals((CustomAttribute)obj);
+        }
+
+        public bool Equals(IMetadataEntity other)
+        {
+            return (other is CustomAttribute) && Equals((CustomAttribute)other);
         }
 
         public bool Equals(CustomAttribute other)

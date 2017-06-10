@@ -23,7 +23,7 @@ namespace CSharpCompiler.Syntax.Ast.Tests
             string content =
                 @"int a = 1;
                   int b = 1;
-                  writeLine(a + b);";
+                  System.Console.WriteLine(a + b);";
 
             TokenEnumerable tokens = Scanner.Scan(content);
             ParseTree parseTree = Parser.Parse(tokens);
@@ -56,7 +56,7 @@ namespace CSharpCompiler.Syntax.Ast.Tests
                 ),
                 new ExpressionStatement(
                     new InvokeExpression(
-                        "writeLine",
+                        new QualifiedIdentifier("System", "Console", "WriteLine"),
                         new [] {
                             new Argument(
                                 new ArithmeticOperation(

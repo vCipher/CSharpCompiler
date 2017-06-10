@@ -1,18 +1,17 @@
 ﻿namespace CSharpCompiler.Semantics.Metadata
 {
-    public class TypeSpecification : ITypeInfo
+    public abstract class TypeSpecification : ITypeInfo
     {
-        public string Name { get; private set; }
-        public string Namespace { get; private set; }
-        public ElementType ElementType { get; private set; }
-        public IAssemblyInfo Assembly { get; private set; }
-        public ITypeInfo ContainedType { get; private set; }
+        public string Name { get; protected set; }
+        public string Namespace { get; protected set; }
+        public ElementType ElementType { get; protected set; }
+        public IAssemblyInfo Assembly { get; protected set; }
+        public ITypeInfo ContainedType { get; protected set; }
 
-        public TypeSpecification(string name, string @namespace, ElementType elementType, ITypeInfo containedType)
+        public TypeSpecification(ITypeInfo containedType)
         {
-            Name = name;
-            Namespace = Namespace;
-            ElementType = elementType;
+            Namespace = containedType.Namespace;
+            Assembly = containedType.Assembly;
             ContainedType = containedType;
         }
 
@@ -28,15 +27,15 @@
 
         public override bool Equals(object obj)
         {
-            return (obj is TypeSpecification) && Equals((TypeSpecification)obj);
+            return (obj is ITypeInfo) && Equals((ITypeInfo)obj);
+        }
+
+        public bool Equals(IMetadataEntity other)
+        {
+            return (other is ITypeInfo) && Equals((ITypeInfo)other);
         }
 
         public bool Equals(ITypeInfo other)
-        {
-            return (other is TypeSpecification) && Equals((TypeSpecification)other);
-        }
-
-        public bool Equals(TypeSpecification other)
         {
             return TypeInfoComparer.Default.Equals(this, other);
         }

@@ -6,34 +6,39 @@ using System.Linq;
 
 namespace CSharpCompiler.Utility
 {
-    internal static class ExtenstionMethods
+    public static class ExtenstionMethods
     {
-        internal static TRes Pipe<TSrc, TRes>(this TSrc src, Func<TSrc, TRes> func)
+        public static TRes Pipe<TSrc, TRes>(this TSrc src, Func<TSrc, TRes> func)
         {
             return (src == null) ? default(TRes) : func(src);
         }
 
-        internal static IEnumerable<TSrc> EmptyIfNull<TSrc>(this IEnumerable<TSrc> src)
+        public static string EmptyIfNull(this string src)
         {
-            return (src == null) ? Enumerable.Empty<TSrc>() : src;
+            return src ?? string.Empty;
         }
 
-        internal static TSrc[] EmptyIfNull<TSrc>(this TSrc[] src)
+        public static IEnumerable<TSrc> EmptyIfNull<TSrc>(this IEnumerable<TSrc> src)
         {
-            return (src == null) ? Empty<TSrc>.Array : src;
+            return src ?? Enumerable.Empty<TSrc>();
         }
 
-        internal static bool IsNullOrEmpty<TSrc>(this IEnumerable<TSrc> src)
+        public static TSrc[] EmptyIfNull<TSrc>(this TSrc[] src)
+        {
+            return src ?? Empty<TSrc>.Array;
+        }
+
+        public static bool IsNullOrEmpty<TSrc>(this IEnumerable<TSrc> src)
         {
             return src == null || !src.Any();
         }
 
-        internal static bool IsNullOrEmpty(this IEnumerable src)
+        public static bool IsNullOrEmpty(this IEnumerable src)
         {
             return src == null || !src.GetEnumerator().MoveNext();
         }
 
-        internal static void ForEach<TSrc>(this IEnumerable<TSrc> src, Action<TSrc> action)
+        public static void ForEach<TSrc>(this IEnumerable<TSrc> src, Action<TSrc> action)
         {
             if (src == null) return;
 
@@ -41,7 +46,7 @@ namespace CSharpCompiler.Utility
                 action?.Invoke(item);
         }
 
-        internal static void ForEach<TSrc>(this IEnumerable<TSrc> src, Action<TSrc, EnumerationInfo> action)
+        public static void ForEach<TSrc>(this IEnumerable<TSrc> src, Action<TSrc, EnumerationInfo> action)
         {
             if (src == null || action == null) return;
 
@@ -58,19 +63,70 @@ namespace CSharpCompiler.Utility
             }
         }
 
-        internal static HashSet<TSrc> ToHashSet<TSrc>(this IEnumerable<TSrc> src)
+        public static TValue GetOrAdd<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key, Func<TValue> factory)
+        {
+            TValue value;
+            if (dict.TryGetValue(key, out value))
+                return value;
+
+            value = factory();
+            dict.Add(key, value);
+
+            return value;
+        }
+
+        public static Stack<TSrc> ToStack<TSrc>(this IEnumerable<TSrc> src)
+        {
+            return new Stack<TSrc>(src);
+        }
+
+        public static Stack<TSrc> ToInvertedStack<TSrc>(this IEnumerable<TSrc> src)
+        {
+            var stack = new Stack<TSrc>();
+            foreach (var item in src.Reverse())
+            {
+                stack.Push(item);
+            }
+
+            return stack;
+        }
+
+        public static HashSet<TSrc> ToHashSet<TSrc>(this IEnumerable<TSrc> src)
         {
             return new HashSet<TSrc>(src);
         }
 
-        internal static Collection<TSrc> ToCollection<TSrc>(this IEnumerable<TSrc> src)
+        public static Collection<TSrc> ToCollection<TSrc>(this IEnumerable<TSrc> src)
         {
             return new Collection<TSrc>(src.ToList());
         }
 
-        internal static List<TSrc> ToSingletonList<TSrc>(this TSrc src)
+        public static Collection<TSrc> ToCollection<TSrc>(this IEnumerable<TSrc> src, int count)
         {
-            return new List<TSrc> { src };
+            return new Collection<TSrc>(src.ToList(count));
+        }
+
+        public static List<TSrc> ToList<TSrc>(this IEnumerable<TSrc> src, int count)
+        {
+            var list = new List<TSrc>(count);
+            foreach (var item in src)
+            {
+                list.Add(item);
+            }
+
+            return list;
+        }
+
+        public static TSrc[] ToArray<TSrc>(this IEnumerable<TSrc> src, int count)
+        {
+            var array = new TSrc[count];
+            var iterator = src.GetEnumerator();
+            for (int index = 0; iterator.MoveNext(); index++)
+            {
+                array[index] = iterator.Current;
+            }
+
+            return array;
         }
     }
 }

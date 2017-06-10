@@ -54,7 +54,7 @@ namespace CSharpCompiler.Semantics.Cil
             Emit(Instruction.Create(opCode, value));
         }
 
-        public void Emit(OpCode opCode, MethodReference method)
+        public void Emit(OpCode opCode, IMethodInfo method)
         {
             Emit(Instruction.Create(opCode, method));
         }

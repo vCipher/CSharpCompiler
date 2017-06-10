@@ -5,21 +5,19 @@ namespace CSharpCompiler.Utility
 {
     public class ByteBuffer : IEquatable<ByteBuffer>
     {
-        protected int _align;
+        public const int START_POSITION = 0;
+
+        private int _align;
 
         public byte[] Buffer { get; private set; }
         public int Length { get; private set; }
         public int Position { get; private set; }
         public bool IsEmpty { get { return Length < 1; } }
 
-        public ByteBuffer() : this(Empty<byte>.Array, 1)
-        { }
-
-        public ByteBuffer(int length) : this(new byte[length], 1)
-        { }
-
-        public ByteBuffer(byte[] buffer) : this(buffer, 1)
-        { }
+        public ByteBuffer() : this(Empty<byte>.Array, 1) { }
+        public ByteBuffer(int length) : this(new byte[length], 1) { }
+        public ByteBuffer(byte[] buffer) : this(buffer, 1) { }
+        public ByteBuffer(ByteBuffer buffer) : this(buffer.Buffer, buffer._align) { }
 
         public ByteBuffer(byte[] buffer, int align)
         {
@@ -29,27 +27,18 @@ namespace CSharpCompiler.Utility
             Position = Buffer.Length;
         }
 
-        public static byte[] ConvertToZeroEndBytes(string @string)
+        public static byte[] ToZeroEndBytes(string @string)
         {
             int size = @string.Length + 1;
-            return ConvertToBytes(@string, BitArithmetic.Align((uint)size, 4u));
+            return ToBytes(@string, BitArithmetic.Align((uint)size, 4u));
         }
 
-        public static byte[] ConvertToBytes(string @string)
+        public static byte[] ToBytes(string @string)
         {
-            return ConvertToBytes(@string, @string.Length);
+            return ToBytes(@string, @string.Length);
         }
 
-        public static byte[] ConvertToBytes(string @string, uint length)
-        {
-            var bytes = new byte[length];
-            for (int i = 0; i < @string.Length; i++)
-                bytes[i] = (byte)@string[i];
-
-            return bytes;
-        }
-
-        public static byte[] ConvertToBytes(string @string, int length)
+        public static byte[] ToBytes(string @string, uint length)
         {
             var bytes = new byte[length];
             for (int i = 0; i < @string.Length; i++)
@@ -58,10 +47,19 @@ namespace CSharpCompiler.Utility
             return bytes;
         }
 
-        public static byte[] ConvertToBytes<T>(T value) where T : struct
+        public static byte[] ToBytes(string @string, int length)
         {
-            int size = Marshal.SizeOf(value);
-            byte[] buffer = new byte[size];
+            var bytes = new byte[length];
+            for (int i = 0; i < @string.Length; i++)
+                bytes[i] = (byte)@string[i];
+
+            return bytes;
+        }
+
+        public static byte[] ToBytes<T>(T value) where T : struct
+        {
+            var size = Marshal.SizeOf(value);
+            var buffer = new byte[size];
 
             IntPtr ptr = Marshal.AllocHGlobal(size);
             Marshal.StructureToPtr(value, ptr, false);
@@ -71,16 +69,148 @@ namespace CSharpCompiler.Utility
             return buffer;
         }
 
-        public static uint SizeOf<T>() where T : struct
+        public static T FromBytes<T>(byte[] bytes) where T : struct
         {
-            return (uint)Marshal.SizeOf<T>();
+        	var size = bytes.Length;            
+            var ptr = Marshal.AllocHGlobal(size);
+            Marshal.Copy(bytes, 0, ptr, size);
+
+            var str = Marshal.PtrToStructure<T>(ptr);
+            Marshal.FreeHGlobal(ptr);
+
+            return str;
+        }
+
+        public static int SizeOf<T>() where T : struct
+        {
+            return Marshal.SizeOf<T>();
         }
 
         public byte[] ToByteArray()
         {
-            byte[] result = new byte[Length];
+            var result = new byte[Length];
             System.Buffer.BlockCopy(Buffer, 0, result, 0, Length);
             return result;
+        }
+
+        public byte ReadByte()
+        {
+            return Buffer[Position++];
+        }
+
+        public sbyte ReadSByte()
+        {
+            return (sbyte)ReadByte();
+        }
+
+        public byte[] ReadBytes(int size)
+        {
+            var bytes = new byte[size];
+            System.Buffer.BlockCopy(Buffer, Position, bytes, 0, size);
+            Position += size;
+            return bytes;
+        }
+
+        public ushort ReadUInt16()
+        {
+            return (ushort)(Buffer[Position++] 
+                | (Buffer[Position++] << 8));
+        }
+
+        public short ReadInt16()
+        {
+            return (short)ReadUInt16();
+        }
+
+        public uint ReadUInt32()
+        {
+            return (uint)(Buffer[Position++]
+                | (Buffer[Position++] << 8)
+                | (Buffer[Position++] << 16)
+                | (Buffer[Position++] << 24));
+        }
+
+        public int ReadInt32()
+        {
+            return (int)ReadUInt32();
+        }
+
+        public ulong ReadUInt64()
+        {
+            uint low = ReadUInt32();
+            uint high = ReadUInt32();
+
+            return (((ulong)high) << 32) | low;
+        }
+
+        public long ReadInt64()
+        {
+            return (long)ReadUInt64();
+        }
+
+        public uint ReadCompressedUInt32()
+        {
+            byte first = ReadByte();
+            if ((first & 0x80) == 0)
+                return first;
+
+            if ((first & 0x40) == 0)
+                return ((uint)(first & ~0x80) << 8)
+                    | ReadByte();
+
+            return ((uint)(first & ~0xc0) << 24)
+                | (uint)ReadByte() << 16
+                | (uint)ReadByte() << 8
+                | ReadByte();
+        }
+
+        public int ReadCompressedInt32()
+        {
+            var value = (int)(ReadCompressedUInt32() >> 1);
+            if ((value & 1) == 0)
+                return value;
+            if (value < 0x40)
+                return value - 0x40;
+            if (value < 0x2000)
+                return value - 0x2000;
+            if (value < 0x10000000)
+                return value - 0x10000000;
+            return value - 0x20000000;
+        }
+
+        public float ReadSingle()
+        {
+            if (!BitConverter.IsLittleEndian)
+            {
+                var bytes = ReadBytes(4);
+                Array.Reverse(bytes);
+                return BitConverter.ToSingle(bytes, 0);
+            }
+
+            float value = BitConverter.ToSingle(Buffer, Position);
+            Position += 4;
+            return value;
+        }
+
+        public double ReadDouble()
+        {
+            if (!BitConverter.IsLittleEndian)
+            {
+                var bytes = ReadBytes(8);
+                Array.Reverse(bytes);
+                return BitConverter.ToDouble(bytes, 0);
+            }
+
+            double value = BitConverter.ToDouble(Buffer, Position);
+            Position += 8;
+            return value;
+        }
+
+        public T ReadStruct<T>() where T : struct
+        {
+            var size = Marshal.SizeOf<T>();
+            var bytes = ReadBytes(size);
+            return FromBytes<T>(bytes);
         }
 
         public void WriteByte(byte value)
@@ -170,7 +300,7 @@ namespace CSharpCompiler.Utility
 
         public void WriteStruct<T>(T value) where T : struct
         {
-            WriteBytes(ConvertToBytes(value));
+            WriteBytes(ToBytes(value));
         }
 
         public void WriteSingle(float value)
@@ -211,6 +341,11 @@ namespace CSharpCompiler.Utility
                 WriteByte((byte)((value >> 8) & 0xff));
                 WriteByte((byte)(value & 0xff));
             }
+        }
+
+        public void MoveTo(int position)
+        {
+            Position = position;
         }
 
         public override int GetHashCode()

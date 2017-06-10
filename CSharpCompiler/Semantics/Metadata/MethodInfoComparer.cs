@@ -13,7 +13,6 @@ namespace CSharpCompiler.Semantics.Metadata
         public bool Equals(IMethodInfo x, IMethodInfo y)
         {
             if (ReferenceEquals(x, y)) return true;
-            if (x.GetType() != y.GetType()) return false;
 
             return string.Equals(x.Name, y.Name)
                 && x.ReturnType.Equals(y.ReturnType)
@@ -31,7 +30,8 @@ namespace CSharpCompiler.Semantics.Metadata
             {
                 int hash = 17;
                 hash = hash * 23 + EqualityComparer<string>.Default.GetHashCode(obj.Name);
-                hash = hash * 23 + StandAloneSignature.GetMethodSignature(obj).GetHashCode();
+                hash = hash * 23 + TypeInfoComparer.Default.GetHashCode(obj.DeclaringType);
+                hash = hash * 23 + RuntimeBindingSignature.GetMethodSignature(obj).GetHashCode();
                 return hash;
             }
         }

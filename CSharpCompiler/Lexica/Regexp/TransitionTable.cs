@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CSharpCompiler.Utility;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -44,7 +45,7 @@ namespace CSharpCompiler.Lexica.Regexp
             Head = head;
             Transitions = transitions;
             Aliases = aliases;
-            Accepting = aliases.Keys.ToArray();
+            Accepting = aliases.Keys.ToArray(aliases.Count);
         }
 
         public static TransitionTable FromFile(string path)

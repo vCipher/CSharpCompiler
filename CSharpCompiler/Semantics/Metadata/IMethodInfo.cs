@@ -1,10 +1,8 @@
 ﻿using System.Collections.ObjectModel;
-using CSharpCompiler.Semantics.Metadata;
-using System;
 
 namespace CSharpCompiler.Semantics.Metadata
 {
-    public interface IMethodInfo : IMetadataEntity, IEquatable<IMethodInfo>
+    public interface IMethodInfo : IMetadataEntity
     {
         string Name { get; }
         CallingConventions CallingConventions { get; }

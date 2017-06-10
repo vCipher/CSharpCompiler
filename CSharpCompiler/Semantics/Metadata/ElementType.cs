@@ -1,7 +1,7 @@
 ﻿namespace CSharpCompiler.Semantics.Metadata
 {
     /// <summary>
-    /// Element type for signature
+    /// Element type for signature according with CLI specification ECMA-335 (section 23.1.16)
     /// </summary>
     public enum ElementType : byte
     {
@@ -39,9 +39,6 @@
         Internal = 0x21,
         Modifier = 0x40,
         Sentinel = 0x41,
-        Pinned = 0x45,
-        Type = 0x50,
-        Boxed = 0x51,
-        Enum = 0x55
+        Pinned = 0x45
     }
 }

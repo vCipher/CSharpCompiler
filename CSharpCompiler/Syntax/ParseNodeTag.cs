@@ -44,6 +44,7 @@
         PrefixIncrement,
         PrefixDecrement,
         ObjectCreation,
-        ArrayCreation
+        ArrayCreation,
+        IdentifierList
     }
 }

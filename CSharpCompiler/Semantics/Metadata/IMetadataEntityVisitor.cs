@@ -13,6 +13,7 @@
         void VisitAssemblyReference(AssemblyReference entity);
         void VisitTypeReference(TypeReference entity);
         void VisitMethodReference(MethodReference entity);
-        void VisitTypeSpecification(TypeSpecification entity);
+        void VisitTypeSpecification(ITypeInfo entity);
+        void VisitFieldReference(FieldReference entity);
     }
 }

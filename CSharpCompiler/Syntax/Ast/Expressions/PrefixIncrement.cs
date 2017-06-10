@@ -1,6 +1,4 @@
-﻿using CSharpCompiler.Semantics.Metadata;
-
-namespace CSharpCompiler.Syntax.Ast.Expressions
+﻿namespace CSharpCompiler.Syntax.Ast.Expressions
 {
     public sealed class PrefixIncrement : Expression
     {

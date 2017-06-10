@@ -11,7 +11,6 @@ namespace CSharpCompiler.Semantics.Metadata
         public bool Equals(ITypeInfo x, ITypeInfo y)
         {
             if (ReferenceEquals(x, y)) return true;
-            if (x.GetType() != y.GetType()) return false;
 
             return string.Equals(x.Name, y.Name) 
                 && string.Equals(x.Namespace, y.Namespace) 

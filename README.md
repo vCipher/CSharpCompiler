@@ -6,11 +6,12 @@ Supported:
 * expressions
 * for loop
 * arrays
-* `writeLine(...)` console output
+* `System.Console.WriteLine(...)` console output
+* method invokation with name and signature resolving
 * a script like file structure (without `using`, `namespace`, `class` or method declarations)
 
 Work in progress:
-* method invokation with name and signature resolving
+* method declaration
 * file structure with `using`, `namespace`, `class`, and method declaration
 
 # Usage
@@ -21,6 +22,6 @@ Compiler testing example:
 Compiler cli building example:
 * `cd CSharpCompiler.Cmd`
 * `dotnet build`
-* `cd bin/BNB/Debug/netcoreapp1.1`
+* `cd bin/Debug/netcoreapp1.1`
 * `dotnet sample netcoreapp1.1` (where: `sample` - a source file name, `netcoreapp1.1` - a target platform)
 * `dotnet sample.dll`

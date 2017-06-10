@@ -24,11 +24,6 @@ namespace CSharpCompiler.Semantics.Metadata
             Variables = new Collection<VariableDefinition>();
         }
 
-        public MethodBuilder GetBuilder()
-        {
-            return new MethodBuilder(this);
-        }
-
         private int ComputeCodeSize()
         {
             int offset = 0;

@@ -44,7 +44,7 @@ namespace CSharpCompiler.Syntax.Ast
             return node.Children
                 .EmptyIfNull()
                 .Select(Statement)
-                .ToList();
+                .ToList(node.Children.Count);
         }
 
         private Statement Statement(ParseNode node)
@@ -111,7 +111,7 @@ namespace CSharpCompiler.Syntax.Ast
 
             children.Skip(TokenTag.CLOSE_PAREN);
             var body = children.GetAndMove(Statement);
-            
+
             _scopes.Pop();
 
             forStatement.Init(declarations, condition, postIteration, body);
@@ -174,7 +174,7 @@ namespace CSharpCompiler.Syntax.Ast
 
             if (!children.Check(TokenTag.ASSIGN))
                 return new VarDeclaration(varName, null, GetCurrentScope());
-            
+
             var initializer = children
                 .Skip(TokenTag.ASSIGN)
                 .GetAndMove(Expression);
@@ -211,7 +211,7 @@ namespace CSharpCompiler.Syntax.Ast
                 .GetAndMove(ParseNodeTag.Terminal)
                 .Token
                 .Lexeme;
-            
+
             VarDeclaration declaration;
             if (SeekVariable(varName, out declaration))
                 return new VarAccess(varName, declaration.Scope);
@@ -371,14 +371,19 @@ namespace CSharpCompiler.Syntax.Ast
         private InvokeExpression InvocationExpression(ParseNode node, bool isStatementExpression = false)
         {
             var methodName = node.Children
-                .GetAndMove(ParseNodeTag.Terminal)
-                .Token
-                .Lexeme;
+                .GetAndMove(QualifiedIdentifier);
 
             return node.Children
                 .Skip(TokenTag.OPEN_PAREN)
                 .GetAndMove(Arguments)
                 .Pipe(args => new InvokeExpression(methodName, args, isStatementExpression));
+        }
+
+        private QualifiedIdentifier QualifiedIdentifier(ParseNode node)
+        {
+            return node.Children
+                .Select(x => x.Token.Lexeme)
+                .Pipe(x => new QualifiedIdentifier(x));
         }
 
         private List<Argument> Arguments(ParseNode node)
@@ -550,7 +555,7 @@ namespace CSharpCompiler.Syntax.Ast
 
             throw new SyntaxException("Unsupported type: {0}", node);
         }
-        
+
         private ArrayTypeNode ArrayType(ParseNode node)
         {
             var ofType = node.Children.GetAndMove(NotArrayType);
@@ -587,7 +592,7 @@ namespace CSharpCompiler.Syntax.Ast
 
             return false;
         }
-        
+
         private VarScope GetCurrentScope()
         {
             return _scopes.Peek();

@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace CSharpCompiler.Semantics.Metadata
+﻿namespace CSharpCompiler.Semantics.Metadata
 {
-    public interface ITypeInfo : IMetadataEntity, IEquatable<ITypeInfo>
+    public interface ITypeInfo : IMetadataEntity
     {
         string Name { get; }
         string Namespace { get; }

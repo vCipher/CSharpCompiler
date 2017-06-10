@@ -1,18 +1,21 @@
 ﻿using CSharpCompiler.Lexica.Tokens;
-using CSharpCompiler.Semantics.TypeSystem;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace CSharpCompiler.Syntax
 {
     public sealed class Parser
     {
         private TokenEnumerator _enumerator;
-        
+
         private Parser(TokenEnumerator enumerator)
         {
             _enumerator = enumerator;
+
+            IdentifierList = GetFlattenLeftRecurtion(
+                ParseNodeTag.IdentifierList,
+                () => Terminal(TokenTag.ID),
+                () => ExpectAndSkip(TokenTag.DOT));
 
             StatementSeq = GetFlattenLeftRecurtion(
                 ParseNodeTag.StatementSeq,
@@ -73,7 +76,7 @@ namespace CSharpCompiler.Syntax
                 ParseNodeTag.RankSpecifier,
                 RankSpecifier,
                 () => Expect(TokenTag.OPEN_SQUARE_BRACE));
-            
+
             ArgumentList = GetFlattenLeftRecurtion(
                 ParseNodeTag.ArgumentList,
                 Argument,
@@ -89,11 +92,15 @@ namespace CSharpCompiler.Syntax
         {
             return new Parser(new TokenEnumerator(tokens)).Parse();
         }
-        
+
         private ParseTree Parse()
         {
             return new ParseTree(StatementSeq());
         }
+
+        #region common
+        private Func<ParseNode> IdentifierList;
+        #endregion
 
         #region statements
         private Func<ParseNode> StatementSeq;
@@ -112,7 +119,7 @@ namespace CSharpCompiler.Syntax
             if (Expect(TokenTag.FOR)) return ForStatement();
             if (Expect(TokenTag.IF)) return IfStatement();
             if (Expect(TokenTag.BREAK)) return BreakStatement();
-            if (IsVarDeclaration()) return DeclarationStatement();            
+            if (IsVarDeclaration()) return DeclarationStatement();
 
             return ExpressionStatement();
         }
@@ -159,7 +166,7 @@ namespace CSharpCompiler.Syntax
                 .AddChild(VarDeclaration())
                 .AddChild(Terminal(TokenTag.SEMICOLON));
         }
-        
+
         private ParseNode VarDeclaration()
         {
             return new ParseNode(ParseNodeTag.VarDeclaration)
@@ -254,7 +261,7 @@ namespace CSharpCompiler.Syntax
         private Func<ParseNode> ConditionalAndExpression;
         private Func<ParseNode> ConditionalOrExpression;
         private Func<ParseNode> ArgumentList;
-        
+
         private ParseNode Expression()
         {
             var expr = ConditionExpression();
@@ -281,7 +288,7 @@ namespace CSharpCompiler.Syntax
         {
             var expr = ConditionalOrExpression();
 
-            return Expect(TokenTag.QUESTION) 
+            return Expect(TokenTag.QUESTION)
                 ? TernaryExpression(expr)
                 : expr;
         }
@@ -305,11 +312,11 @@ namespace CSharpCompiler.Syntax
                 .AddChild(Terminal())
                 .AddChild(PrimaryExpression());
         }
-        
+
         private ParseNode PrimaryExpression()
         {
             if (IsElementStore()) return ElementStore();
-            if (IsElementAccess()) return ElementAccess();            
+            if (IsElementAccess()) return ElementAccess();
 
             return NotArrayInteropExpression();
         }
@@ -336,7 +343,7 @@ namespace CSharpCompiler.Syntax
             return new ParseNode(ParseNodeTag.Literal)
                 .AddChild(Terminal());
         }
-        
+
         private ParseNode CastExpression()
         {
             return new ParseNode(ParseNodeTag.CastExpression)
@@ -345,7 +352,7 @@ namespace CSharpCompiler.Syntax
                 .AddChild(Terminal(TokenTag.CLOSE_PAREN))
                 .AddChild(UnaryExpression());
         }
-        
+
         private ParseNode ParenthesisExpression()
         {
             return new ParseNode(ParseNodeTag.ParenthesisExpression)
@@ -353,16 +360,16 @@ namespace CSharpCompiler.Syntax
                 .AddChild(Expression())
                 .AddChild(Terminal(TokenTag.CLOSE_PAREN));
         }
-        
+
         private ParseNode InvokeExpression()
         {
             return new ParseNode(ParseNodeTag.InvokeExpression)
-                .AddChild(Terminal(TokenTag.ID))
+                .AddChild(IdentifierList())
                 .AddChild(Terminal(TokenTag.OPEN_PAREN))
                 .AddChild(ArgumentList())
                 .AddChild(Terminal(TokenTag.CLOSE_PAREN));
         }
-                
+
         private ParseNode Argument()
         {
             if (Expect(TokenTag.REF) || Expect(TokenTag.OUT))
@@ -395,14 +402,14 @@ namespace CSharpCompiler.Syntax
                 .AddChild(Terminal(TokenTag.ASSIGN))
                 .AddChild(Expression());
         }
-        
+
         private ParseNode PostfixIncrement()
         {
             return new ParseNode(ParseNodeTag.PostfixIncrement)
                 .AddChild(VarAccess())
                 .AddChild(Terminal(TokenTag.INCREMENT));
         }
-        
+
         private ParseNode PostfixDecrement()
         {
             return new ParseNode(ParseNodeTag.PostfixDecrement)
@@ -457,11 +464,6 @@ namespace CSharpCompiler.Syntax
             return _enumerator.Lookahead();
         }
 
-        private Token Lookahead(int shift)
-        {
-            return _enumerator.Lookahead(shift);
-        }
-
         private bool TryAddChild(ParseNode node, Func<ParseNode> production, TokenTag reqTokenTag)
         {
             return TryAddChild(node, production, () => Expect(reqTokenTag));
@@ -477,7 +479,7 @@ namespace CSharpCompiler.Syntax
 
             return false;
         }
-        
+
         private ParseNode Terminal()
         {
             if (!_enumerator.MoveNext())
@@ -485,7 +487,7 @@ namespace CSharpCompiler.Syntax
 
             return new ParseNode(_enumerator.Current);
         }
-        
+
         private ParseNode Terminal(TokenTag reqTokenTag)
         {
             var token = RequireToken(reqTokenTag);
@@ -503,7 +505,7 @@ namespace CSharpCompiler.Syntax
 
             return currToken;
         }
-        
+
         private Func<ParseNode> GetLeftRecurtion(
             Func<ParseNode, ParseNode, ParseNode> nodeFactory,
             Func<ParseNode> leftChildFactory,
@@ -601,7 +603,22 @@ namespace CSharpCompiler.Syntax
 
         private bool IsPrimitiveType(TokenTag tag)
         {
-            return tag.IsPrimitiveType();
+            return tag == TokenTag.OBJECT
+                || tag == TokenTag.BOOL
+                || tag == TokenTag.CHAR
+                || tag == TokenTag.SBYTE
+                || tag == TokenTag.BYTE
+                || tag == TokenTag.USHORT
+                || tag == TokenTag.SHORT
+                || tag == TokenTag.UINT
+                || tag == TokenTag.INT
+                || tag == TokenTag.ULONG
+                || tag == TokenTag.LONG
+                || tag == TokenTag.FLOAT
+                || tag == TokenTag.DOUBLE
+                || tag == TokenTag.DECIMAL
+                || tag == TokenTag.STRING
+                || tag == TokenTag.VOID;
         }
 
         private bool IsArrayType()
@@ -622,31 +639,30 @@ namespace CSharpCompiler.Syntax
             return new TokenPredictor(_enumerator)
                 .Expect(TokenTag.NEW)
                 .Expect(IsNotArrayType)
-                .Skip(TokenTag.OPEN_SQUARE_BRACE, TokenTag.COMMA, TokenTag.CLOSE_SQUARE_BRACE)
-                .Expect(TokenTag.ID)
+                .Expect(TokenTag.OPEN_SQUARE_BRACE)
                 .Result;
         }
 
         private bool IsAssingExpression()
         {
             return new TokenPredictor(_enumerator)
-                .Expect(TokenTag.ID)
+                .Expect(IsIdentifierList)
                 .Expect(IsAssingOperator)
                 .Result;
         }
 
         private bool IsAssingOperator(TokenTag tag)
         {
-            return tag == TokenTag.ASSIGN ||
-                tag == TokenTag.PLUS_ASSIGN ||
-                tag == TokenTag.MINUS_ASSIGN ||
-                tag == TokenTag.MULTIPLY_ASSIGN ||
-                tag == TokenTag.MOD_ASSIGN ||
-                tag == TokenTag.BIT_AND_ASSIGN ||
-                tag == TokenTag.BIT_OR_ASSIGN ||
-                tag == TokenTag.BIT_XOR_ASSIGN ||
-                tag == TokenTag.LEFT_SHIFT_ASSIGN ||
-                tag == TokenTag.RIGHT_SHIFT_ASSIGN;
+            return tag == TokenTag.ASSIGN 
+                || tag == TokenTag.PLUS_ASSIGN 
+                || tag == TokenTag.MINUS_ASSIGN 
+                || tag == TokenTag.MULTIPLY_ASSIGN 
+                || tag == TokenTag.MOD_ASSIGN 
+                || tag == TokenTag.BIT_AND_ASSIGN 
+                || tag == TokenTag.BIT_OR_ASSIGN 
+                || tag == TokenTag.BIT_XOR_ASSIGN 
+                || tag == TokenTag.LEFT_SHIFT_ASSIGN 
+                || tag == TokenTag.RIGHT_SHIFT_ASSIGN;
         }
 
         private bool IsUnaryExpression()
@@ -676,30 +692,24 @@ namespace CSharpCompiler.Syntax
 
         private bool IsInvokeExpression()
         {
-            // todo: implement checking for general expressions 
-            // instead of simple TokenTag.ID
             return new TokenPredictor(_enumerator)
-                .Expect(TokenTag.ID)
+                .Expect(IsIdentifierList)
                 .Expect(TokenTag.OPEN_PAREN)
                 .Result;
         }
 
         private bool IsElementAccess()
         {
-            // todo: implement checking for general expressions 
-            // instead of simple TokenTag.ID
             return new TokenPredictor(_enumerator)
-                .Expect(TokenTag.ID)
+                .Expect(IsIdentifierList)
                 .Expect(TokenTag.OPEN_SQUARE_BRACE)
                 .Result;
         }
 
         private bool IsElementStore()
         {
-            // todo: implement checking for general expressions 
-            // instead of simple TokenTag.ID
             return new TokenPredictor(_enumerator)
-                .Expect(TokenTag.ID)
+                .Expect(IsIdentifierList)
                 .Expect(TokenTag.OPEN_SQUARE_BRACE)
                 .SkipUntil(TokenTag.CLOSE_SQUARE_BRACE)
                 .Expect(TokenTag.ASSIGN)
@@ -708,27 +718,24 @@ namespace CSharpCompiler.Syntax
 
         private bool IsPostfixIncrement()
         {
-            // todo: implement checking for general expressions 
-            // instead of simple TokenTag.ID
             return new TokenPredictor(_enumerator)
-                .Expect(TokenTag.ID)
+                .Expect(IsIdentifierList)
                 .Expect(TokenTag.INCREMENT)
                 .Result;
         }
 
         private bool IsPostfixDecrement()
         {
-            // todo: implement checking for general expressions 
-            // instead of simple TokenTag.ID
             return new TokenPredictor(_enumerator)
-                .Expect(TokenTag.ID)
+                .Expect(IsIdentifierList)
                 .Expect(TokenTag.DECREMENT)
                 .Result;
         }
 
         private bool IsVarDeclaration()
         {
-            if (Expect(TokenTag.VAR)) return true;
+            if (Expect(TokenTag.VAR))
+                return true;
 
             return new TokenPredictor(_enumerator)
                 .Expect(IsNotArrayType)
@@ -737,11 +744,24 @@ namespace CSharpCompiler.Syntax
                 .Result;
         }
 
+        private bool IsIdentifierList(TokenPredictor predictor)
+        {
+            return predictor
+                .Expect(TokenTag.ID)
+                .Skip(TokenTag.ID, TokenTag.DOT)
+                .Result;
+        }
+
         private bool Expect(TokenTag tag)
         {
             return new TokenPredictor(_enumerator)
                 .Expect(tag)
                 .Result;
+        }
+
+        private bool ExpectAndSkip(TokenTag tag)
+        {
+            return Expect(tag) && _enumerator.MoveNext();
         }
 
         private bool ExpectOneOf(params TokenTag[] tags)

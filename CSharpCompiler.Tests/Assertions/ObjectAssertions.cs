@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.Collections.Generic;
+using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
@@ -39,6 +40,16 @@ namespace CSharpCompiler.Tests.Assertions
                 output?.WriteLine("Actual:\n {0}\n", actualJson);
                 throw new EqualException(expected, actual);
             }
+        }
+
+        public void BeNull()
+        {
+            Assert.Null((object)actual);
+        }
+
+        public void BeNotNull()
+        {
+            Assert.NotNull((object)actual);
         }
     }
 }

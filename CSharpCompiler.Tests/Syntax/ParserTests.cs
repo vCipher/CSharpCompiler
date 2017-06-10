@@ -21,14 +21,14 @@ namespace CSharpCompiler.Syntax.Tests
             string content =
                 @"int a = 1;
                   int b = 1;
-                  writeLine(a + b);";
+                  System.Console.WriteLine(a + b);";
 
             ParseTree expected = new ParseTree(
                 new ParseNode(ParseNodeTag.StatementSeq,
                     DeclarationStatement(INT, ID("a"), INT_LITERAL("1")),
                     DeclarationStatement(INT, ID("b"), INT_LITERAL("1")),
                     ExpressionStatement(InvokeMethod(
-                        ID("writeLine"), 
+                        ID_LIST("System", "Console", "WriteLine"), 
                         Plus(Var("a"), Var("b"))
                     ))
                 )

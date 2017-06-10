@@ -1,5 +1,6 @@
 ﻿using CSharpCompiler.Lexica.Tokens;
 using CSharpCompiler.Syntax;
+using System.Linq;
 
 namespace CSharpCompiler.Tests.Helpers
 {
@@ -12,10 +13,11 @@ namespace CSharpCompiler.Tests.Helpers
                 new ParseNode(Tokens.SEMICOLON)
             );
         }
-        public static ParseNode InvokeMethod(Token method, ParseNode arg)
+
+        public static ParseNode InvokeMethod(ParseNode method, ParseNode arg)
         {
             return new ParseNode(ParseNodeTag.InvokeExpression,
-                new ParseNode(method),
+                method,
                 new ParseNode(Tokens.OPEN_PAREN),
                 new ParseNode(ParseNodeTag.ArgumentList,
                     new ParseNode(ParseNodeTag.Argument, arg)),
@@ -73,6 +75,14 @@ namespace CSharpCompiler.Tests.Helpers
             return new ParseNode(ParseNodeTag.VarAccess,
                 new ParseNode(Tokens.ID(name))
             );
+        }
+
+        public static ParseNode ID_LIST(params string[] ids)
+        {
+            return new ParseNode(ParseNodeTag.IdentifierList,
+                ids.Select(x => Tokens.ID(x))
+                .Select(x => new ParseNode(x))
+                .ToArray());
         }
     }
 }

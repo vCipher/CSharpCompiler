@@ -1,5 +1,6 @@
 ﻿using CSharpCompiler.Cmd.Runtimes;
-using CSharpCompiler.CodeGen;
+using CSharpCompiler.Compilation;
+using CSharpCompiler.PE;
 using System;
 using System.IO;
 
@@ -25,9 +26,9 @@ namespace CSharpCompiler.Cmd
             var assemblyDef = Compiler.CompileAssembly(content, options);
 
             using (Stream stream = File.Open(Path.Combine(AppContext.BaseDirectory, options.AssemblyName), FileMode.Create))
-            using (PEWriter pe = new PEWriter(assemblyDef, stream, options))
+            using (AssemblyWriter pe = new AssemblyWriter(assemblyDef, stream, options))
             {
-                pe.Write();
+                pe.WriteAssembly();
             }
 
             RuntimeManager.WriteManifest(fileName, runtime);
