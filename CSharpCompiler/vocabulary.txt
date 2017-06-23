@@ -135,9 +135,15 @@ while                   WHILE
 ;                       SEMICOLON
 .                       DOT
 ,                       COMMA
+\$                      NEW_LINE
+\s                      WHITE_SPACE
 
 # constants and identifiers
 -?\d+                       INT_LITERAL
 -?\d+(.\d+)?(E(\+|-)?\d+)?  FLOAT_LITERAL
 "\.*"                       STRING_LITERAL
 \w(\w|\d)*                  ID
+
+# comments
+//\.*\$?                LINE_COMMENT
+/\*(\.|\$)*\*/          MULTI_LINE_COMMENT

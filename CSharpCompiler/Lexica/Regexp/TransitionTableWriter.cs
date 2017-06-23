@@ -70,7 +70,14 @@ namespace CSharpCompiler.Lexica.Regexp
 
         private string Escape(char @char)
         {
-            return (@char == '\\') ? "\\\\" : new string(@char, 1);
+            switch (@char)
+            {
+                case '\\': return "\\\\";
+                case '\n': return "\\n";
+                case '\r': return "\\r";
+                case '\t': return "\\t";
+                default: return new string(@char, 1);
+            }
         }
 
         private string GetAliasesSourceCode(TransitionTable table)

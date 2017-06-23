@@ -132,6 +132,10 @@
         FLOAT_LITERAL,
         DOUBLE_LITERAL,
         STRING_LITERAL,
-        ID
+        ID,
+        WHITE_SPACE,
+        NEW_LINE,
+        LINE_COMMENT,
+        MULTI_LINE_COMMENT
     }
 }

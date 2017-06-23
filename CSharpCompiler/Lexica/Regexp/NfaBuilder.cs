@@ -9,6 +9,7 @@ namespace CSharpCompiler.Lexica.Regexp
         private const string NUMBER_PATTERN = "0|1|2|3|4|5|6|7|8|9";
         private const string WORD_PATTERN = "a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|_";
         private const string WHITE_SPACE_PATTERN = " |\t";
+        private const string NEW_LINE_PATTERN = "\r?\n";
         private const string ANY_CHAR_PATTERN = "\\w|\\d|\\s|!|\"|#|$|%|&|\\(|\\)|\\*|\\+|,|\\-|.|/|:|;|<|=|>|\\?|@|[|\\\\|]|^|_|`|{|\\||}|~";
 
         private readonly Dictionary<char, Func<CharEnumerator, Nfa, Nfa>> _mappers;
@@ -32,6 +33,7 @@ namespace CSharpCompiler.Lexica.Regexp
             _macros.Add('w', () => Parse(WORD_PATTERN));
             _macros.Add('s', () => Parse(WHITE_SPACE_PATTERN));
             _macros.Add('.', () => Parse(ANY_CHAR_PATTERN));
+            _macros.Add('$', () => Parse(NEW_LINE_PATTERN));
         }
 
         public Nfa Parse(string regexp)

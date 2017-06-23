@@ -19,14 +19,14 @@ namespace CSharpCompiler.Tests.Assertions
             Assert.Equal(expected, actual, comparer);
         }
 
-        public void Contains(T expected)
-        {
-            Assert.Contains(expected, actual);
-        }
-
-        public void Single(T expected)
+        public void BeSingle(T expected)
         {
             Assert.Single(actual, expected);
         }
+
+        public void Contains(T expected)
+        {
+            Assert.Contains(expected, actual);
+        }        
     }
 }

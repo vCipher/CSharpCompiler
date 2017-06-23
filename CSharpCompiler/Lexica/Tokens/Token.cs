@@ -45,6 +45,11 @@ namespace CSharpCompiler.Lexica.Tokens
             return Tag == other.Tag && string.Equals(Lexeme, other.Lexeme);
         }
 
+        public override string ToString()
+        {
+            return $"[{Tag}, {Lexeme}]";
+        }
+
         public static bool operator ==(Token first, Token second)
         {
             return first.Equals(second);

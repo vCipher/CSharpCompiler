@@ -62,6 +62,8 @@ namespace CSharpCompiler.Lexica.Tokens
         public static readonly Token DOT = new Token(".", TokenTag.DOT);
         public static readonly Token COMMA = new Token(",", TokenTag.COMMA);
         public static readonly Token QUESTION = new Token("?", TokenTag.QUESTION);
+        public static readonly Token WHITE_SPACE = new Token(" ", TokenTag.WHITE_SPACE);
+        public static readonly Token NEW_LINE = new Token("\n", TokenTag.NEW_LINE);
 
         // reserved keywords
         public static readonly Token ABSTRACT = new Token("abstract", TokenTag.ABSTRACT);
@@ -154,6 +156,8 @@ namespace CSharpCompiler.Lexica.Tokens
         public static Func<string, Token> DOUBLE_LITERAL = val => new Token(val, TokenTag.DOUBLE_LITERAL);
         public static Func<string, Token> STRING_LITERAL = val => new Token(val.Trim('"'), TokenTag.STRING_LITERAL);
         public static Func<string, Token> ID = val => new Token(val, TokenTag.ID);
+        public static Func<string, Token> LINE_COMMENT = val => new Token(val, TokenTag.LINE_COMMENT);
+        public static Func<string, Token> MULTI_LINE_COMMENT = val => new Token(val, TokenTag.MULTI_LINE_COMMENT);
 
         private static Dictionary<string, Token> _tokenMap = GetFieldMap<Token>();
         private static Dictionary<string, Func<string, Token>> _tokenFactoryMap = GetFieldMap<Func<string, Token>>();
