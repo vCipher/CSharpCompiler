@@ -70,6 +70,15 @@ namespace CSharpCompiler.Tests.Helpers
             );
         }
 
+        public static ParseNode Minus(ParseNode leftOp, ParseNode rightOp)
+        {
+            return new ParseNode(ParseNodeTag.AdditiveExpression,
+                leftOp,
+                new ParseNode(Tokens.MINUS),
+                rightOp
+            );
+        }
+
         public static ParseNode Var(string name)
         {
             return new ParseNode(ParseNodeTag.VarAccess,

@@ -18,26 +18,36 @@ namespace CSharpCompiler.Syntax.Tests
         [Fact]
         public void ParseTest()
         {
-            string content =
+            var content =
                 @"int a = 1;
                   int b = 1;
                   System.Console.WriteLine(a + b);";
 
-            ParseTree expected = new ParseTree(
+            var expected = new ParseTree(
                 new ParseNode(ParseNodeTag.StatementSeq,
                     DeclarationStatement(INT, ID("a"), INT_LITERAL("1")),
                     DeclarationStatement(INT, ID("b"), INT_LITERAL("1")),
                     ExpressionStatement(InvokeMethod(
-                        ID_LIST("System", "Console", "WriteLine"), 
+                        ID_LIST("System", "Console", "WriteLine"),
                         Plus(Var("a"), Var("b"))
                     ))
                 )
             );
 
-            TokenEnumerable tokens = Scanner.Scan(content);
-            ParseNode actual = Parser.Parse(tokens);
+            var tokens = Scanner.Scan(content);
+            var actual = Parser.Parse(tokens);
             
             actual.Should().Be(expected, Output);
+        }
+
+        [Fact]
+        public void ParseTest_MinusExpression()
+        {
+            var content = "1 - 2;";
+            var tokens = Scanner.Scan(content);
+            var actual = Parser.Parse(tokens);
+
+            actual.Should().BeNotNull();
         }
     }
 }

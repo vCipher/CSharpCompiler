@@ -305,12 +305,14 @@ namespace CSharpCompiler.Syntax
 
         private ParseNode UnaryExpression()
         {
-            var expr = PrimaryExpression();
-            if (!IsUnaryExpression()) return expr;
+            if (IsUnaryExpression())
+            {
+                return new ParseNode(ParseNodeTag.UnaryExpression)
+                   .AddChild(Terminal())
+                   .AddChild(PrimaryExpression());
+            }
 
-            return new ParseNode(ParseNodeTag.UnaryExpression)
-                .AddChild(Terminal())
-                .AddChild(PrimaryExpression());
+            return PrimaryExpression();
         }
 
         private ParseNode PrimaryExpression()
