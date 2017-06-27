@@ -43,7 +43,7 @@ namespace CSharpCompiler.Lexica.Tests
                 ; SEMICOLON
                 \s WHITE_SPACE";
 
-            var table = TransitionTable.FromString(vocabulary);
+            var table = TransitionTable.FromVocabularyString(vocabulary);
             var tokens = Scanner.Scan(content, new ScannerOptions { Transitions = table });
 
             tokens.Should().Be(new[] {
@@ -61,7 +61,7 @@ namespace CSharpCompiler.Lexica.Tests
             string content = "#";
             string vocabulary = "\\w ID";
 
-            var table = TransitionTable.FromString(vocabulary);
+            var table = TransitionTable.FromVocabularyString(vocabulary);
             Assert.Throws<NotAcceptLexemeException>(() => Scanner.Scan(content, new ScannerOptions { Transitions = table }));
         }
 
@@ -71,7 +71,7 @@ namespace CSharpCompiler.Lexica.Tests
             string content = "\"hello, world!\"";
             string vocabulary = "\"\\.*\" STRING_LITERAL";
 
-            var table = TransitionTable.FromString(vocabulary);
+            var table = TransitionTable.FromVocabularyString(vocabulary);
             var tokens = Scanner.Scan(content, new ScannerOptions { Transitions = table });
 
             tokens.Should().BeSingle(STRING_LITERAL("hello, world!"));
@@ -90,7 +90,7 @@ namespace CSharpCompiler.Lexica.Tests
                 \$ NEW_LINE
                 //\.*\$? LINE_COMMENT";
 
-            var table = TransitionTable.FromString(vocabulary);
+            var table = TransitionTable.FromVocabularyString(vocabulary);
             var options = new ScannerOptions { Transitions = table, BlackList = Empty<TokenTag>.Array };
             var tokens = Scanner.Scan(content, options);
 
@@ -112,7 +112,7 @@ namespace CSharpCompiler.Lexica.Tests
                 \$ NEW_LINE
                 /\*(\.|\$)*\*/ MULTI_LINE_COMMENT";
 
-            var table = TransitionTable.FromString(vocabulary);
+            var table = TransitionTable.FromVocabularyString(vocabulary);
             var options = new ScannerOptions { Transitions = table, BlackList = Empty<TokenTag>.Array };
             var tokens = Scanner.Scan(content, options);
 

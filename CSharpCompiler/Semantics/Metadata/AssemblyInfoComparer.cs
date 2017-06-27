@@ -15,7 +15,7 @@ namespace CSharpCompiler.Semantics.Metadata
 
             return string.Equals(x.Name, y.Name)
                 && x.Version.Equals(y.Version)
-                && ByteArrayComparer.Default.Equals(x.PublicKeyToken, y.PublicKeyToken);
+                && ArrayComparer<byte>.Default.Equals(x.PublicKeyToken, y.PublicKeyToken);
         }
 
         public int GetHashCode(IAssemblyInfo obj)
@@ -28,7 +28,7 @@ namespace CSharpCompiler.Semantics.Metadata
                 int hash = 17;
                 hash = hash * 23 + obj.Version?.GetHashCode() ?? 0;
                 hash = hash * 23 + EqualityComparer<string>.Default.GetHashCode(obj.Name);
-                hash = hash * 23 + ByteArrayComparer.Default.GetHashCode(obj.PublicKeyToken);
+                hash = hash * 23 + ArrayComparer<byte>.Default.GetHashCode(obj.PublicKeyToken);
                 return hash;
             }
         }

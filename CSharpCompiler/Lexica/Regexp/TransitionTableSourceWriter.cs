@@ -1,16 +1,15 @@
 ﻿using CSharpCompiler.Utility;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
 namespace CSharpCompiler.Lexica.Regexp
 {
-    public sealed class TransitionTableWriter : IDisposable
+    public sealed class TransitionTableSourceWriter : ITransitionTableWriter
     {
         private TextWriter _writer;
 
-        public TransitionTableWriter(Stream stream)
+        public TransitionTableSourceWriter(Stream stream)
         {
             _writer = new StreamWriter(stream);
         }
@@ -38,34 +37,44 @@ namespace CSharpCompiler.Lexica.Regexp
 
         private string GetHeadSourceCode(TransitionTable table)
         {
-            return string.Format("int head = {0};", table.Head);
+            return string.Format("ushort head = {0};", table.Head);
         }
 
         private string GetTransitionsSourceCode(TransitionTable table)
         {
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine("var transitions = new Dictionary<int, Dictionary<char, int>>");
-            sb.AppendLine("{");
-            table.Transitions.ForEach((from, info) => AppendTransitionsSourceCode(sb, from.Key, from.Value, info));
-            sb.AppendLine("};");
+            var length = table.Transitions.Length;
+            var sb = new StringBuilder();
+            sb.AppendFormat("var transitions = new Dictionary<char, ushort>[{0}];", length);
+            sb.AppendLine();
+            
+            for (ushort index = 0; index < length; index++)
+            {
+                var states = table.Transitions[index];
+                AppendTransitionsSourceCode(sb, index, states);
+            }
 
             return sb.ToString();
         }
 
-        private void AppendTransitionsSourceCode(StringBuilder sb, int from, Dictionary<char, int> states, EnumerationInfo info)
+        private void AppendTransitionsSourceCode(StringBuilder sb, ushort from, Dictionary<char, ushort> states)
         {
-            sb.AppendFormat("[{0}] = new Dictionary<char, int>", from);
+            if (states.Count == 0)
+            {
+                sb.AppendFormat("transitions[{0}] = new Dictionary<char, ushort>();", from);
+                sb.AppendLine();
+                return;
+            }
+
+            sb.AppendFormat("transitions[{0}] = new Dictionary<char, ushort>({1}) ", from, states.Count);
             sb.Append("{");
-            states.ForEach((state, innerInfo) => AppendTransiotionSourceCode(sb, state.Key, state.Value, innerInfo));
 
-            if (info.IsLast) sb.AppendLine(" }");
-            else sb.AppendLine(" },");
-        }
+            states.ForEach((state, info) =>
+            {
+                sb.AppendFormat("['{0}'] = {1}", Escape(state.Key), state.Value);
+                if (!info.IsLast) sb.Append(", ");
+            });
 
-        private void AppendTransiotionSourceCode(StringBuilder sb, char @char, int state, EnumerationInfo info)
-        {
-            sb.AppendFormat("['{0}'] = {1}", Escape(@char), state);
-            if (!info.IsLast) sb.Append(", ");
+            sb.AppendLine(" };");
         }
 
         private string Escape(char @char)
@@ -82,19 +91,17 @@ namespace CSharpCompiler.Lexica.Regexp
 
         private string GetAliasesSourceCode(TransitionTable table)
         {
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine("var aliases = new Dictionary<int, string>");
-            sb.AppendLine("{");
-            table.Aliases.ForEach((alias, info) => AppendAliasSourceCode(sb, alias.Key, alias.Value, info));
-            sb.AppendLine("};");
+            var sb = new StringBuilder();
+            sb.AppendFormat("var aliases = new Dictionary<ushort, string>({0});", table.Aliases.Count);
+            sb.AppendLine();
+            
+            foreach (var alias in table.Aliases)
+            {
+                sb.AppendFormat("aliases[{0}] = \"{1}\";", alias.Key, alias.Value);
+                sb.AppendLine();
+            }
 
             return sb.ToString();
-        }
-
-        private void AppendAliasSourceCode(StringBuilder sb, int state, string alias, EnumerationInfo info)
-        {
-            sb.AppendFormat("[{0}] = \"{1}\"", state, alias);
-            if (!info.IsLast) sb.Append(", ");
         }
 
         #region IDisposable Support

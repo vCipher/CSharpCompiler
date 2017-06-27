@@ -18,17 +18,19 @@ namespace CSharpCompiler.Lexica.Regexp.Tests
         {
             var expected = new TransitionTable(
                 head: 0,
-                transitions: new Dictionary<int, Dictionary<char, int>> {
-                    [0] = new Dictionary<char, int> { ['a'] = 1 },
-                    [1] = new Dictionary<char, int> { ['b'] = 2 },
-                    [2] = new Dictionary<char, int> { ['c'] = 3 },
-                    [3] = new Dictionary<char, int> { }
+                transitions: new Dictionary<char, ushort>[] 
+                {
+                    new Dictionary<char, ushort> { ['a'] = 1 },
+                    new Dictionary<char, ushort> { ['b'] = 2 },
+                    new Dictionary<char, ushort> { ['c'] = 3 },
+                    new Dictionary<char, ushort> { }
                 },
-                aliases: new Dictionary<int, string> {
+                aliases: new Dictionary<ushort, string>
+                {
                     [3] = "ID"
                 }
             );
-            var actual = TransitionTable.FromFile(Path.Combine(AppContext.BaseDirectory, "Content/vocabulary.txt"));
+            var actual = TransitionTable.FromVocabularyFile(Path.Combine(AppContext.BaseDirectory, "Content/vocabulary.txt"));
 
             actual.Should().Be(expected);
         }
@@ -38,19 +40,19 @@ namespace CSharpCompiler.Lexica.Regexp.Tests
         {
             var expected = new TransitionTable(
                 head: 0,
-                transitions: new Dictionary<int, Dictionary<char, int>>
+                transitions: new Dictionary<char, ushort>[]
                 {
-                    [0] = new Dictionary<char, int> { ['a'] = 1, ['b'] = 2 },
-                    [1] = new Dictionary<char, int> { },
-                    [2] = new Dictionary<char, int> { }
+                    new Dictionary<char, ushort> { ['a'] = 1, ['b'] = 2 },
+                    new Dictionary<char, ushort> { },
+                    new Dictionary<char, ushort> { }
                 },
-                aliases: new Dictionary<int, string>
+                aliases: new Dictionary<ushort, string>
                 {
                     [1] = "ID",
                     [2] = "ID"
                 }
             );
-            var actual = TransitionTable.FromString(@"a|b ID");
+            var actual = TransitionTable.FromVocabularyString(@"a|b ID");
 
             actual.Should().Be(expected);
         }

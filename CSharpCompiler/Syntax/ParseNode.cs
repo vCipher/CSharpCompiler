@@ -11,7 +11,6 @@ namespace CSharpCompiler.Syntax
     {
         public ParseNodeTag Tag { get; private set; }
         public Token Token { get; private set; }
-        public ParseNode Parent { get; private set; }
         public ParseNodeCollection Children { get; private set; }
 
         public bool IsTerminal
@@ -20,29 +19,26 @@ namespace CSharpCompiler.Syntax
         }
 
         public ParseNode(Token terminal)
-            : this(ParseNodeTag.Terminal, terminal, null, Empty<ParseNode>.Array)
+            : this(ParseNodeTag.Terminal, terminal, Empty<ParseNode>.Array)
         { }
 
         public ParseNode(ParseNodeTag tag, params ParseNode[] children)
-            : this(tag, default(Token), null, children)
+            : this(tag, default(Token), children)
         { }
 
-        public ParseNode(ParseNodeTag tag, Token terminal, ParseNode parent, IEnumerable<ParseNode> children)
+        public ParseNode(ParseNodeTag tag, Token terminal, IEnumerable<ParseNode> children)
         {
             Tag = tag;
             Token = terminal;
-            Parent = parent;
             Children = new ParseNodeCollection(children);
-            Children.ForEach(child => child.Parent = this);
         }
 
         public ParseNode AddChild(ParseNode parseNode)
         {
-            if (parseNode == null) throw new ArgumentNullException("parseNode");
-
-            parseNode.Parent = this;
+            if (parseNode == null)
+                throw new ArgumentNullException("parseNode");
+            
             Children.Add(parseNode);
-
             return this;
         }
 

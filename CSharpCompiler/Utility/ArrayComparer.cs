@@ -3,13 +3,13 @@ using System.Linq;
 
 namespace CSharpCompiler.Utility
 {
-    public sealed class ByteArrayComparer : IEqualityComparer<byte[]>
+    public sealed class ArrayComparer<T> : IEqualityComparer<T[]>
     {
-        public static readonly ByteArrayComparer Default = new ByteArrayComparer();
+        public static readonly ArrayComparer<T> Default = new ArrayComparer<T>();
+        
+        private ArrayComparer() { }
 
-        private ByteArrayComparer() { }
-
-        public bool Equals(byte[] x, byte[] y)
+        public bool Equals(T[] x, T[] y)
         {
             if (ReferenceEquals(x, y)) return true;
             if (x.Length != y.Length) return false;
@@ -17,16 +17,16 @@ namespace CSharpCompiler.Utility
             return x.SequenceEqual(y);
         }
 
-        public int GetHashCode(byte[] bytes)
+        public int GetHashCode(T[] array)
         {
-            if (bytes == null)
+            if (array == null)
                 return 0;
 
             unchecked
             {
                 int hash = 1;
-                for (int i = 0; i < bytes.Length; i++)
-                    hash = (hash * 37) ^ bytes[i];
+                for (int i = 0; i < array.Length; i++)
+                    hash = (hash * 37) ^ array[i].GetHashCode();
 
                 return hash;
             }

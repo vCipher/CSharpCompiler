@@ -9,6 +9,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Lexica\vocabulary.bin" />
+    <None Remove="Lexica\vocabulary.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Lexica\vocabulary.bin" />
+    <EmbeddedResource Include="Lexica\vocabulary.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="System.Reflection.TypeExtensions" Version="4.4.0-preview1-25305-02" />
   </ItemGroup>
 

@@ -8,13 +8,13 @@ namespace CSharpCompiler.Tests.Assertions
     {
         public static readonly TransitionTableComparer Default = new TransitionTableComparer();
 
-        private DictionaryComparer<int, string> _aliasesComparer;
-        private DictionaryComparer<int, Dictionary<char, int>> _transComparer;
+        private DictionaryComparer<ushort, string> _aliasesComparer;
+        private DictionaryComparer<char, ushort> _transComparer;
 
         private TransitionTableComparer()
         {
-            _aliasesComparer = new DictionaryComparer<int, string>();
-            _transComparer = new DictionaryComparer<int, Dictionary<char, int>>(new DictionaryComparer<char, int>());
+            _aliasesComparer = new DictionaryComparer<ushort, string>();
+            _transComparer = new DictionaryComparer<char, ushort>();
         }
 
         public bool Equals(TransitionTable first, TransitionTable second)
@@ -23,21 +23,6 @@ namespace CSharpCompiler.Tests.Assertions
                 Equals(first.Accepting, second.Accepting) &&
                 Equals(first.Aliases, second.Aliases) &&
                 Equals(first.Transitions, second.Transitions);
-        }
-
-        private bool Equals(int[] first, int[] second)
-        {
-            return first.SequenceEqual(second);
-        }
-
-        private bool Equals(Dictionary<int, string> first, Dictionary<int, string> second)
-        {
-            return _aliasesComparer.Equals(first, second);
-        }
-
-        private bool Equals(Dictionary<int, Dictionary<char, int>> first, Dictionary<int, Dictionary<char, int>> second)
-        {
-            return _transComparer.Equals(first, second);
         }
 
         public int GetHashCode(TransitionTable obj)
@@ -53,14 +38,39 @@ namespace CSharpCompiler.Tests.Assertions
             return hash;
         }
 
-        private int GetHashCode(Dictionary<int, string> aliases)
+        private bool Equals(ushort[] first, ushort[] second)
+        {
+            return first.SequenceEqual(second);
+        }
+
+        private bool Equals(Dictionary<ushort, string> first, Dictionary<ushort, string> second)
+        {
+            return _aliasesComparer.Equals(first, second);
+        }
+
+        private bool Equals(Dictionary<char, ushort>[] first, Dictionary<char, ushort>[] second)
+        {
+            return first.SequenceEqual(second, _transComparer);
+        }
+
+        private int GetHashCode(Dictionary<ushort, string> aliases)
         {
             return _aliasesComparer.GetHashCode(aliases);
         }
 
-        private int GetHashCode(Dictionary<int, Dictionary<char, int>> trans)
+        private int GetHashCode(Dictionary<char, ushort>[] trans)
         {
-            return _transComparer.GetHashCode(trans);
+            if (trans == null)
+                return 0;
+
+            unchecked
+            {
+                int hash = 1;
+                foreach (var item in trans)
+                    hash = (hash * 37) ^ _transComparer.GetHashCode(item);
+
+                return hash;
+            }
         }
     }
 }

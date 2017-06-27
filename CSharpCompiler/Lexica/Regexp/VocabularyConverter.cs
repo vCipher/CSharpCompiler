@@ -5,48 +5,51 @@ using System.Linq;
 
 namespace CSharpCompiler.Lexica.Regexp
 {
-    public sealed class TransitionTableReader : IDisposable
+    public sealed class VocabularyConverter : IDisposable
     {
         private TextReader _reader;
 
-        public TransitionTableReader(Stream stream)
+        public VocabularyConverter(Stream stream)
         {
             _reader = new StreamReader(stream);
         }
 
-        public TransitionTableReader(string content)
+        public VocabularyConverter(string content)
         {
             _reader = new StringReader(content);
         }
 
-        public TransitionTable Read()
+        public TransitionTable Convert()
         {
             Nfa nfa = CreateNfa();
             Dfa dfa = Dfa.FromNfa(nfa);
 
-            HashSet<DfaState> states = dfa.GetStates();
-            Dictionary<int, Dictionary<char, int>> transitions = GetTransitions(states);
-            Dictionary<int, string> aliases = GetAliases(states);
+            var states = dfa.GetStates();
+            var transitions = GetTransitions(states);
+            var aliases = GetAliases(states);
 
-            return new TransitionTable(dfa.Head.Id, transitions, aliases);
+            return new TransitionTable((ushort)dfa.Head.Id, transitions, aliases);
         }
 
-        private static Dictionary<int, string> GetAliases(HashSet<DfaState> states)
+        private static Dictionary<ushort, string> GetAliases(HashSet<DfaState> states)
         {
             return states.Where(state => state.IsAccepting)
                 .OrderBy(state => state.Id)
-                .ToDictionary(state => state.Id, state => state.Alias);
+                .ToDictionary(state => (ushort)state.Id, state => state.Alias);
         }
 
-        private static Dictionary<int, Dictionary<char, int>> GetTransitions(HashSet<DfaState> states)
+        private static Dictionary<char, ushort>[] GetTransitions(HashSet<DfaState> states)
         {
-            return states
-                .OrderBy(state => state.Id)
-                .ToDictionary(
-                    state => state.Id,
-                    state => state.Transitions.ToDictionary(
-                        trans => trans.Character, 
-                        trans => trans.To.Id));
+            var result = new Dictionary<char, ushort>[states.Count];
+
+            foreach (var state in states.OrderBy(state => state.Id))
+            {
+                result[state.Id] = state.Transitions.ToDictionary(
+                        trans => trans.Character,
+                        trans => (ushort)trans.To.Id);
+            }
+
+            return result;
         }
 
         private IEnumerable<string> ReadLines()

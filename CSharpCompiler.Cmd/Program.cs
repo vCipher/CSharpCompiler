@@ -10,6 +10,13 @@ namespace CSharpCompiler.Cmd
     {
         public static void Main(string[] args)
         {
+            //using (var result = File.OpenWrite("TransitionTableSource.cs"))
+            //using (var writer = new Lexica.Regexp.TransitionTableBinaryWriter(result))
+            //{
+            //    var table = Lexica.Regexp.TransitionTable.FromVocabularyFile("vocabulary.txt");
+            //    writer.Write(table);
+            //}
+
             if (args.Length < 2) throw new ArgumentException(nameof(args));
 
             string file = args[0];
