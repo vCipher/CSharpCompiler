@@ -27,18 +27,18 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public ExportedTypeTable() : base() { }
         public ExportedTypeTable(int count) : base(count) { }
 
-        protected override ExportedTypeRow ReadRow(TableHeap heap)
+        protected override ExportedTypeRow ReadRow(TableHeapReader heap)
         {
             return new ExportedTypeRow(
                 (TypeAttributes)heap.ReadUInt32(),
                 heap.ReadUInt32(),
-                heap.ReadString(),
-                heap.ReadString(),
+                heap.ReadStringOffset(),
+                heap.ReadStringOffset(),
                 heap.ReadCodedToken(CodedTokenType.Implementation)
             );
         }
 
-        protected override void WriteRow(ExportedTypeRow row, TableHeap heap)
+        protected override void WriteRow(ExportedTypeRow row, TableHeapWriter heap)
         {
             heap.WriteUInt32((uint)row.Attributes);
             heap.WriteUInt32(row.TypeDefId);

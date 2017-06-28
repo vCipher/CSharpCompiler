@@ -20,7 +20,7 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public EventMapTable() : base() { }
         public EventMapTable(int count) : base(count) { }
 
-        protected override EventMapRow ReadRow(TableHeap heap)
+        protected override EventMapRow ReadRow(TableHeapReader heap)
         {
             return new EventMapRow(
                 heap.ReadToken(MetadataTokenType.TypeDef),
@@ -28,7 +28,7 @@ namespace CSharpCompiler.PE.Metadata.Tables
             );
         }
 
-        protected override void WriteRow(EventMapRow row, TableHeap heap)
+        protected override void WriteRow(EventMapRow row, TableHeapWriter heap)
         {
             heap.WriteToken(row.Parent);
             heap.WriteToken(row.EventList);

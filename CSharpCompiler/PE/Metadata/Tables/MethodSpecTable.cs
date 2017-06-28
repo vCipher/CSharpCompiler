@@ -20,15 +20,15 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public MethodSpecTable() : base() { }
         public MethodSpecTable(int count) : base(count) { }
 
-        protected override MethodSpecRow ReadRow(TableHeap heap)
+        protected override MethodSpecRow ReadRow(TableHeapReader heap)
         {
             return new MethodSpecRow(
                 heap.ReadCodedToken(CodedTokenType.MethodDefOrRef),
-                heap.ReadBlob()
+                heap.ReadBlobOffset()
             );
         }
 
-        protected override void WriteRow(MethodSpecRow row, TableHeap heap)
+        protected override void WriteRow(MethodSpecRow row, TableHeapWriter heap)
         {
             heap.WriteCodedToken(row.Method, CodedTokenType.MethodDefOrRef);
             heap.WriteBlob(row.Instantiation);

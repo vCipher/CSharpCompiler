@@ -3,7 +3,6 @@ using CSharpCompiler.PE.Metadata.Heaps;
 using CSharpCompiler.PE.Sections;
 using CSharpCompiler.PE.Sections.Text;
 using CSharpCompiler.Semantics.Metadata;
-using CSharpCompiler.Utility;
 using System;
 using System.IO;
 
@@ -11,7 +10,7 @@ using static CSharpCompiler.PE.Constants;
 
 namespace CSharpCompiler.PE
 {
-    public sealed class AssemblyReader : BinaryReader
+    public sealed class AssemblyReader : PEReader
     {
         private DosHeader _dosHeader;
         private FileHeader _peHeader;
@@ -21,7 +20,7 @@ namespace CSharpCompiler.PE
         private SectionHeader[] _sectionHeaders;
         private DataDirectory[] _directories;
 
-        private MetadataHeaps _heaps;
+        private MetadataReader _metadata;
 
         public AssemblyReader(Stream input) : base(input)
         { }
@@ -38,10 +37,7 @@ namespace CSharpCompiler.PE
 
         private AssemblyDefinition ResolveAssembly()
         {
-            var entryPoint = _clrHeader.EntryPointToken;
-            var reader = new MetadataReader(_heaps, entryPoint);
-            var metadata = new MetadataSystem(reader);
-            return metadata.Assembly;
+            return new MetadataSystem(_metadata).Assembly;
         }
 
         private void ReadDosHeader()
@@ -105,6 +101,7 @@ namespace CSharpCompiler.PE
             var clr = _directories[DIRECTORY_ENTRY_COM_DESCRIPTOR];
             MoveTo(ResolveVirtualAddress(clr.RVA));
             _clrHeader = ReadStruct<CLRHeader>();
+            _metadata = new MetadataReader(BaseStream, _clrHeader.EntryPointToken);
         }
 
         private void ReadMetadataHeader()
@@ -130,14 +127,13 @@ namespace CSharpCompiler.PE
             SectionHeader header;
             if (!TryGetSectionAtVirtualAddress(_clrHeader.Metadata.RVA, out header))
                 throw new BadImageFormatException();
-
-            _heaps = new MetadataHeaps();
+            
             for (int i = 0; i < _metadataHeader.NumberOfStreams; i++)
             {
                 ReadMetadataStream(header);
             }
 
-            _heaps.Tables.Read();
+            _metadata.TableReader.ReadMetadataTablesContent();
         }
 
         private void ReadMetadataStream(SectionHeader sectionHeader)
@@ -153,83 +149,23 @@ namespace CSharpCompiler.PE
             {
                 case "#~":
                 case "#-":
-                    _heaps.Tables = new TableHeap(_heaps, ReadBytes(size));
+                    _metadata.TableReader.ReadMetadataTablesSchema();
                     break;
                 case "#Strings":
-                    _heaps.Strings = new StringHeap(ReadBytes(size));
+                    _metadata.Strings.WriteBytes(ReadBytes(size));
                     break;
                 case "#Blob":
-                    _heaps.Blobs = new BlobHeap(ReadBytes(size));
+                    _metadata.Blobs.WriteBytes(ReadBytes(size));
                     break;
                 case "#GUID":
-                    _heaps.Guids = new GuidHeap(ReadBytes(size));
+                    _metadata.Guids.WriteBytes(ReadBytes(size));
                     break;
                 case "#US":
-                    _heaps.UserStrings = new UserStringHeap(ReadBytes(size));
+                    _metadata.UserStrings.WriteBytes(ReadBytes(size));
                     break;
             }
 
             MoveTo(position);
-        }
-
-        private ByteBuffer ReadBuffer(int size)
-        {
-            var bytes = ReadBytes(size);
-            return new ByteBuffer(bytes);
-        }
-
-        private T ReadStruct<T>() where T : struct
-        {
-            var size = ByteBuffer.SizeOf<T>();
-            var bytes = ReadBytes(size);
-            return ByteBuffer.FromBytes<T>(bytes);
-        }
-
-        private string ReadZeroTerminatedString(int length)
-        {
-            int read = 0;
-            var buffer = new char[length];
-            var bytes = ReadBytes(length);
-
-            while (read < length)
-            {
-                var current = bytes[read];
-                if (current == 0)
-                    break;
-
-                buffer[read++] = (char)current;
-            }
-
-            return new string(buffer, 0, read);
-        }
-
-        private string ReadAlignedString(int length)
-        {
-            var read = 0;
-            var buffer = new char[length];
-
-            while (read < length)
-            {
-                read++;
-                var current = ReadByte();
-                if (current == 0)
-                    break;
-
-                buffer[read - 1] = (char)current;
-            }
-
-            Advance(BitArithmetic.Align(read, 4) - read);
-            return new string(buffer, 0, read - 1);
-        }
-
-        private void MoveTo(uint raw)
-        {
-            BaseStream.Seek(raw, SeekOrigin.Begin);
-        }
-
-        private void Advance(int bytes)
-        {
-            BaseStream.Seek(bytes, SeekOrigin.Current);
         }
 
         private uint ResolveVirtualAddress(uint rva)

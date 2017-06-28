@@ -1,44 +1,51 @@
 ﻿using CSharpCompiler.PE.Metadata.Tables;
 using CSharpCompiler.PE.Metadata.Tokens;
-using CSharpCompiler.Utility;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace CSharpCompiler.PE.Metadata.Heaps
 {
-    public sealed class TableHeap : HeapBuffer
+    public sealed class TableHeap : IEnumerable<IMetadataTable>
     {
-        private const int TABLES_COUNT = 45;
-        private Func<CodedTokenType, bool> _isLargeToken;
-
-        private MetadataHeaps _heaps;
+        public const int TABLES_COUNT = 45;
+        
         private IMetadataTable[] _tables;
 
-        public TableHeap(MetadataHeaps heaps) : base(Empty<byte>.Array, 0x08)
-        {
-            _heaps = heaps;
-            _tables = new IMetadataTable[TABLES_COUNT];
-            _isLargeToken = Func.Memoize<CodedTokenType, bool>(type => CodedTokenSchema.IsLargeToken(type, this));
-        }
+        public AssemblyTable AssemblyTable => GetOrCreate<AssemblyTable>(MetadataTableType.Assembly);
+        public AssemblyRefTable AssemblyRefTable => GetOrCreate<AssemblyRefTable>(MetadataTableType.AssemblyRef);
+        public CustomAttributeTable CustomAttributeTable => GetOrCreate<CustomAttributeTable>(MetadataTableType.CustomAttribute);
+        public FieldTable FieldTable => GetOrCreate<FieldTable>(MetadataTableType.Field);
+        public MemberRefTable MemberRefTable => GetOrCreate<MemberRefTable>(MetadataTableType.MemberRef);
+        public MethodTable MethodTable => GetOrCreate<MethodTable>(MetadataTableType.Method);
+        public ModuleTable ModuleTable => GetOrCreate<ModuleTable>(MetadataTableType.Module);
+        public ParamTable ParameterTable => GetOrCreate<ParamTable>(MetadataTableType.Param);
+        public StandAloneSigTable StandAloneSigTable => GetOrCreate<StandAloneSigTable>(MetadataTableType.StandAloneSig);
+        public TypeDefTable TypeDefTable => GetOrCreate<TypeDefTable>(MetadataTableType.TypeDef);
+        public TypeRefTable TypeRefTable => GetOrCreate<TypeRefTable>(MetadataTableType.TypeRef);
+        public NestedClassTable NestedClassTable => GetOrCreate<NestedClassTable>(MetadataTableType.NestedClass);
 
-        public TableHeap(MetadataHeaps heaps, byte[] buffer) : base(buffer, 0x08)
+        public TableHeap()
         {
-            MoveTo(START_POSITION);
-            _heaps = heaps;
-            _tables = GetMetadataTables();
-            _isLargeToken = Func.Memoize<CodedTokenType, bool>(type => CodedTokenSchema.IsLargeToken(type, this));
+            _tables = new IMetadataTable[TABLES_COUNT];
         }
 
         public TTable GetOrCreate<TTable>(MetadataTableType type) where TTable : IMetadataTable
         {
-            return (TTable)GetOrCreate(type);
+            return (TTable)GetOrCreate(type, () => MetadataTableFactory.Create(type));
         }
 
         public IMetadataTable GetOrCreate(MetadataTableType type)
         {
+            return GetOrCreate(type, () => MetadataTableFactory.Create(type));
+        }
+
+        public IMetadataTable GetOrCreate(MetadataTableType type, Func<IMetadataTable> factory)
+        {
             var table = _tables[(int)type];
             if (table == null)
             {
-                table = MetadataTableFactory.Create(type);
+                table = factory();
                 _tables[(int)type] = table;
             }
             return table;
@@ -52,115 +59,16 @@ namespace CSharpCompiler.PE.Metadata.Heaps
                 return false;
             }
 
-            var tableType = Convert(tokenType);
+            return TryGetTable(tokenType.ToTableType(), out table);
+        }
+
+        public bool TryGetTable(MetadataTableType tableType, out IMetadataTable table)
+        {
             table = _tables[(int)tableType];
             return table != null;
         }
 
-        public uint ReadBlob()
-        {
-            return ReadBySize(_heaps.Blobs.IsLarge);
-        }
-
-        public uint ReadGuid()
-        {
-            return ReadBySize(_heaps.Guids.IsLarge);
-        }
-
-        public uint ReadString()
-        {
-            return ReadBySize(_heaps.Strings.IsLarge);
-        }
-
-        public MetadataToken ReadToken(MetadataTokenType tokenType)
-        {
-            var tableType = Convert(tokenType);
-            var rid = ReadBySize(IsLargeTable(tableType));
-            return new MetadataToken(tokenType, rid);
-        }
-
-        public MetadataToken ReadCodedToken(CodedTokenType tokenType)
-        {
-            var value = ReadBySize(IsLargeToken(tokenType));
-            var codedToken = new CodedToken(value);
-            return CodedTokenSchema.GetMetadataToken(codedToken, tokenType);
-        }
-
-        public void Read()
-        {
-            foreach (var table in _tables)
-            {
-                if (table != null)
-                    table.Read(this);
-            }
-        }
-
-        public void WriteBlob(uint rva)
-        {
-            WriteBySize(rva, _heaps.Blobs.IsLarge);
-        }
-
-        public void WriteGuid(uint rva)
-        {
-            WriteBySize(rva, _heaps.Guids.IsLarge);
-        }
-
-        public void WriteString(uint rva)
-        {
-            WriteBySize(rva, _heaps.Strings.IsLarge);
-        }
-
-        public void WriteToken(MetadataToken token)
-        {
-            var tableType = Convert(token.Type);
-            WriteBySize(token.RID, IsLargeTable(tableType));
-        }
-
-        public void WriteCodedToken(MetadataToken token, CodedTokenType tokenType)
-        {
-            var codedToken = CodedTokenSchema.GetCodedToken(token, tokenType);
-            WriteBySize(codedToken.Value, IsLargeToken(tokenType));
-        }
-
-        public void Write()
-        {
-            WriteStruct(GetTableHeapHeader());
-            WriteRowCount();
-            WriteTables();
-        }
-
-        private void WriteRowCount()
-        {
-            foreach (var table in _tables)
-            {
-                if (table != null)
-                    WriteUInt32((uint)table.Length);
-            }
-        }
-
-        private void WriteTables()
-        {
-            foreach (var table in _tables)
-            {
-                if (table != null)
-                    table.Write(this);
-            }
-        }
-
-        private TableHeapHeader GetTableHeapHeader()
-        {
-            return new TableHeapHeader()
-            {
-                MajorVersion = 0x02,
-                MinorVersion = 0x00,
-                HeapFlags = _heaps.GetHeapFlags(),
-                Rid = 0x01,
-                MaskValid = GetValidMask(),
-                MaskSorted = GetSortedMask()
-            };
-        }
-
-        private ulong GetValidMask()
+        public ulong GetValidMask()
         {
             ulong valid = 0;
             for (int index = 0; index < TABLES_COUNT; index++)
@@ -172,7 +80,7 @@ namespace CSharpCompiler.PE.Metadata.Heaps
             return valid;
         }
 
-        private ulong GetSortedMask()
+        public ulong GetSortedMask()
         {
             ulong sorted = 0;
             sorted |= 1ul << (int)MetadataTableType.InterfaceImpl;
@@ -195,57 +103,19 @@ namespace CSharpCompiler.PE.Metadata.Heaps
             return sorted;
         }
 
-        private bool IsLargeToken(CodedTokenType tokenType)
+        public IEnumerator<IMetadataTable> GetEnumerator()
         {
-            return _isLargeToken(tokenType);
-        }
-
-        private bool IsLargeTable(MetadataTableType tableType)
-        {
-            var table = _tables[(int)tableType];
-            return table != null && table.Length > 0xffff;
-        }
-
-        private MetadataTableType Convert(MetadataTokenType tokenType)
-        {
-            return (MetadataTableType)(byte)((uint)tokenType >> 24);
-        }
-
-        private MetadataTokenType Convert(MetadataTableType tableType)
-        {
-            return (MetadataTokenType)((uint)tableType << 24);
-        }
-
-        private IMetadataTable[] GetMetadataTables()
-        {
-            var tables = new IMetadataTable[TABLES_COUNT];
-            var header = ReadStruct<TableHeapHeader>();
-            var valid = header.MaskValid;
-
             for (int index = 0; index < TABLES_COUNT; index++)
             {
-                if (((valid >> index) & 1) == 1)
-                {
-                    var type = (MetadataTableType)index;
-                    var count = ReadInt32();
-                    tables[(int)type] = MetadataTableFactory.Create(type, count);
-                }
+                var table = _tables[index];
+                if (table != null)
+                    yield return table;
             }
-
-            return tables;
         }
 
-        private uint ReadBySize(bool isLarge)
+        IEnumerator IEnumerable.GetEnumerator()
         {
-            return (isLarge) ? ReadUInt32() : ReadUInt16();
-        }
-
-        private void WriteBySize(uint value, bool isLarge)
-        {
-            if (isLarge)
-                WriteUInt32(value);
-            else
-                WriteUInt16((ushort)value);
+            return GetEnumerator();
         }
     }
 }

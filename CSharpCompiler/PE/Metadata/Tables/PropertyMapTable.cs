@@ -20,7 +20,7 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public PropertyMapTable() : base() { }
         public PropertyMapTable(int count) : base(count) { }
 
-        protected override PropertyMapRow ReadRow(TableHeap heap)
+        protected override PropertyMapRow ReadRow(TableHeapReader heap)
         {
             return new PropertyMapRow(
                 heap.ReadToken(MetadataTokenType.TypeDef),
@@ -28,7 +28,7 @@ namespace CSharpCompiler.PE.Metadata.Tables
             );
         }
 
-        protected override void WriteRow(PropertyMapRow row, TableHeap heap)
+        protected override void WriteRow(PropertyMapRow row, TableHeapWriter heap)
         {
             heap.WriteToken(row.Parent);
             heap.WriteToken(row.PropertyList);

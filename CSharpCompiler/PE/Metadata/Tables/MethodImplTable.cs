@@ -22,7 +22,7 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public MethodImplTable() : base() { }
         public MethodImplTable(int count) : base(count) { }
 
-        protected override MethodImplRow ReadRow(TableHeap heap)
+        protected override MethodImplRow ReadRow(TableHeapReader heap)
         {
             return new MethodImplRow(
                 heap.ReadToken(MetadataTokenType.TypeDef),
@@ -31,7 +31,7 @@ namespace CSharpCompiler.PE.Metadata.Tables
             );
         }
 
-        protected override void WriteRow(MethodImplRow row, TableHeap heap)
+        protected override void WriteRow(MethodImplRow row, TableHeapWriter heap)
         {
             heap.WriteToken(row.Class);
             heap.WriteCodedToken(row.MethodBody, CodedTokenType.MethodDefOrRef);

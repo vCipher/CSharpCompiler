@@ -4,8 +4,8 @@ namespace CSharpCompiler.PE.Metadata.Heaps
 {
     public class StringHeap : HeapBuffer
     {
-        public StringHeap() : base(new byte[] { 0x00 }) { }
-        public StringHeap(byte[] buffer) : base(buffer) { MoveTo(START_POSITION); }
+        public StringHeap() : base() { }
+        public StringHeap(byte[] buffer) : base(buffer) { }
 
         public uint WriteString(string @string)
         {

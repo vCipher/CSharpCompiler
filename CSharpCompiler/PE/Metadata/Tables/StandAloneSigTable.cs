@@ -17,14 +17,14 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public StandAloneSigTable() : base() { }
         public StandAloneSigTable(int count) : base(count) { }
         
-        protected override void WriteRow(StandAloneSigRow row, TableHeap heap)
+        protected override void WriteRow(StandAloneSigRow row, TableHeapWriter heap)
         {
             heap.WriteBlob(row.Signature);
         }
 
-        protected override StandAloneSigRow ReadRow(TableHeap heap)
+        protected override StandAloneSigRow ReadRow(TableHeapReader heap)
         {
-            return new StandAloneSigRow(heap.ReadBlob());
+            return new StandAloneSigRow(heap.ReadBlobOffset());
         }
     }
 }

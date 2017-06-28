@@ -52,55 +52,55 @@ namespace CSharpCompiler.PE.Metadata
                 GetMethodDefinition(_reader.EntryPoint.RID));
 
             _assembly = new Lazy<AssemblyDefinition>(() =>
-                AssemblyDefinitionResolver.Resolve(_reader.AssemblyTable.Row, this));
+                AssemblyDefinitionResolver.Resolve(_reader.Tables.AssemblyTable.Row, this));
 
             _module = new Lazy<ModuleDefinition>(() =>
-                ModuleDefinitionResolver.Resolve(_reader.ModuleTable.Row, this));
+                ModuleDefinitionResolver.Resolve(_reader.Tables.ModuleTable.Row, this));
 
             _assemblyRefs = new Lazy<AssemblyReference[]>(() =>
-                _reader.AssemblyRefTable
+                _reader.Tables.AssemblyRefTable
                     .Select((row, id) => AssemblyReferenceResolver.Resolve((uint)(id + 1), row, this))
-                    .ToArray(_reader.AssemblyRefTable.Length));
+                    .ToArray(_reader.Tables.AssemblyRefTable.Length));
 
             _types = new Lazy<TypeDefinition[]>(() =>
-                _reader.TypeDefTable
+                _reader.Tables.TypeDefTable
                      .Select((row, id) => TypeDefinitionResolver.Resolve((uint)(id + 1), row, this))
-                     .ToArray(_reader.TypeDefTable.Length));
+                     .ToArray(_reader.Tables.TypeDefTable.Length));
 
             _methods = new Lazy<MethodDefinition[]>(() =>
                 _types.Value.SelectMany(type => type.Methods)
-                    .ToArray(_reader.MethodTable.Length));
+                    .ToArray(_reader.Tables.MethodTable.Length));
 
             _fields = new Lazy<FieldDefinition[]>(() =>
                 _types.Value.SelectMany(type => type.Fields)
-                    .ToArray(_reader.FieldTable.Length));
+                    .ToArray(_reader.Tables.FieldTable.Length));
 
             _typeRefLookup = new Lazy<ILookup<MetadataToken, TypeReference>>(() =>
-                _reader.TypeRefTable.ToLookup(row => row.ResolutionScope,
+                _reader.Tables.TypeRefTable.ToLookup(row => row.ResolutionScope,
                     row => TypeReferenceResolver.Resolve(row, this)));
 
             _memberRefLookup = new Lazy<ILookup<MetadataToken, IMemberReference>>(() =>
-                _reader.MemberRefTable.ToLookup(row => row.Class,
+                _reader.Tables.MemberRefTable.ToLookup(row => row.Class,
                     row => MemberReferenceResolver.Resolve(row, this)));
 
             _attributeLookup = new Lazy<ILookup<MetadataToken, CustomAttribute>>(() =>
-                _reader.CustomAttributeTable.ToLookup(row => row.Parent,
+                _reader.Tables.CustomAttributeTable.ToLookup(row => row.Parent,
                     row => CustomAttributeResolver.Resolve(row, this)));
 
             _typeRefs = new Lazy<TypeReference[]>(() =>
                 _typeRefLookup.Value.SelectMany(items => items)
-                    .ToArray(_reader.TypeRefTable.Length));
+                    .ToArray(_reader.Tables.TypeRefTable.Length));
 
             _memberRefs = new Lazy<IMemberReference[]>(() =>
                 _memberRefLookup.Value.SelectMany(items => items)
-                    .ToArray(_reader.MemberRefTable.Length));
+                    .ToArray(_reader.Tables.MemberRefTable.Length));
 
             _attributes = new Lazy<CustomAttribute[]>(() =>
                 _attributeLookup.Value.SelectMany(items => items)
-                    .ToArray(_reader.CustomAttributeTable.Length));
+                    .ToArray(_reader.Tables.CustomAttributeTable.Length));
 
             _enclosingTypeMapping = new Lazy<Dictionary<MetadataToken, ITypeInfo>>(() =>
-                _reader.NestedClassTable.ToDictionary(
+                _reader.Tables.NestedClassTable.ToDictionary(
                     row => row.NestedClass, 
                     row => GetTypeInfo(row.EnclosingClass)));
         }
@@ -209,7 +209,7 @@ namespace CSharpCompiler.PE.Metadata
             for (uint offset = 0; offset < count; offset++)
             {
                 var methodRid = start + offset;
-                var methodRow = _reader.MethodTable[methodRid];
+                var methodRow = _reader.Tables.MethodTable[methodRid];
                 methods[offset] = MethodDefinitionResolver.Resolve(methodRid, methodRow, this, typeDef);
             }
 
@@ -225,7 +225,7 @@ namespace CSharpCompiler.PE.Metadata
             for (uint offset = 0; offset < count; offset++)
             {
                 var fieldRid = start + offset;
-                var fieldRow = _reader.FieldTable[fieldRid];
+                var fieldRow = _reader.Tables.FieldTable[fieldRid];
                 fields[offset] = FieldDefinitionResolver.Resolve(fieldRid, fieldRow, this, typeDef);
             }
 
@@ -241,7 +241,7 @@ namespace CSharpCompiler.PE.Metadata
             for (uint offset = 0; offset < count; offset++)
             {
                 var paramRid = start + offset;
-                var paramRow = _reader.ParameterTable[paramRid];
+                var paramRow = _reader.Tables.ParameterTable[paramRid];
                 var paramType = signature.ParamTypes[paramRow.Sequence - 1];
                 parameters[offset] = ParameterDefinitionResolver.Resolve(paramRid, paramRow, this, methodDef, paramType);
             }
@@ -256,8 +256,8 @@ namespace CSharpCompiler.PE.Metadata
 
         private int GetMethodsCount(uint typeRid, TypeDefRow typeRow)
         {
-            var types = _reader.TypeDefTable;
-            var methods = _reader.MethodTable;
+            var types = _reader.Tables.TypeDefTable;
+            var methods = _reader.Tables.MethodTable;
             return (typeRid == types.Length)
                 ? methods.Length - typeRow.MethodList
                 : types[typeRid + 1].MethodList - typeRow.MethodList;
@@ -265,8 +265,8 @@ namespace CSharpCompiler.PE.Metadata
 
         private int GetFieldsCount(uint typeRid, TypeDefRow typeRow)
         {
-            var types = _reader.TypeDefTable;
-            var fields = _reader.FieldTable;
+            var types = _reader.Tables.TypeDefTable;
+            var fields = _reader.Tables.FieldTable;
             return (typeRid == types.Length)
                 ? fields.Length - typeRow.FieldList
                 : types[typeRid + 1].FieldList - typeRow.FieldList;

@@ -23,16 +23,16 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public ConstantTable() : base() { }
         public ConstantTable(int count) : base(count) { }
 
-        protected override ConstantRow ReadRow(TableHeap heap)
+        protected override ConstantRow ReadRow(TableHeapReader heap)
         {
             return new ConstantRow(
                 (ElementType)heap.ReadUInt16(),
                 heap.ReadCodedToken(CodedTokenType.HasConstant),
-                heap.ReadBlob()
+                heap.ReadBlobOffset()
             );
         }
 
-        protected override void WriteRow(ConstantRow row, TableHeap heap)
+        protected override void WriteRow(ConstantRow row, TableHeapWriter heap)
         {
             heap.WriteUInt16((ushort)row.Type);
             heap.WriteCodedToken(row.Parent, CodedTokenType.HasConstant);

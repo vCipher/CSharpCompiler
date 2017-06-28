@@ -20,7 +20,7 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public FieldRVATable() : base() { }
         public FieldRVATable(int count) : base(count) { }
 
-        protected override FieldRVARow ReadRow(TableHeap heap)
+        protected override FieldRVARow ReadRow(TableHeapReader heap)
         {
             return new FieldRVARow(
                 heap.ReadUInt32(),
@@ -28,7 +28,7 @@ namespace CSharpCompiler.PE.Metadata.Tables
             );
         }
 
-        protected override void WriteRow(FieldRVARow row, TableHeap heap)
+        protected override void WriteRow(FieldRVARow row, TableHeapWriter heap)
         {
             heap.WriteUInt32(row.RVA);
             heap.WriteToken(row.Field);

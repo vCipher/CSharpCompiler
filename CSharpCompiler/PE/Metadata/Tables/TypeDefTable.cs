@@ -35,19 +35,19 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public TypeDefTable() : base() { }
         public TypeDefTable(int count) : base(count) { }
 
-        protected override TypeDefRow ReadRow(TableHeap heap)
+        protected override TypeDefRow ReadRow(TableHeapReader heap)
         {
             return new TypeDefRow(
                 (TypeAttributes)heap.ReadUInt32(),
-                heap.ReadString(),
-                heap.ReadString(),
+                heap.ReadStringOffset(),
+                heap.ReadStringOffset(),
                 heap.ReadCodedToken(CodedTokenType.TypeDefOrRef),
                 heap.ReadUInt16(),
                 heap.ReadUInt16()
             );
         }
 
-        protected override void WriteRow(TypeDefRow row, TableHeap heap)
+        protected override void WriteRow(TypeDefRow row, TableHeapWriter heap)
         {
             heap.WriteUInt32((uint)row.Attributes);
             heap.WriteString(row.Name);

@@ -22,16 +22,16 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public DeclSecurityTable() : base() { }
         public DeclSecurityTable(int count) : base(count) { }
 
-        protected override DeclSecurityRow ReadRow(TableHeap heap)
+        protected override DeclSecurityRow ReadRow(TableHeapReader heap)
         {
             return new DeclSecurityRow(
                 heap.ReadUInt16(),
                 heap.ReadCodedToken(CodedTokenType.HasDeclSecurity),
-                heap.ReadBlob()
+                heap.ReadBlobOffset()
             );
         }
 
-        protected override void WriteRow(DeclSecurityRow row, TableHeap heap)
+        protected override void WriteRow(DeclSecurityRow row, TableHeapWriter heap)
         {
             heap.WriteUInt16(row.Action);
             heap.WriteCodedToken(row.Parent, CodedTokenType.HasDeclSecurity);

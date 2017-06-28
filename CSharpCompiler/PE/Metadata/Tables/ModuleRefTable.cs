@@ -17,12 +17,12 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public ModuleRefTable() : base() { }
         public ModuleRefTable(int count) : base(count) { }
 
-        protected override ModuleRefRow ReadRow(TableHeap heap)
+        protected override ModuleRefRow ReadRow(TableHeapReader heap)
         {
-            return new ModuleRefRow(heap.ReadString());
+            return new ModuleRefRow(heap.ReadStringOffset());
         }
 
-        protected override void WriteRow(ModuleRefRow row, TableHeap heap)
+        protected override void WriteRow(ModuleRefRow row, TableHeapWriter heap)
         {
             heap.WriteString(row.Name);
         }

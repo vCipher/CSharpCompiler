@@ -22,19 +22,19 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public ParamTable() : base() { }
         public ParamTable(int count) : base(count) { }
 
-        protected override void WriteRow(ParamRow row, TableHeap heap)
+        protected override void WriteRow(ParamRow row, TableHeapWriter heap)
         {
             heap.WriteUInt16((ushort)row.Attributes);
             heap.WriteUInt16(row.Sequence);
             heap.WriteString(row.Name);
         }
 
-        protected override ParamRow ReadRow(TableHeap heap)
+        protected override ParamRow ReadRow(TableHeapReader heap)
         {
             return new ParamRow(
                 (ParameterAttributes)heap.ReadUInt16(),
                 heap.ReadUInt16(),
-                heap.ReadString()
+                heap.ReadStringOffset()
             );
         }
     }

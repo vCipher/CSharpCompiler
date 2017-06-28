@@ -34,19 +34,19 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public MethodTable() : base() { }
         public MethodTable(int count) : base(count) { }
 
-        protected override MethodRow ReadRow(TableHeap heap)
+        protected override MethodRow ReadRow(TableHeapReader heap)
         {
             return new MethodRow(
                 heap.ReadUInt32(),
                 (MethodImplAttributes)heap.ReadUInt16(),
                 (MethodAttributes)heap.ReadUInt16(),
-                heap.ReadString(),
-                heap.ReadBlob(),
+                heap.ReadStringOffset(),
+                heap.ReadBlobOffset(),
                 heap.ReadUInt16()
             );
         }
 
-        protected override void WriteRow(MethodRow row, TableHeap heap)
+        protected override void WriteRow(MethodRow row, TableHeapWriter heap)
         {
             heap.WriteUInt32(row.RVA);
             heap.WriteUInt16((ushort)row.ImplAttributes);

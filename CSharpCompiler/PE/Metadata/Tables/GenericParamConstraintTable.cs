@@ -20,7 +20,7 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public GenericParamConstraintTable() : base() { }
         public GenericParamConstraintTable(int count) : base(count) { }
 
-        protected override GenericParamConstraintRow ReadRow(TableHeap heap)
+        protected override GenericParamConstraintRow ReadRow(TableHeapReader heap)
         {
             return new GenericParamConstraintRow(
                 heap.ReadToken(MetadataTokenType.GenericParam),
@@ -28,7 +28,7 @@ namespace CSharpCompiler.PE.Metadata.Tables
             );
         }
 
-        protected override void WriteRow(GenericParamConstraintRow row, TableHeap heap)
+        protected override void WriteRow(GenericParamConstraintRow row, TableHeapWriter heap)
         {
             heap.WriteToken(row.Owner);
             heap.WriteCodedToken(row.Constraint, CodedTokenType.TypeDefOrRef);

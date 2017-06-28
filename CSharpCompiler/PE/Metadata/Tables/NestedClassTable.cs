@@ -20,7 +20,7 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public NestedClassTable() : base() { }
         public NestedClassTable(int count) : base(count) { }
 
-        protected override NestedClassRow ReadRow(TableHeap heap)
+        protected override NestedClassRow ReadRow(TableHeapReader heap)
         {
             return new NestedClassRow(
                 heap.ReadToken(MetadataTokenType.TypeDef),
@@ -28,7 +28,7 @@ namespace CSharpCompiler.PE.Metadata.Tables
             );
         }
 
-        protected override void WriteRow(NestedClassRow row, TableHeap heap)
+        protected override void WriteRow(NestedClassRow row, TableHeapWriter heap)
         {
             heap.WriteToken(row.NestedClass);
             heap.WriteToken(row.EnclosingClass);

@@ -23,7 +23,7 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public MethodSemanticsTable() : base() { }
         public MethodSemanticsTable(int count) : base(count) { }
 
-        protected override MethodSemanticsRow ReadRow(TableHeap heap)
+        protected override MethodSemanticsRow ReadRow(TableHeapReader heap)
         {
             return new MethodSemanticsRow(
                 (MethodSemanticsAttributes)heap.ReadUInt16(),
@@ -32,7 +32,7 @@ namespace CSharpCompiler.PE.Metadata.Tables
             );
         }
 
-        protected override void WriteRow(MethodSemanticsRow row, TableHeap heap)
+        protected override void WriteRow(MethodSemanticsRow row, TableHeapWriter heap)
         {
             heap.WriteUInt16((ushort)row.Attributes);
             heap.WriteToken(row.Method);

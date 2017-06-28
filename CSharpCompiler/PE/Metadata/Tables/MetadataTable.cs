@@ -45,19 +45,19 @@ namespace CSharpCompiler.PE.Metadata.Tables
             return (uint)_rows.Count;
         }
 
-        public void Write(TableHeap heap)
+        public void Write(TableHeapWriter writer)
         {
             foreach (TRow row in _rows)
             {
-                WriteRow(row, heap);
+                WriteRow(row, writer);
             }
         }
 
-        public void Read(TableHeap heap)
+        public void Read(TableHeapReader reader)
         {
             for (int index = 0; index < Length; index++)
             {
-                var row = ReadRow(heap);
+                var row = ReadRow(reader);
                 if (index >= _rows.Count)
                     _rows.Add(row);
                 else
@@ -75,7 +75,7 @@ namespace CSharpCompiler.PE.Metadata.Tables
             return _rows.GetEnumerator();
         }
 
-        protected abstract void WriteRow(TRow row, TableHeap heap);
-        protected abstract TRow ReadRow(TableHeap heap);
+        protected abstract void WriteRow(TRow row, TableHeapWriter writer);
+        protected abstract TRow ReadRow(TableHeapReader reader);
     }
 }

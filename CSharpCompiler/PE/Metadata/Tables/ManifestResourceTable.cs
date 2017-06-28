@@ -25,17 +25,17 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public ManifestResourceTable() : base() { }
         public ManifestResourceTable(int count) : base(count) { }
 
-        protected override ManifestResourceRow ReadRow(TableHeap heap)
+        protected override ManifestResourceRow ReadRow(TableHeapReader heap)
         {
             return new ManifestResourceRow(
                 heap.ReadUInt32(),
                 (ManifestResourceAttributes)heap.ReadUInt32(),
-                heap.ReadString(),
+                heap.ReadStringOffset(),
                 heap.ReadCodedToken(CodedTokenType.Implementation)
             );
         }
 
-        protected override void WriteRow(ManifestResourceRow row, TableHeap heap)
+        protected override void WriteRow(ManifestResourceRow row, TableHeapWriter heap)
         {
             heap.WriteUInt32(row.Offset);
             heap.WriteUInt32((uint)row.Attributes);

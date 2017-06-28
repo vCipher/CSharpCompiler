@@ -25,7 +25,7 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public ModuleTable() : base() { }
         public ModuleTable(int count) : base(count) { }
         
-        protected override void WriteRow(ModuleRow row, TableHeap heap)
+        protected override void WriteRow(ModuleRow row, TableHeapWriter heap)
         {
             heap.WriteUInt16(row.Generation);
             heap.WriteString(row.Name);
@@ -34,12 +34,12 @@ namespace CSharpCompiler.PE.Metadata.Tables
             heap.WriteUInt16(row.EncBaseId);
         }
 
-        protected override ModuleRow ReadRow(TableHeap heap)
+        protected override ModuleRow ReadRow(TableHeapReader heap)
         {
             return new ModuleRow(
                 heap.ReadUInt16(),
-                heap.ReadString(),
-                heap.ReadGuid(),
+                heap.ReadStringOffset(),
+                heap.ReadGuidOffset(),
                 heap.ReadUInt16(),
                 heap.ReadUInt16()
             );

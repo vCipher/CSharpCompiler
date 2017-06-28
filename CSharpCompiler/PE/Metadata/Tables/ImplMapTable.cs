@@ -25,17 +25,17 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public ImplMapTable() : base() { }
         public ImplMapTable(int count) : base(count) { }
 
-        protected override ImplMapRow ReadRow(TableHeap heap)
+        protected override ImplMapRow ReadRow(TableHeapReader heap)
         {
             return new ImplMapRow(
                 (MethodImplAttributes)heap.ReadUInt16(),
                 heap.ReadCodedToken(CodedTokenType.MemberForwarded),
-                heap.ReadString(),
+                heap.ReadStringOffset(),
                 heap.ReadToken(MetadataTokenType.ModuleRef)
             );
         }
 
-        protected override void WriteRow(ImplMapRow row, TableHeap heap)
+        protected override void WriteRow(ImplMapRow row, TableHeapWriter heap)
         {
             heap.WriteUInt16((ushort)row.Attributes);
             heap.WriteCodedToken(row.MemberForwarded, CodedTokenType.MemberForwarded);

@@ -4,8 +4,8 @@ namespace CSharpCompiler.PE.Metadata.Heaps
 {
     public sealed class BlobHeap : HeapBuffer
     {
-        public BlobHeap() : base(new byte[] { 0x00 }) { }
-        public BlobHeap(byte[] buffer) : base(buffer) { MoveTo(START_POSITION); }
+        public BlobHeap() : base() { }
+        public BlobHeap(byte[] buffer) : base(buffer) { }
 
         public uint WriteBlob(ByteBuffer blob)
         {

@@ -22,7 +22,7 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public ClassLayoutTable() : base() { }
         public ClassLayoutTable(int count) : base(count) { }
 
-        protected override ClassLayoutRow ReadRow(TableHeap heap)
+        protected override ClassLayoutRow ReadRow(TableHeapReader heap)
         {
             return new ClassLayoutRow(
                 heap.ReadUInt16(),
@@ -31,7 +31,7 @@ namespace CSharpCompiler.PE.Metadata.Tables
             );
         }
 
-        protected override void WriteRow(ClassLayoutRow row, TableHeap heap)
+        protected override void WriteRow(ClassLayoutRow row, TableHeapWriter heap)
         {
             heap.WriteUInt16(row.PackingSize);
             heap.WriteUInt32(row.ClassSize);

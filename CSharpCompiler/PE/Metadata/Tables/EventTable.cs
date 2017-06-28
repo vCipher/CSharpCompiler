@@ -23,16 +23,16 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public EventTable() : base() { }
         public EventTable(int count) : base(count) { }
 
-        protected override EventRow ReadRow(TableHeap heap)
+        protected override EventRow ReadRow(TableHeapReader heap)
         {
             return new EventRow(
                 (EventAttributes)heap.ReadUInt16(),
-                heap.ReadString(),
+                heap.ReadStringOffset(),
                 heap.ReadCodedToken(CodedTokenType.TypeDefOrRef)
             );
         }
 
-        protected override void WriteRow(EventRow row, TableHeap heap)
+        protected override void WriteRow(EventRow row, TableHeapWriter heap)
         {
             heap.WriteUInt16((ushort)row.Attributes);
             heap.WriteString(row.Name);

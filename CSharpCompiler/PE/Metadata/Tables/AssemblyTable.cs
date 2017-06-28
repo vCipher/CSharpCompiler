@@ -43,7 +43,7 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public AssemblyTable() : base() { }
         public AssemblyTable(int count) : base(count) { }
         
-        protected override AssemblyRow ReadRow(TableHeap heap)
+        protected override AssemblyRow ReadRow(TableHeapReader heap)
         {
             return new AssemblyRow(
                 (AssemblyHashAlgorithm)heap.ReadUInt32(),
@@ -52,13 +52,13 @@ namespace CSharpCompiler.PE.Metadata.Tables
                 heap.ReadUInt16(),
                 heap.ReadUInt16(),
                 (AssemblyAttributes)heap.ReadUInt32(),
-                heap.ReadBlob(),
-                heap.ReadString(),
-                heap.ReadString()
+                heap.ReadBlobOffset(),
+                heap.ReadStringOffset(),
+                heap.ReadStringOffset()
             );
         }
 
-        protected override void WriteRow(AssemblyRow row, TableHeap heap)
+        protected override void WriteRow(AssemblyRow row, TableHeapWriter heap)
         {
             heap.WriteUInt32((uint)row.HashAlgId);
             heap.WriteUInt16(row.MajorVersion);

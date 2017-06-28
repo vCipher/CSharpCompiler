@@ -22,16 +22,16 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public FileTable() : base() { }
         public FileTable(int count) : base(count) { }
 
-        protected override FileRow ReadRow(TableHeap heap)
+        protected override FileRow ReadRow(TableHeapReader heap)
         {
             return new FileRow(
                 (FileAttributes)heap.ReadUInt32(),
-                heap.ReadString(),
-                heap.ReadBlob()
+                heap.ReadStringOffset(),
+                heap.ReadBlobOffset()
             );
         }
 
-        protected override void WriteRow(FileRow row, TableHeap heap)
+        protected override void WriteRow(FileRow row, TableHeapWriter heap)
         {
             heap.WriteUInt32((uint)row.Attributes);
             heap.WriteString(row.Name);

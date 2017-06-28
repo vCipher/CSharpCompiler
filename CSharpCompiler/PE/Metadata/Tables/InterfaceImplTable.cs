@@ -20,7 +20,7 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public InterfaceImplTable() : base() { }
         public InterfaceImplTable(int count) : base(count) { }
 
-        protected override InterfaceImplRow ReadRow(TableHeap heap)
+        protected override InterfaceImplRow ReadRow(TableHeapReader heap)
         {
             return new InterfaceImplRow(
                 heap.ReadToken(MetadataTokenType.TypeDef),
@@ -28,7 +28,7 @@ namespace CSharpCompiler.PE.Metadata.Tables
             );
         }
 
-        protected override void WriteRow(InterfaceImplRow row, TableHeap heap)
+        protected override void WriteRow(InterfaceImplRow row, TableHeapWriter heap)
         {
             heap.WriteToken(row.Class);
             heap.WriteCodedToken(row.Interface, CodedTokenType.TypeDefOrRef);

@@ -22,16 +22,16 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public CustomAttributeTable() : base() { }
         public CustomAttributeTable(int count) : base(count) { }
         
-        protected override CustomAttributeRow ReadRow(TableHeap heap)
+        protected override CustomAttributeRow ReadRow(TableHeapReader heap)
         {
             return new CustomAttributeRow(
                 heap.ReadCodedToken(CodedTokenType.HasCustomAttribute),
                 heap.ReadCodedToken(CodedTokenType.CustomAttributeType),
-                heap.ReadBlob()
+                heap.ReadBlobOffset()
             );
         }
 
-        protected override void WriteRow(CustomAttributeRow row, TableHeap heap)
+        protected override void WriteRow(CustomAttributeRow row, TableHeapWriter heap)
         {
             heap.WriteCodedToken(row.Parent, CodedTokenType.HasCustomAttribute);
             heap.WriteCodedToken(row.Type, CodedTokenType.CustomAttributeType);

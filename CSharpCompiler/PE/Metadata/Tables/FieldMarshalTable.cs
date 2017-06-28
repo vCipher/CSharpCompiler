@@ -20,15 +20,15 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public FieldMarshalTable() : base() { }
         public FieldMarshalTable(int count) : base(count) { }
 
-        protected override FieldMarshalRow ReadRow(TableHeap heap)
+        protected override FieldMarshalRow ReadRow(TableHeapReader heap)
         {
             return new FieldMarshalRow(
                 heap.ReadCodedToken(CodedTokenType.HasFieldMarshal),
-                heap.ReadBlob()
+                heap.ReadBlobOffset()
             );
         }
 
-        protected override void WriteRow(FieldMarshalRow row, TableHeap heap)
+        protected override void WriteRow(FieldMarshalRow row, TableHeapWriter heap)
         {
             heap.WriteCodedToken(row.Parent, CodedTokenType.HasFieldMarshal);
             heap.WriteBlob(row.NativeType);

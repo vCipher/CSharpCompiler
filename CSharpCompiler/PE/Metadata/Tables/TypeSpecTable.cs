@@ -17,12 +17,12 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public TypeSpecTable() : base() { }
         public TypeSpecTable(int count) : base(count) { }
 
-        protected override TypeSpecRow ReadRow(TableHeap heap)
+        protected override TypeSpecRow ReadRow(TableHeapReader heap)
         {
-            return new TypeSpecRow(heap.ReadBlob());
+            return new TypeSpecRow(heap.ReadBlobOffset());
         }
 
-        protected override void WriteRow(TypeSpecRow row, TableHeap heap)
+        protected override void WriteRow(TypeSpecRow row, TableHeapWriter heap)
         {
             heap.WriteBlob(row.Signature);
         }

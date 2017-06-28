@@ -1,47 +1,39 @@
-﻿using CSharpCompiler.PE.Metadata.Tables;
+﻿using CSharpCompiler.PE.Metadata.Heaps;
 using CSharpCompiler.PE.Metadata.Tokens;
 using CSharpCompiler.Utility;
 using System;
+using System.IO;
 
 namespace CSharpCompiler.PE.Metadata
 {
-    public sealed class MetadataReader
+    public sealed class MetadataReader : PEReader
     {
-        private MetadataHeaps _heaps;
-        private MetadataToken _entryPoint;
-
         private Func<uint, ByteBuffer> _resolveBlob;
         private Func<uint, Guid> _resolveGuid;
         private Func<uint, string> _resolveString;
         private Func<uint, string> _resolveUserString;
+        
+        public TableHeapReader TableReader { get; private set; }
+        public BlobHeap Blobs { get; private set; }
+        public GuidHeap Guids { get; private set; }
+        public StringHeap Strings { get; private set; }
+        public UserStringHeap UserStrings { get; private set; }
+        public TableHeap Tables { get; private set; }
+        public MetadataToken EntryPoint { get; private set; }
 
-        public MetadataToken EntryPoint => _entryPoint;
-        public AssemblyTable AssemblyTable => GetOrCreate<AssemblyTable>(MetadataTableType.Assembly);
-        public AssemblyRefTable AssemblyRefTable => GetOrCreate<AssemblyRefTable>(MetadataTableType.AssemblyRef);
-        public CustomAttributeTable CustomAttributeTable => GetOrCreate<CustomAttributeTable>(MetadataTableType.CustomAttribute);
-        public FieldTable FieldTable => GetOrCreate<FieldTable>(MetadataTableType.Field);
-        public MemberRefTable MemberRefTable => GetOrCreate<MemberRefTable>(MetadataTableType.MemberRef);
-        public MethodTable MethodTable => GetOrCreate<MethodTable>(MetadataTableType.Method);
-        public ModuleTable ModuleTable => GetOrCreate<ModuleTable>(MetadataTableType.Module);
-        public ParamTable ParameterTable => GetOrCreate<ParamTable>(MetadataTableType.Param);
-        public StandAloneSigTable StandAloneSigTable => GetOrCreate<StandAloneSigTable>(MetadataTableType.StandAloneSig);
-        public TypeDefTable TypeDefTable => GetOrCreate<TypeDefTable>(MetadataTableType.TypeDef);
-        public TypeRefTable TypeRefTable => GetOrCreate<TypeRefTable>(MetadataTableType.TypeRef);
-        public NestedClassTable NestedClassTable => GetOrCreate<NestedClassTable>(MetadataTableType.NestedClass);
-
-        public MetadataReader(MetadataHeaps heaps, MetadataToken entryPoint)
+        public MetadataReader(Stream stream, MetadataToken entryPoint) : base(stream)
         {
-            _heaps = heaps;
-            _entryPoint = entryPoint;
-            _resolveBlob = Func.Memoize<uint, ByteBuffer>(_heaps.Blobs.ReadBlob);
-            _resolveGuid = Func.Memoize<uint, Guid>(_heaps.Guids.ReadGuid);
-            _resolveString = Func.Memoize<uint, string>(_heaps.Strings.ReadString);
-            _resolveUserString = Func.Memoize<uint, string>(_heaps.UserStrings.ReadString);
-        }
-
-        public TTable GetOrCreate<TTable>(MetadataTableType type) where TTable : IMetadataTable, new()
-        {
-            return _heaps.Tables.GetOrCreate<TTable>(type);
+            EntryPoint = entryPoint;
+            TableReader = new TableHeapReader(this);
+            Blobs = new BlobHeap();
+            Guids = new GuidHeap();
+            Strings = new StringHeap();
+            UserStrings = new UserStringHeap();
+            Tables = new TableHeap();
+            _resolveBlob = Func.Memoize<uint, ByteBuffer>(Blobs.ReadBlob);
+            _resolveGuid = Func.Memoize<uint, Guid>(Guids.ReadGuid);
+            _resolveString = Func.Memoize<uint, string>(Strings.ReadString);
+            _resolveUserString = Func.Memoize<uint, string>(UserStrings.ReadString);
         }
 
         public ByteBuffer ResolveBlob(uint index)

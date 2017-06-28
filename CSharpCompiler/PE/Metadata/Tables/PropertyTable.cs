@@ -22,16 +22,16 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public PropertyTable() : base() { }
         public PropertyTable(int count) : base(count) { }
 
-        protected override PropertyRow ReadRow(TableHeap heap)
+        protected override PropertyRow ReadRow(TableHeapReader heap)
         {
             return new PropertyRow(
                 (PropertyAttributes)heap.ReadUInt16(),
-                heap.ReadString(),
-                heap.ReadBlob()
+                heap.ReadStringOffset(),
+                heap.ReadBlobOffset()
             );
         }
 
-        protected override void WriteRow(PropertyRow row, TableHeap heap)
+        protected override void WriteRow(PropertyRow row, TableHeapWriter heap)
         {
             heap.WriteUInt16((ushort)row.Attributes);
             heap.WriteString(row.Name);

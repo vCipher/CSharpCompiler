@@ -20,7 +20,7 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public FieldLayoutTable() : base() { }
         public FieldLayoutTable(int count) : base(count) { }
 
-        protected override FieldLayoutRow ReadRow(TableHeap heap)
+        protected override FieldLayoutRow ReadRow(TableHeapReader heap)
         {
             return new FieldLayoutRow(
                 heap.ReadUInt32(),
@@ -28,7 +28,7 @@ namespace CSharpCompiler.PE.Metadata.Tables
             );
         }
 
-        protected override void WriteRow(FieldLayoutRow row, TableHeap heap)
+        protected override void WriteRow(FieldLayoutRow row, TableHeapWriter heap)
         {
             heap.WriteUInt32(row.Offset);
             heap.WriteToken(row.Field);

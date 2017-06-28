@@ -25,17 +25,17 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public GenericParamTable() : base() { }
         public GenericParamTable(int count) : base(count) { }
 
-        protected override GenericParamRow ReadRow(TableHeap heap)
+        protected override GenericParamRow ReadRow(TableHeapReader heap)
         {
             return new GenericParamRow(
                 heap.ReadUInt16(),
                 (GenericParameterAttributes)heap.ReadUInt16(),
                 heap.ReadCodedToken(CodedTokenType.TypeOrMethodDef),
-                heap.ReadString()
+                heap.ReadStringOffset()
             );
         }
 
-        protected override void WriteRow(GenericParamRow row, TableHeap heap)
+        protected override void WriteRow(GenericParamRow row, TableHeapWriter heap)
         {
             heap.WriteUInt16(row.Number);
             heap.WriteUInt16((ushort)row.Attributes);

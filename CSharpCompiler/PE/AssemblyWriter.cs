@@ -12,7 +12,7 @@ using static CSharpCompiler.PE.Constants;
 
 namespace CSharpCompiler.PE
 {
-    public sealed class AssemblyWriter : BinaryWriter
+    public sealed class AssemblyWriter : PEWriter
     {
         private CompilationOptions _options;
         private TextSection _text;
@@ -468,53 +468,13 @@ namespace CSharpCompiler.PE
             WriteUInt8(0);
         }
 
-        private void WriteUInt32(uint value)
-        {
-            Write(value);
-        }
-
-        private void WriteUInt16(ushort value)
-        {
-            Write(value);
-        }
-
-        private void WriteUInt8(byte value)
-        {
-            Write(value);
-        }
-
-        private void WriteBytes(byte[] value)
-        {
-            Write(value);
-        }
-
-        private void WriteBuffer(ByteBuffer buffer)
-        {
-            Write(buffer.Buffer, 0, buffer.Length);
-        }
-
-        private void WriteStruct<T>(T value) where T : struct
-        {
-            Write(ByteBuffer.ToBytes(value));
-        }
-
         private void MoveTo(TextSegment segment)
         {
             SectionHeader header = _text.Header;
             uint rva = _text.Map[segment].RVA;
             uint raw = rva + header.PointerToRawData - header.VirtualAddress;
 
-            BaseStream.Seek(raw, SeekOrigin.Begin);
-        }
-
-        private void MoveTo(uint raw)
-        {
-            BaseStream.Seek(raw, SeekOrigin.Begin);
-        }
-
-        private void Advance(int bytes)
-        {
-            BaseStream.Seek(bytes, SeekOrigin.Current);
+            MoveTo(raw);
         }
     }
 }

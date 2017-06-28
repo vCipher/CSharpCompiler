@@ -22,16 +22,16 @@ namespace CSharpCompiler.PE.Metadata.Tables
         public MemberRefTable() : base() { }
         public MemberRefTable(int count) : base(count) { }
 
-        protected override MemberRefRow ReadRow(TableHeap heap)
+        protected override MemberRefRow ReadRow(TableHeapReader heap)
         {
             return new MemberRefRow(
                 heap.ReadCodedToken(CodedTokenType.MemberRefParent),
-                heap.ReadString(),
-                heap.ReadBlob()
+                heap.ReadStringOffset(),
+                heap.ReadBlobOffset()
             );
         }
 
-        protected override void WriteRow(MemberRefRow row, TableHeap heap)
+        protected override void WriteRow(MemberRefRow row, TableHeapWriter heap)
         {
             heap.WriteCodedToken(row.Class, CodedTokenType.MemberRefParent);
             heap.WriteString(row.Name);
