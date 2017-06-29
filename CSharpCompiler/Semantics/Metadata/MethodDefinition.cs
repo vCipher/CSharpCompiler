@@ -1,28 +1,40 @@
 ﻿using CSharpCompiler.Semantics.Resolvers;
-using System;
 using System.Collections.ObjectModel;
+using System.Threading;
 
 namespace CSharpCompiler.Semantics.Metadata
 {
     public sealed class MethodDefinition : IMethodInfo, ICustomAttributeProvider
     {
-        private Lazy<MethodBody> _body;
-        private Lazy<ITypeInfo> _returnType;
-        private Lazy<ITypeInfo> _declaringType;
-        private Lazy<CallingConventions> _callingConventions;
-        private Lazy<Collection<ParameterDefinition>> _parameters;
-        private Lazy<Collection<CustomAttribute>> _customAttributes;
+        private object _syncRoot = new object();
+        private IMethodDefinitionResolver _resolver;
 
-        public string Name { get; private set; }
-        public MethodAttributes Attributes { get; private set; }
-        public MethodImplAttributes ImplAttributes { get; private set; }
-        
-        public MethodBody Body => _body.Value;
-        public ITypeInfo ReturnType => _returnType.Value;
-        public ITypeInfo DeclaringType => _declaringType.Value;
-        public CallingConventions CallingConventions => _callingConventions.Value;
-        public Collection<ParameterDefinition> Parameters => _parameters.Value;
-        public Collection<CustomAttribute> CustomAttributes => _customAttributes.Value;
+        private bool _callingConventionsInited;
+        private CallingConventions _callingConventions;
+
+        private bool _attributesInited;
+        private MethodAttributes _attributes;
+
+        private bool _implAttributesInited;
+        private MethodImplAttributes _implAttributes;
+
+        private string _name;
+        private MethodBody _body;
+        private ITypeInfo _returnType;
+        private ITypeInfo _declaringType;
+        private Collection<ParameterDefinition> _parameters;
+        private Collection<CustomAttribute> _customAttributes;
+
+        public CallingConventions CallingConventions => LazyInitializer.EnsureInitialized(ref _callingConventions, ref _callingConventionsInited, ref _syncRoot, _resolver.GetCallingConventions);
+        public MethodAttributes Attributes => LazyInitializer.EnsureInitialized(ref _attributes, ref _attributesInited, ref _syncRoot, _resolver.GetAttributes);
+        public MethodImplAttributes ImplAttributes => LazyInitializer.EnsureInitialized(ref _implAttributes, ref _implAttributesInited, ref _syncRoot, _resolver.GetImplAttributes);
+
+        public string Name => LazyInitializer.EnsureInitialized(ref _name, _resolver.GetName);
+        public MethodBody Body => LazyInitializer.EnsureInitialized(ref _body, _resolver.GetMethodBody);
+        public ITypeInfo ReturnType => LazyInitializer.EnsureInitialized(ref _returnType, _resolver.GetReturnType);
+        public ITypeInfo DeclaringType => LazyInitializer.EnsureInitialized(ref _declaringType, _resolver.GetDeclaringType);
+        public Collection<ParameterDefinition> Parameters => LazyInitializer.EnsureInitialized(ref _parameters, () => _resolver.GetParameters(this));
+        public Collection<CustomAttribute> CustomAttributes => LazyInitializer.EnsureInitialized(ref _customAttributes, () => _resolver.GetCustomAttributes(this));
 
         public bool HasThis
         {
@@ -31,15 +43,7 @@ namespace CSharpCompiler.Semantics.Metadata
 
         public MethodDefinition(IMethodDefinitionResolver resolver)
         {
-            Name = resolver.GetName();
-            ImplAttributes = resolver.GetImplAttributes();
-            Attributes = resolver.GetAttributes();
-            _body = new Lazy<MethodBody>(resolver.GetMethodBody);
-            _returnType = new Lazy<ITypeInfo>(resolver.GetReturnType);
-            _declaringType = new Lazy<ITypeInfo>(resolver.GetDeclaringType);
-            _callingConventions = new Lazy<CallingConventions>(resolver.GetCallingConventions);
-            _parameters = new Lazy<Collection<ParameterDefinition>>(() => resolver.GetParameters(this));
-            _customAttributes = new Lazy<Collection<CustomAttribute>>(() => resolver.GetCustomAttributes(this));
+            _resolver = resolver;
         }
 
         public void Accept(IMetadataEntityVisitor visitor)

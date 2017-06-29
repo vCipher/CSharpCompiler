@@ -1,37 +1,36 @@
 ﻿using CSharpCompiler.Semantics.Resolvers;
+using CSharpCompiler.Utility;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace CSharpCompiler.Semantics.Metadata
 {
     public sealed class ModuleDefinition : IMetadataEntity
     {
-        private Lazy<AssemblyDefinition> _assembly;
-        private Lazy<MethodDefinition> _entryPoint;
-        private Lazy<Collection<TypeDefinition>> _types;
+        private object _syncLock;
+        private IModuleDefinitionResolver _resolver;
+
+        private LazyWrapper<Guid> _mvid;
+        private LazyWrapper<string> _name;
+        private LazyWrapper<AssemblyDefinition> _assembly;
+        private LazyWrapper<MethodDefinition> _entryPoint;
+        private LazyWrapper<Collection<TypeDefinition>> _types;
 
         private RuntimeBindingCollection<TypeDefinition> _typeMapping;
 
-        public Guid Mvid { get; private set; }
-        public string Name { get; private set; }
-
-        public AssemblyDefinition Assembly => _assembly.Value;
-        public MethodDefinition EntryPoint => _entryPoint.Value;
-        public Collection<TypeDefinition> Types => _types.Value;
+        public Guid Mvid => _mvid.GetValue(ref _syncLock, _resolver.GetMvid);
+        public string Name => _name.GetValue(ref _syncLock, _resolver.GetName);
+        public AssemblyDefinition Assembly => _assembly.GetValue(ref _syncLock, _resolver.GetAssembly);
+        public MethodDefinition EntryPoint => _entryPoint.GetValue(ref _syncLock, _resolver.GetEntryPoint);
+        public Collection<TypeDefinition> Types => _types.GetValue(ref _syncLock, _resolver.GetTypes);
 
         public ModuleDefinition(IModuleDefinitionResolver resolver)
         {
-            Mvid = resolver.GetMvid();
-            Name = resolver.GetName();
-            
-            _assembly = new Lazy<AssemblyDefinition>(resolver.GetAssembly);
-            _entryPoint = new Lazy<MethodDefinition>(resolver.GetEntryPoint);
-            _types = new Lazy<Collection<TypeDefinition>>(resolver.GetTypes);
-
+            _syncLock = new object();
+            _resolver = resolver;
             _typeMapping = new RuntimeBindingCollection<TypeDefinition>(
-                () => _types.Value, RuntimeBindingSignature.GetTypeSignature);
+                () => Types, RuntimeBindingSignature.GetTypeSignature);
         }
 
         public void Accept(IMetadataEntityVisitor visitor)

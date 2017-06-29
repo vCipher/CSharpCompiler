@@ -1,27 +1,30 @@
 ﻿using CSharpCompiler.Semantics.Resolvers;
+using CSharpCompiler.Utility;
 using System;
 
 namespace CSharpCompiler.Semantics.Metadata
 {
     public sealed class ParameterDefinition : IMetadataEntity, IEquatable<ParameterDefinition>
     {
-        private Lazy<ITypeInfo> _type;
-        private Lazy<IMethodInfo> _method;
+        private object _syncLock;
+        private IParameterDefinitionResolver _resolver;
 
-        public int Index { get; private set; }
-        public string Name { get; private set; }
-        public ParameterAttributes Attributes { get; private set; }
+        private LazyWrapper<int> _index;
+        private LazyWrapper<string> _name;
+        private LazyWrapper<ParameterAttributes> _attributes;
+        private LazyWrapper<ITypeInfo> _type;
+        private LazyWrapper<IMethodInfo> _method;
 
-        public ITypeInfo Type => _type.Value;
-        public IMethodInfo Method => _method.Value;
+        public int Index => _index.GetValue(ref _syncLock, _resolver.GetIndex);
+        public string Name => _name.GetValue(ref _syncLock, _resolver.GetName);
+        public ParameterAttributes Attributes => _attributes.GetValue(ref _syncLock, _resolver.GetAttributes);
+        public ITypeInfo Type => _type.GetValue(ref _syncLock, _resolver.GetParameterType);
+        public IMethodInfo Method => _method.GetValue(ref _syncLock, _resolver.GetMethod);
 
         public ParameterDefinition(IParameterDefinitionResolver resolver)
         {
-            Index = resolver.GetIndex();
-            Name = resolver.GetName();
-            Attributes = resolver.GetAttributes();
-            _type = new Lazy<ITypeInfo>(resolver.GetParameterType);
-            _method = new Lazy<IMethodInfo>(resolver.GetMethod);
+            _syncLock = new object();
+            _resolver = resolver;
         }
 
         public void Accept(IMetadataEntityVisitor visitor)

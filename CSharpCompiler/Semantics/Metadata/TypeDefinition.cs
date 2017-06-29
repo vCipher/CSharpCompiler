@@ -1,54 +1,52 @@
 ﻿using CSharpCompiler.Semantics.Resolvers;
+using CSharpCompiler.Utility;
 using System;
 using System.Collections.ObjectModel;
+using System.Threading;
 
 namespace CSharpCompiler.Semantics.Metadata
 {
     public sealed class TypeDefinition : ITypeInfo, ICustomAttributeProvider
     {
-        private Lazy<string> _name;
-        private Lazy<ElementType> _elementType;
-        private Lazy<IAssemblyInfo> _assembly;
-        private Lazy<ITypeInfo> _baseType;
-        private Lazy<Collection<MethodDefinition>> _methods;
-        private Lazy<Collection<FieldDefinition>> _fields;
-        private Lazy<Collection<CustomAttribute>> _attributes;
+        private object _syncLock;
+        private ITypeDefinitionResolver _resolver;
+
+        private LazyWrapper<string> _name;
+        private LazyWrapper<string> _namespace;
+        private LazyWrapper<TypeAttributes> _attributes;
+        private LazyWrapper<ElementType> _elementType;
+        private LazyWrapper<IAssemblyInfo> _assembly;
+        private LazyWrapper<ITypeInfo> _baseType;
+        private LazyWrapper<Collection<MethodDefinition>> _methods;
+        private LazyWrapper<Collection<FieldDefinition>> _fields;
+        private LazyWrapper<Collection<CustomAttribute>> _customAttributes;
 
         private RuntimeBindingCollection<MethodDefinition> _methodMapping;
         private RuntimeBindingCollection<FieldDefinition> _fieldMapping;
-
-        public string Namespace { get; private set; }
-        public TypeAttributes Attributes { get; private set; }
-
-        public string Name => _name.Value;
-        public ElementType ElementType => _elementType.Value;
-        public IAssemblyInfo Assembly => _assembly.Value;
-        public ITypeInfo BaseType => _baseType.Value;
-        public Collection<MethodDefinition> Methods => _methods.Value;
-        public Collection<FieldDefinition> Fields => _fields.Value;
-        public Collection<CustomAttribute> CustomAttributes => _attributes.Value;
+        
+        public string Name => _name.GetValue(ref _syncLock, _resolver.GetName);
+        public string Namespace => _namespace.GetValue(ref _syncLock, _resolver.GetNamespace);
+        public TypeAttributes Attributes => _attributes.GetValue(ref _syncLock, _resolver.GetAttributes);
+        public ElementType ElementType => _elementType.GetValue(ref _syncLock, () => _resolver.GetElementType(this));
+        public IAssemblyInfo Assembly => _assembly.GetValue(ref _syncLock, _resolver.GetAssembly);
+        public ITypeInfo BaseType => _baseType.GetValue(ref _syncLock, _resolver.GetBaseType);
+        public Collection<MethodDefinition> Methods => _methods.GetValue(ref _syncLock, () => _resolver.GetMethods(this));
+        public Collection<FieldDefinition> Fields => _fields.GetValue(ref _syncLock, () => _resolver.GetFields(this));
+        public Collection<CustomAttribute> CustomAttributes => _customAttributes.GetValue(ref _syncLock, () => _resolver.GetCustomAttributes(this));
 
         public bool IsModuleType => Name == "<Module>";
 
         public TypeDefinition(ITypeDefinitionResolver resolver)
         {
-            Namespace = resolver.GetNamespace();
-            Attributes = resolver.GetAttributes();
-
-            _name = new Lazy<string>(resolver.GetName);
-            _elementType = new Lazy<ElementType>(() => resolver.GetElementType(this));
-            _assembly = new Lazy<IAssemblyInfo>(resolver.GetAssembly);
-            _baseType = new Lazy<ITypeInfo>(resolver.GetBaseType);
-            _methods = new Lazy<Collection<MethodDefinition>>(() => resolver.GetMethods(this));
-            _fields = new Lazy<Collection<FieldDefinition>>(() => resolver.GetFields(this));
-            _attributes = new Lazy<Collection<CustomAttribute>>(() => resolver.GetCustomAttributes(this));
+            _syncLock = new object();
+            _resolver = resolver;
 
             _methodMapping = new RuntimeBindingCollection<MethodDefinition>(
-                () => _methods.Value,
+                () => Methods,
                 RuntimeBindingSignature.GetMethodSignature);
 
             _fieldMapping = new RuntimeBindingCollection<FieldDefinition>(
-                () => _fields.Value,
+                () => Fields,
                 RuntimeBindingSignature.GetFieldSignature);
         }
 

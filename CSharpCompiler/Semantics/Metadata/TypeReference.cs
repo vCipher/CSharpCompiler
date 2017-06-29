@@ -1,25 +1,28 @@
 ﻿using CSharpCompiler.Semantics.Resolvers;
+using CSharpCompiler.Utility;
 using System;
 
 namespace CSharpCompiler.Semantics.Metadata
 {
     public sealed class TypeReference : ITypeInfo
     {
-        private Lazy<ElementType> _elementType;
-        private Lazy<IAssemblyInfo> _assembly;
+        private object _syncLock;
+        private ITypeReferenceResolver _resolver;
 
-        public string Name { get; private set; }
-        public string Namespace { get; private set; }
-        
-        public IAssemblyInfo Assembly => _assembly.Value;
-        public ElementType ElementType => _elementType.Value;
+        private LazyWrapper<string> _name;
+        private LazyWrapper<string> _namespace;
+        private LazyWrapper<ElementType> _elementType;
+        private LazyWrapper<IAssemblyInfo> _assembly;
+
+        public string Name => _name.GetValue(ref _syncLock, _resolver.GetName);
+        public string Namespace => _namespace.GetValue(ref _syncLock, _resolver.GetNamespace);
+        public IAssemblyInfo Assembly => _assembly.GetValue(ref _syncLock, _resolver.GetAssembly);
+        public ElementType ElementType => _elementType.GetValue(ref _syncLock, () => _resolver.GetElementType(this));
 
         public TypeReference(ITypeReferenceResolver resolver)
         {
-            Name = resolver.GetName();
-            Namespace = resolver.GetNamespace();
-            _assembly = new Lazy<IAssemblyInfo>(resolver.GetAssembly);
-            _elementType = new Lazy<ElementType>(() => resolver.GetElementType(this));
+            _syncLock = new object();
+            _resolver = resolver;
         }
 
         public void Accept(IMetadataEntityVisitor visitor)

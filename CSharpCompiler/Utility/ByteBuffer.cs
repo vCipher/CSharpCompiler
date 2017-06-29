@@ -71,7 +71,7 @@ namespace CSharpCompiler.Utility
 
         public static T FromBytes<T>(byte[] bytes) where T : struct
         {
-        	var size = bytes.Length;            
+            var size = bytes.Length;
             var ptr = Marshal.AllocHGlobal(size);
             Marshal.Copy(bytes, 0, ptr, size);
 
@@ -113,7 +113,7 @@ namespace CSharpCompiler.Utility
 
         public ushort ReadUInt16()
         {
-            return (ushort)(Buffer[Position++] 
+            return (ushort)(Buffer[Position++]
                 | (Buffer[Position++] << 8));
         }
 

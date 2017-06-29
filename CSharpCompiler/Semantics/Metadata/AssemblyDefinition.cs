@@ -8,39 +8,39 @@ namespace CSharpCompiler.Semantics.Metadata
 {
     public sealed class AssemblyDefinition : IAssemblyInfo, ICustomAttributeProvider
     {
-        private Lazy<ModuleDefinition> _module;
-        private Lazy<MethodDefinition> _entryPoint;
-        private Lazy<Collection<AssemblyReference>> _references;
-        private Lazy<Collection<CustomAttribute>> _customAttributes;
+        private object _syncLock;
+        private IAssemblyDefinitionResolver _resolver;
 
-        public string Name { get; private set; }
-        public string Culture { get; private set; }
-        public byte[] PublicKey { get; private set; }
-        public byte[] PublicKeyToken { get; private set; }
-        public Version Version { get; private set; }
-        public byte[] Hash { get; private set; }
-        public AssemblyAttributes Attributes { get; private set; }
-        public AssemblyHashAlgorithm HashAlgorithm { get; private set; }
+        private LazyWrapper<string> _name;
+        private LazyWrapper<string> _culture;
+        private LazyWrapper<byte[]> _publicKey;
+        private LazyWrapper<byte[]> _publicKeyToken;
+        private LazyWrapper<Version> _version;
+        private LazyWrapper<byte[]> _hash;
+        private LazyWrapper<AssemblyAttributes> _attributes;
+        private LazyWrapper<AssemblyHashAlgorithm> _hashAlgorithm;
+        private LazyWrapper<ModuleDefinition> _module;
+        private LazyWrapper<MethodDefinition> _entryPoint;
+        private LazyWrapper<Collection<AssemblyReference>> _references;
+        private LazyWrapper<Collection<CustomAttribute>> _customAttributes;
 
-        public ModuleDefinition Module => _module.Value;
-        public MethodDefinition EntryPoint => _entryPoint.Value;
-        public Collection<AssemblyReference> References => _references.Value;
-        public Collection<CustomAttribute> CustomAttributes => _customAttributes.Value;
+        public string Name => _name.GetValue(ref _syncLock, _resolver.GetName);
+        public string Culture => _culture.GetValue(ref _syncLock, _resolver.GetCulture);
+        public byte[] PublicKey => _publicKey.GetValue(ref _syncLock, _resolver.GetPublicKey);
+        public byte[] PublicKeyToken => _publicKeyToken.GetValue(ref _syncLock, _resolver.GetPublicKeyToken);
+        public Version Version => _version.GetValue(ref _syncLock, _resolver.GetVersion);
+        public byte[] Hash => _hash.GetValue(ref _syncLock, _resolver.GetHash);
+        public AssemblyAttributes Attributes => _attributes.GetValue(ref _syncLock, _resolver.GetAttributes);
+        public AssemblyHashAlgorithm HashAlgorithm => _hashAlgorithm.GetValue(ref _syncLock, _resolver.GetHashAlgorithm);
+        public ModuleDefinition Module => _module.GetValue(ref _syncLock, _resolver.GetModule);
+        public MethodDefinition EntryPoint => _entryPoint.GetValue(ref _syncLock, _resolver.GetEntryPoint);
+        public Collection<AssemblyReference> References => _references.GetValue(ref _syncLock, _resolver.GetReferences);
+        public Collection<CustomAttribute> CustomAttributes => _customAttributes.GetValue(ref _syncLock, _resolver.GetCustomAttributes);
 
         public AssemblyDefinition(IAssemblyDefinitionResolver resolver)
         {
-            Name = resolver.GetName();
-            PublicKey = resolver.GetPublicKey();
-            PublicKeyToken = resolver.GetPublicKeyToken();
-            Version = resolver.GetVersion();
-            Culture = resolver.GetCulture();
-            Hash = resolver.GetHash();
-            Attributes = resolver.GetAttributes();
-            HashAlgorithm = resolver.GetHashAlgorithm();
-            _module = new Lazy<ModuleDefinition>(resolver.GetModule);
-            _entryPoint = new Lazy<MethodDefinition>(resolver.GetEntryPoint);
-            _references = new Lazy<Collection<AssemblyReference>>(resolver.GetReferences);
-            _customAttributes = new Lazy<Collection<CustomAttribute>>(resolver.GetCustomAttributes);
+            _syncLock = new object();
+            _resolver = resolver;
         }
 
         public void Accept(IMetadataEntityVisitor visitor)
